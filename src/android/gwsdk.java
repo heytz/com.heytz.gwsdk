@@ -1,4 +1,4 @@
-package com.heytz.gwsdkwrapper;
+package com.heytz.gwsdk;
 
 import android.content.Context;
 import android.util.Base64;
