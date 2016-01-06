@@ -35,6 +35,5 @@
         <source-file src="libs/libEsptouch_v0.3.3.4_3.jar" target-dir="libs" />
         <source-file src="libs/json-lib-2.4-jdk15.jar" target-dir="libs" />
         <source-file src="libs/XPGWiFiSDK.jar" target-dir="libs" />
-        <source-file src="libs/easylink_only.jar" target-dir="libs" />
     </platform>
 </plugin>
