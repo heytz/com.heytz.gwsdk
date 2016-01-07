@@ -22,13 +22,12 @@
 @synthesize commandHolder;
 @synthesize _deviceList;
 
-NSString * productKey;
+
 NSString    *_currentPairDeviceMacAddress;
 NSInteger currentState;
 bool      _debug=true;
-NSString * _appId,*_uid,*_token,*_mac;
+NSString * _appId,* productKey,*_uid,*_token,*_mac;
 NSMutableDictionary *_controlObject;
-XPGWifiSDK * _shareInstance;
 BOOL isDiscoverLock;
 
 //操作状态的枚举
@@ -53,7 +52,6 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
     if(!([XPGWifiSDK sharedInstance].delegate)){
         [XPGWifiSDK sharedInstance].delegate = self;
     }
-
    self.commandHolder = command;
 }
 /*
@@ -77,7 +75,9 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
      @see 对应的回调接口：[XPGWifiSDKDelegate XPGWifiSDK:didSetDeviceWifi:result:]
      */
     //新接口 11.24
-    NSLog(@"ssid:@s,pwd:@s",command.arguments[2],command.arguments[3]);
+    if (_debug) {
+        NSLog(@"ssid:@s,pwd:@s",command.arguments[2],command.arguments[3]);
+    }
     [[XPGWifiSDK  sharedInstance] setDeviceWifi:command.arguments[2] key:command.arguments[3] mode:XPGWifiSDKAirLinkMode softAPSSIDPrefix:nil timeout:180 wifiGAgentType:nil];
 }
 
