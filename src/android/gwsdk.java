@@ -59,6 +59,27 @@ public class gwsdk extends CordovaPlugin {
             return _devicesList.size() == deviceList.size();
         }
 
+        private void sendDeviceInfo(XPGWifiDevice device) {
+            JSONObject json = new JSONObject();
+            try {
+                json.put("productKey", device.getProductKey());
+                json.put("did", device.getDid());
+                json.put("macAddress", device.getMacAddress());
+                json.put("passcode", device.getPasscode());
+            } catch (JSONException e) {
+                if (debug)
+                    Log.e("====parseJSON====", e.getMessage());
+                //异常处理
+                PluginResult pr = new PluginResult(PluginResult.Status.ERROR, e.getMessage());
+                airLinkCallbackContext.sendPluginResult(pr);
+            }
+            if (debug)
+                Log.e("====didDiscovered====", "success:" + device.getDid());
+            //成功的返回
+            PluginResult pr = new PluginResult(PluginResult.Status.OK, json);
+            airLinkCallbackContext.sendPluginResult(pr);
+        }
+
         /**
          * wifi配对的回调,这个回调不保证可以获取到设备的did
          * 所以我们拿到这个设备的MacAddress,去didDiscovered 等待设备详细的信息反馈,
@@ -68,9 +89,12 @@ public class gwsdk extends CordovaPlugin {
         @Override
         public void didSetDeviceWifi(int error, XPGWifiDevice device) {
             if (error == XPGWifiErrorCode.XPGWifiError_NONE && device.getMacAddress().length() > 0) {
-                //获取配对到的设备地址,去didDiscovered 等待设备did的信息
-                _currentDeviceMac = device.getMacAddress();
-
+                //如果存在did那么就直接返回成功,现在测试只会返回一次
+                if (_currentDeviceMac == null && device.getDid().length() > 0) {
+                    sendDeviceInfo(device);
+                } else {//否则获取配对到的设备地址,去didDiscovered 等待设备did的信息
+                    _currentDeviceMac = device.getMacAddress();
+                }
                 if (debug) {
                     Log.e("didSetDevicewifi", device.getMacAddress());
                     Log.e("didSetDevicewifi", device.getDid());
@@ -94,41 +118,45 @@ public class gwsdk extends CordovaPlugin {
             if (result == XPGWifiErrorCode.XPGWifiError_NONE && devicesList.size() > 0) {
                 switch (GwsdkStateCode.getCurrentState()) {
                     case GwsdkStateCode.SetWifiCode:
-                        for (int i = 0; i < devicesList.size(); i++) {
-                            if (debug) {
-                                Log.e("didDiscovered", devicesList.get(i).getMacAddress());
-                                Log.e("didDiscovered", devicesList.get(i).getDid());
-                                Log.e("didDiscovered", devicesList.get(i).getIPAddress());
-                                Log.e("didDiscovered", devicesList.get(i).getProductKey());
-                            }
-                            //判断did 是否为空
-                            if (devicesList.get(i).getDid().length() > 0) {
-                                //判断当前设备是否为正在配对的设备(*Mac地址判断),
-                                if ((_currentDeviceMac != null) && (devicesList.get(i).getMacAddress().indexOf(_currentDeviceMac) > -1)) {
-                                    //清空内存中的Mac
-                                    _currentDeviceMac = null;
-                                    JSONObject json = new JSONObject();
-                                    try {
-                                        json.put("productKey", devicesList.get(i).getProductKey());
-                                        json.put("did", devicesList.get(i).getDid());
-                                        json.put("macAddress", devicesList.get(i).getMacAddress());
-                                        json.put("passcode", devicesList.get(i).getPasscode());
-                                    } catch (JSONException e) {
-                                        if (debug)
-                                            Log.e("====parseJSON====", e.getMessage());
-                                        //异常处理
-                                        PluginResult pr = new PluginResult(PluginResult.Status.ERROR, e.getMessage());
-                                        airLinkCallbackContext.sendPluginResult(pr);
-                                    }
-                                    if (debug)
-                                        Log.e("====didDiscovered====", "success:" + devicesList.get(i).getDid());
-                                    //成功的返回
-                                    PluginResult pr = new PluginResult(PluginResult.Status.OK, json);
-                                    airLinkCallbackContext.sendPluginResult(pr);
+                        //如果当前配对的DeviceMac 存在.
+                        if (_currentDeviceMac != null) {
+                            for (int i = 0; i < devicesList.size(); i++) {
+                                if (debug) {
+                                    Log.e("didDiscovered", devicesList.get(i).getMacAddress());
+                                    Log.e("didDiscovered", devicesList.get(i).getDid());
+                                    Log.e("didDiscovered", devicesList.get(i).getIPAddress());
+                                    Log.e("didDiscovered", devicesList.get(i).getProductKey());
                                 }
-                            } else {
-                                if (debug)
-                                    Log.e("====didDiscovered====", "did is null:" + devicesList.get(i).getMacAddress());
+                                //判断did 是否为空
+                                if (devicesList.get(i).getDid().length() > 0) {
+                                    //判断当前设备是否为正在配对的设备(*Mac地址判断),
+                                    if ((devicesList.get(i).getMacAddress().indexOf(_currentDeviceMac) > -1)) {
+                                        //清空内存中的Mac
+                                        _currentDeviceMac = null;
+                                        sendDeviceInfo(devicesList.get(i));
+//                                        JSONObject json = new JSONObject();
+//                                        try {
+//                                            json.put("productKey", devicesList.get(i).getProductKey());
+//                                            json.put("did", devicesList.get(i).getDid());
+//                                            json.put("macAddress", devicesList.get(i).getMacAddress());
+//                                            json.put("passcode", devicesList.get(i).getPasscode());
+//                                        } catch (JSONException e) {
+//                                            if (debug)
+//                                                Log.e("====parseJSON====", e.getMessage());
+//                                            //异常处理
+//                                            PluginResult pr = new PluginResult(PluginResult.Status.ERROR, e.getMessage());
+//                                            airLinkCallbackContext.sendPluginResult(pr);
+//                                        }
+//                                        if (debug)
+//                                            Log.e("====didDiscovered====", "success:" + devicesList.get(i).getDid());
+//                                        //成功的返回
+//                                        PluginResult pr = new PluginResult(PluginResult.Status.OK, json);
+//                                        airLinkCallbackContext.sendPluginResult(pr);
+                                    }
+                                } else {
+                                    if (debug)
+                                        Log.e("====didDiscovered====", "did is null:" + devicesList.get(i).getMacAddress());
+                                }
                             }
                         }
                         break;

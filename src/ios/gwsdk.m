@@ -389,11 +389,21 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
  **/
 - (void)XPGWifiDevice:(XPGWifiDevice *)device didReceiveData:(NSDictionary *)data result:(int)result
 {
-    /**
-     * 数据部分
-     */
+    //基本数据，与发送的数据格式⼀一致
     NSDictionary *_data = [data valueForKey:@"data"];
     NSMutableArray *rows = [NSMutableArray array];
+
+
+
+    //警告
+    NSArray *alarms = [data valueForKey:@"alarms"];
+
+    //错误
+    NSArray *faults = [data valueForKey:@"faults"];
+
+    //透传数据
+    NSDictionary *binary = [data valueForKey:@"binary"];
+
 
 }
 
