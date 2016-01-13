@@ -205,51 +205,34 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
 -(void)XPGWifiSDK:(XPGWifiSDK *)wifiSDK didSetDeviceWifi:(XPGWifiDevice *)device result:(int)result{
 
 
-                if(result == XPGWifiError_NONE  && [device macAddress].length > 0) {
-//                    if (_debug) {
-//                    NSDictionary *d = [NSDictionary dictionaryWithObjectsAndKeys:
-//                                       device.did, @"did",
-//                                       device.ipAddress, @"ipAddress",
-//                                       [device macAddress], @"macAddress",
-//                                       device.passcode, @"passcode",
-//                                       device.productKey, @"productKey",
-//                                       device.productName, @"productName",
-//                                       device.remark, @"remark",
-//                                       device.isConnected, @"isConnected",
-//                                       device.isDisabled, @"isDisabled",
-//                                       device.isLAN, @"isLAN",
-//                                       device.isOnline, @"isOnline",
-//                                       @"",@"error",
-//                                       nil];
-//                    for (NSString *key in d) {
-//                        NSLog(@"=======success [device macAddress] key: %@ value: %@", key, d[key]);
-//                    }
-//                    }
-                    _currentPairDeviceMacAddress=device.macAddress;
+                if(result == XPGWifiError_NONE) {
+                    //判断mac是否存在
+                    if ([device macAddress].length > 0||device.macAddress.length > 0) {
+                    //判断did是否存在
+                    if ( _currentPairDeviceMacAddress==nil&&device.did.length>0) {
+                        NSDictionary *d = [NSDictionary dictionaryWithObjectsAndKeys:
+                                           device.did, @"did",
+                                           //                                   device.ipAddress, @"ipAddress",
+                                           device.macAddress, @"macAddress",
+                                           device.passcode, @"passcode",
+                                           //                                   device.productKey, @"productKey",
+                                           //                                   device.productName, @"productName",
+                                           device.remark, @"remark",
+                                           //                                   device.isConnected, @"isConnected",
+                                           //                                   device.isDisabled, @"isDisabled",
+                                           //                                   device.isLAN, @"isLAN",
+                                           //                                   device.isOnline, @"isOnline",
+                                           @"",@"error",
+                                           nil];
+                        
+                        _currentPairDeviceMacAddress=nil;
+                        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:d];
+                        [self.commandDelegate sendPluginResult:pluginResult callbackId:self.commandHolder.callbackId];
 
-                }else if(result == XPGWifiError_NONE  && device.macAddress.length > 0) {
-//                    if (_debug) {
-//
-//                    NSDictionary *d = [NSDictionary dictionaryWithObjectsAndKeys:
-//                                       device.did, @"did",
-//                                       device.ipAddress, @"ipAddress",
-//                                       device.macAddress, @"macAddress",
-//                                       device.passcode, @"passcode",
-//                                       device.productKey, @"productKey",
-//                                       device.productName, @"productName",
-//                                       device.remark, @"remark",
-//                                       device.isConnected, @"isConnected",
-//                                       device.isDisabled, @"isDisabled",
-//                                       device.isLAN, @"isLAN",
-//                                       device.isOnline, @"isOnline",
-//                                       @"",@"error",
-//                                       nil];
-//                    for (NSString *key in d) {
-//                        NSLog(@"=======success device.macAddress key: %@ value: %@", key, d[key]);
-//                    }
-//                    }
-                    _currentPairDeviceMacAddress=device.macAddress;
-
+                        }else{
+                            _currentPairDeviceMacAddress=device.macAddress;
+                        }
+                    }
                 }else if(result == XPGWifiError_CONFIGURE_TIMEOUT){
                     if (_debug)
                         NSLog(@"======timeout=====");
@@ -277,16 +260,16 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
             if( [_currentPairDeviceMacAddress isEqualToString:device.macAddress]&&(device.did.length>0)){
                 NSDictionary *d = [NSDictionary dictionaryWithObjectsAndKeys:
                                    device.did, @"did",
-                                   device.ipAddress, @"ipAddress",
+//                                   device.ipAddress, @"ipAddress",
                                    device.macAddress, @"macAddress",
                                    device.passcode, @"passcode",
-                                   device.productKey, @"productKey",
-                                   device.productName, @"productName",
+//                                   device.productKey, @"productKey",
+//                                   device.productName, @"productName",
                                    device.remark, @"remark",
-                                   device.isConnected, @"isConnected",
-                                   device.isDisabled, @"isDisabled",
-                                   device.isLAN, @"isLAN",
-                                   device.isOnline, @"isOnline",
+//                                   device.isConnected, @"isConnected",
+//                                   device.isDisabled, @"isDisabled",
+//                                   device.isLAN, @"isLAN",
+//                                   device.isOnline, @"isOnline",
                                    @"",@"error",
                                    nil];
                 if(_debug){
