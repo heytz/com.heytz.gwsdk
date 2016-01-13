@@ -104,6 +104,7 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
     _mac=command.arguments[4];
     _controlObject=command.arguments[5];//todo: back to value:5
     isDiscoverLock=true;
+    
     currentState=ControlCode;
     [self init:command];//初始化设置appid
 
@@ -114,7 +115,7 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
      * @param specialProductKey：指定待筛选设备的产品标识（获取或搜索到未指定设备产品标识的设备将其过滤，指定Nil则不过滤）
      * @see 对应的回调接口：[XPGWifiSDK XPGWifiSDK:didDiscovered:result:]
      */
-    [[XPGWifiSDK sharedInstance] getBoundDevicesWithUid:_uid token:_token specialProductKeys:nil,nil];
+    [[XPGWifiSDK sharedInstance] getBoundDevicesWithUid:_uid token:_token specialProductKeys:productKey,nil];
 }
 
 /*!
@@ -347,9 +348,9 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
                     if(deviceList.count>0 && result==0){
 
                         //_deviceList=deviceList;
-                        for (int i=0; i<[deviceList count]; i++) {
-                            // NSLog(@"%@",[deviceList[i] macAddress]);
-                        }
+//                        for (int i=0; i<[deviceList count]; i++) {
+//                            // NSLog(@"%@",[deviceList[i] macAddress]);
+//                        }
 
                         for (int i=0; i<[deviceList count]; i++) {
                             NSLog(@"=======%@",[deviceList[i] macAddress]);
@@ -360,7 +361,7 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
                             if ([device.macAddress isEqualToString: [_mac uppercaseString]]) {
                                 isDiscoverLock=false;//设置锁定状态
                                 if (device.isConnected) {
-                                    [self cWrite:deviceList[i]];
+                                    [self cWrite:device];
                                 }else{
                                     device.delegate = self;
                                     [device login:_uid token:_token];
@@ -382,6 +383,7 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
 
 
 }
+
 
 /**
  write 的回调，
