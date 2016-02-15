@@ -93,7 +93,7 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
     currentState=GetDevcieListCode;
 
     isDiscoverLock = true;
-    [[XPGWifiSDK sharedInstance] getBoundDevicesWithUid:command.arguments[3] token:command.arguments[4] specialProductKeys:command.arguments[1], nil];
+    [[XPGWifiSDK sharedInstance] getBoundDevicesWithUid:command.arguments[2] token:command.arguments[3] specialProductKeys:command.arguments[1], nil];
 }
 
 -(void)deviceControl:(CDVInvokedUrlCommand *)command{
