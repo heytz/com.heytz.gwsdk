@@ -9,6 +9,7 @@
 
 -(void)setDeviceWifi:(CDVInvokedUrlCommand *)command;
 -(void)getDeviceList:(CDVInvokedUrlCommand *)command;
+-(void)setDeviceWifiBindDevice:(CDVInvokedUrlCommand *)command;
 -(void)deviceControl:(CDVInvokedUrlCommand *)command;
 -(void)dealloc:(CDVInvokedUrlCommand *)command;
 
@@ -29,13 +30,14 @@ bool      _debug=true;
 NSString * _appId,* productKey,*_uid,*_token,*_mac;
 NSMutableDictionary *_controlObject;
 BOOL isDiscoverLock;
-
+XPGWifiDevice *_currentDevice;
 //操作状态的枚举
 typedef NS_ENUM(NSInteger, GwsdkStateCode) {
     //以下是枚举成员
     SetWifiCode = 0,
     GetDevcieListCode = 1,
-    ControlCode = 2
+    ControlCode = 2,
+    SetDeviceWifiBindDevice=3
 };
 
 
@@ -80,7 +82,32 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
     }
     [[XPGWifiSDK  sharedInstance] setDeviceWifi:command.arguments[2] key:command.arguments[3] mode:XPGWifiSDKAirLinkMode softAPSSIDPrefix:nil timeout:180 wifiGAgentType:nil];
 }
+-(void)setDeviceWifiBindDevice:(CDVInvokedUrlCommand *)command{
 
+    [self init:command];
+    currentState=SetDeviceWifiBindDevice;
+    _currentPairDeviceMacAddress=nil;
+
+    _uid=command.arguments[4];
+    _token=command.arguments[5];
+
+    /**
+     配置设备连接路由的方法
+     @param ssid 需要配置到路由的SSID名
+     @param key 需要配置到路由的密码
+     @param mode 配置方式
+     @see XPGConfigureMode
+     @param softAPSSIDPrefix SoftAPMode模式下SoftAP的SSID前缀或全名（XPGWifiSDK以此判断手机当前是否连上了SoftAP，AirLink配置时该参数无意义，传nil即可）
+     @param timeout 配置的超时时间 SDK默认执行的最小超时时间为30秒
+     @param types 配置的wifi模组类型列表，存放NSNumber对象，SDK默认同时发送庆科和汉枫模组配置包；SoftAPMode模式下该参数无意义。types为nil，SDK按照默认处理。如果只想配置庆科模组，types中请加入@XPGWifiGAgentTypeMXCHIP类；如果只想配置汉枫模组，types中请加入@XPGWifiGAgentTypeHF；如果希望多种模组配置包同时传，可以把对应类型都加入到types中。XPGWifiGAgentType枚举类型定义SDK支持的所有模组类型。
+     @see 对应的回调接口：[XPGWifiSDKDelegate XPGWifiSDK:didSetDeviceWifi:result:]
+     */
+    //新接口 11.24
+    if (_debug) {
+        NSLog(@"ssid:@s,pwd:@s",command.arguments[2],command.arguments[3]);
+    }
+    [[XPGWifiSDK  sharedInstance] setDeviceWifi:command.arguments[2] key:command.arguments[3] mode:XPGWifiSDKAirLinkMode softAPSSIDPrefix:nil timeout:180 wifiGAgentType:nil];
+}
 /**
  * @brief 回调接口，返回发现设备的结果
  * @param deviceList：为 XPGWifiDevice* 的集合
@@ -93,9 +120,22 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
     currentState=GetDevcieListCode;
 
     isDiscoverLock = true;
-    [[XPGWifiSDK sharedInstance] getBoundDevicesWithUid:command.arguments[2] token:command.arguments[3] specialProductKeys:command.arguments[1], nil];
+    NSLog(@"\n======productkeys%@=====\n",command.arguments[1]);
+    [[XPGWifiSDK sharedInstance] getBoundDevices:command.arguments[2] token:command.arguments[3] specialProductKeys:command.arguments[1]];
 }
-
+-(void)deviceBinding:(CDVInvokedUrlCommand *)command{
+    [self init:command];//初始化设置appid
+    /**
+     绑定设备到服务器
+     @param token 登录成功后得到的token
+     @param uid 登录成功后得到的uid
+     @param did 待绑定设备的did
+     @param passCode 待绑定设备的passCode（能得到就传，得不到可传Nil，SDK会内部尝试获取PassCode）
+     @param remark 待绑定设备的别名，无别名可传nil
+     @see 对应的回调接口：[XPGWifiSDKDelegate XPGWifiSDK:didBindDevice:error:errorMessage:]
+     */
+    [[XPGWifiSDK sharedInstance] bindDeviceWithUid:command.arguments[2] token:command.arguments[3] did:command.arguments[4] passCode:command.arguments[5] remark:command.arguments[6]];
+}
 -(void)deviceControl:(CDVInvokedUrlCommand *)command{
 
     productKey=command.arguments[1];
@@ -104,7 +144,7 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
     _mac=command.arguments[4];
     _controlObject=command.arguments[5];//todo: back to value:5
     isDiscoverLock=true;
-    
+
     currentState=ControlCode;
     [self init:command];//初始化设置appid
 
@@ -160,6 +200,9 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
     }
 }
 
+/**
+ string 转换为Data
+ **/
 +(NSData *)stringToHex: (NSString *) str{
     //-------------------
 
@@ -193,46 +236,66 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
 }
 
 
-
+/**
+ 验证devicelist是否匹配
+ **/
 - (BOOL)hasDone:(NSArray *)devicList{
     if(_deviceList == nil) return false;
     return (_deviceList.count == devicList.count);
 }
-/*
- * 回调接口
- *
- */
+/**
+ * 配置事件 回调接口
+ **/
 -(void)XPGWifiSDK:(XPGWifiSDK *)wifiSDK didSetDeviceWifi:(XPGWifiDevice *)device result:(int)result{
 
 
                 if(result == XPGWifiError_NONE) {
-                    //判断mac是否存在
-                    if ([device macAddress].length > 0||device.macAddress.length > 0) {
-                    //判断did是否存在
-                    if ( _currentPairDeviceMacAddress==nil&&device.did.length>0) {
-                        NSDictionary *d = [NSDictionary dictionaryWithObjectsAndKeys:
-                                           device.did, @"did",
-                                           //                                   device.ipAddress, @"ipAddress",
-                                           device.macAddress, @"macAddress",
-                                           device.passcode, @"passcode",
-                                           device.productKey, @"productKey",
-                                           //                                   device.productName, @"productName",
-                                           device.remark, @"remark",
-                                           //                                   device.isConnected, @"isConnected",
-                                           //                                   device.isDisabled, @"isDisabled",
-                                           //                                   device.isLAN, @"isLAN",
-                                           //                                   device.isOnline, @"isOnline",
-                                           @"",@"error",
-                                           nil];
-                        
-                        _currentPairDeviceMacAddress=nil;
-                        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:d];
-                        [self.commandDelegate sendPluginResult:pluginResult callbackId:self.commandHolder.callbackId];
+                    switch (currentState) {
+                        case SetDeviceWifiBindDevice:
+                            //判断mac是否存在
+                            if ([device macAddress].length > 0||device.macAddress.length > 0) {
+                                //判断did是否存在
+                                if ( _currentPairDeviceMacAddress==nil&&device.did.length>0) {
+                                    _currentDevice=device;
+                                     [[XPGWifiSDK sharedInstance] bindDeviceWithUid:_uid token:_token did:device.did passCode:device.passcode remark:nil];
+                                }else{
+                                    _currentPairDeviceMacAddress=device.macAddress;
+                                }
+                            }
 
-                        }else{
-                            _currentPairDeviceMacAddress=device.macAddress;
-                        }
+                            break;
+                        case SetWifiCode:
+                            //判断mac是否存在
+                            if ([device macAddress].length > 0||device.macAddress.length > 0) {
+                                //判断did是否存在
+                                if ( _currentPairDeviceMacAddress==nil&&device.did.length>0) {
+                                    NSDictionary *d = [NSDictionary dictionaryWithObjectsAndKeys:
+                                                       device.did, @"did",
+                                                       //                                   device.ipAddress, @"ipAddress",
+                                                       device.macAddress, @"macAddress",
+                                                       device.passcode, @"passcode",
+                                                       device.productKey, @"productKey",
+                                                       //                                   device.productName, @"productName",
+                                                       device.remark, @"remark",
+                                                       //                                   device.isConnected, @"isConnected",
+                                                       //                                   device.isDisabled, @"isDisabled",
+                                                       //                                   device.isLAN, @"isLAN",
+                                                       //                                   device.isOnline, @"isOnline",
+                                                       @"",@"error",
+                                                       nil];
+
+                                    _currentPairDeviceMacAddress=nil;
+                                    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:d];
+                                    [self.commandDelegate sendPluginResult:pluginResult callbackId:self.commandHolder.callbackId];
+
+                                }else{
+                                    _currentPairDeviceMacAddress=device.macAddress;
+                                }
+
+                        default:
+                            break;
                     }
+                                        }
                 }else if(result == XPGWifiError_CONFIGURE_TIMEOUT){
                     if (_debug)
                         NSLog(@"======timeout=====");
@@ -244,7 +307,9 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
                     }
                 }
              }
-
+/**
+ ＊ 搜索设备 回调接口
+ **/
 -(void)XPGWifiSDK:(XPGWifiSDK *)wifiSDK didDiscovered:(NSArray *)deviceList result:(int)result{
     if(result==0){
         switch (currentState) {
@@ -357,6 +422,26 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
                     }
                 }
                 break;
+                case SetDeviceWifiBindDevice:
+                if (deviceList.count > 0&&isDiscoverLock) {
+                    for (XPGWifiDevice *device in deviceList){
+                        NSLog(@"======_currentMacAddress:%@ macAddress:%@ did:%@ passcode:%@",
+                              _currentPairDeviceMacAddress,
+                              device.macAddress,
+                              device.did,
+                              device.passcode);
+
+                        if([_currentPairDeviceMacAddress isEqualToString:device.macAddress]&&(device.did.length>0)){
+
+                            _currentPairDeviceMacAddress=nil;
+                            isDiscoverLock=false;
+                            _currentDevice=device;
+                            [[XPGWifiSDK sharedInstance] bindDeviceWithUid:_uid token:_token did:device.did passCode:device.passcode remark:nil];
+
+                        }
+                    }
+                }
+                break;
             default:
                 break;
         }
@@ -366,11 +451,24 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
 
 
 }
-
+/**
+ * 绑定事件 回调接口
+ **/
+-(void)XPGWifiSDK:(XPGWifiSDK *)wifiSDK didBindDevice:(NSString *)did error:(NSNumber *)error errorMessage:(NSString *)errorMessage{
+    if([error intValue] == XPGWifiError_NONE)
+    {
+        //绑定成功
+        NSLog(@"\nbinding success:%@",did);
+    }
+    else
+    {
+        //绑定失败
+         NSLog(@"\nbinding error:%@\n errorMessage:%@",did,errorMessage);
+    }
+}
 
 /**
- write 的回调，
- 这里判断发送消息是否成功
+ * write 的回调 这里判断发送消息是否成功
  **/
 - (void)XPGWifiDevice:(XPGWifiDevice *)device didReceiveData:(NSDictionary *)data result:(int)result
 {
