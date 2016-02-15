@@ -71,7 +71,7 @@
  @param sdid 子设备的设备标识
  @see 对应的回调接口：[XPGWifiGroupDelegate XPGWifiGroup:didGetDevices:result:]
  */
-- (void)addDevice:(NSString*)did withSubDevice:(NSString*)sdid;
+- (void)addDevice:(NSString *)did withSubDevice:(NSString *)sdid;
 
 /**
  从组内删除设备
@@ -79,6 +79,6 @@
  @param sdid 子设备的设备标识
  @see 对应的回调接口：[XPGWifiGroupDelegate XPGWifiGroup:didGetDevices:result:]
  */
-- (void)removeDevice:(NSString*)did withSubDevice:(NSString*)sdid;
+- (void)removeDevice:(NSString *)did withSubDevice:(NSString *)sdid;
 
 @end

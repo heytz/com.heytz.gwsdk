@@ -11,8 +11,7 @@
 /**
  性别类型
  */
-typedef NS_ENUM(NSInteger, XPGUserGenderType)
-{
+typedef NS_ENUM(NSInteger, XPGUserGenderType) {
     /**
      男性
      */

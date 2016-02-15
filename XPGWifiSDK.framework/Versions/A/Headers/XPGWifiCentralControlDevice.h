@@ -57,6 +57,6 @@
  @param subDid 为待删除的子设备id
  @see 对应的回调接口：[XPGWifiCentralControlDeviceDelegate XPGWifiCentralControlDevice:didDiscovered:result:]
  */
-- (void)deleteSubDevice:(NSString*)subDid;
+- (void)deleteSubDevice:(NSString *)subDid;
 
 @end

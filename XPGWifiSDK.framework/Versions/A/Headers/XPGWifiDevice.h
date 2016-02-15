@@ -31,8 +31,7 @@ extern NSString *XPGWifiDeviceHardwareProductKey;
 /**
  XPGWifiDeviceType枚举，描述SDK支持的设备分类
  */
-typedef NS_ENUM (NSInteger, XPGWifiDeviceType)
-{
+typedef NS_ENUM (NSInteger, XPGWifiDeviceType) {
     /**
      普通设备
      */
@@ -375,6 +374,14 @@ typedef NS_ENUM (NSInteger, XPGWifiDeviceType)
  =================== 新版协议格式(v4.0)： ===================
  
  http://site.gizwits.com/zh-cn/document/m2m/i_02_datapoint/
+
+ =================== 无格式的数据透传： ======================
+ 
+ 当设备没有在云端定义数据点时，可通过数据透传方式向设备发送数据。该数据应先转换为base64字符串后，再按如下方式写入：
+ 
+    @{
+        "binary" : "xxxxxxxxxxxx"
+    }
  
  @see 对应的回调接口：[XPGWifiDeviceDelegate XPGWifiDevice:didReceiveData:result:]
  */

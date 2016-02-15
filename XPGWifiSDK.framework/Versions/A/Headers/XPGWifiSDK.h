@@ -19,8 +19,7 @@
 /**
  XPGWifiThirdAccountType枚举，描述SDK支持的第三方账号类型
  */
-typedef NS_ENUM (NSInteger, XPGWifiThirdAccountType)
-{
+typedef NS_ENUM (NSInteger, XPGWifiThirdAccountType) {
     /**
      百度账号
      */
@@ -38,10 +37,31 @@ typedef NS_ENUM (NSInteger, XPGWifiThirdAccountType)
 };
 
 /**
- XPGWifiLogLevel枚举，描述SDK提供的日志级别
+ GizLogPrintLevel枚举，描述SDK提供的日志级别
  */
-typedef NS_ENUM (NSInteger, XPGWifiLogLevel)
-{
+typedef NS_ENUM(NSInteger, GizLogPrintLevel) {
+    /**
+     无日志
+     */
+    GizLogPrintNone = 0,
+    /**
+     只显示错误和业务日志
+     */
+    GizLogPrintI,
+    /**
+     显示调试日志和业务日志
+     */
+    GizLogPrintII,
+    /**
+     显示全部日志
+     */
+    GizLogPrintAll
+};
+
+/**
+ XPGWifiLogLevel枚举，描述SDK提供的日志级别（已废弃）
+ */
+typedef NS_ENUM (NSInteger, XPGWifiLogLevel) {
     /**
      错误日志
      */
@@ -56,7 +76,7 @@ typedef NS_ENUM (NSInteger, XPGWifiLogLevel)
      所有日志
      */
     XPGWifiLogLevelAll,
-};
+} DEPRECATED_ATTRIBUTE;
 
 /**
  XPGWifiErrorCode枚举，描述SDK提供的所有错误码定义。
@@ -65,8 +85,7 @@ typedef NS_ENUM (NSInteger, XPGWifiLogLevel)
     http://site.gizwits.com/zh-cn/document/openplatform/i_05_openapi/#_3
  
  */
-typedef NS_ENUM (NSInteger, XPGWifiErrorCode)
-{
+typedef NS_ENUM (NSInteger, XPGWifiErrorCode) {
     /**
      无错误
      */
@@ -241,13 +260,17 @@ typedef NS_ENUM (NSInteger, XPGWifiErrorCode)
      不支持的 API
      */
     XPGWifiError_UNSUPPORTED_API = -47,
+    
+    /**
+     透传数据
+     */
+    XPGWifiError_RAW_DATA_TRANSMIT = -48,
 };
 
 /**
  XPGWifiLoginErrorCode枚举，描述设备登录错误码
  */
-typedef NS_ENUM (NSInteger, XPGWifiLoginErrorCode)
-{
+typedef NS_ENUM (NSInteger, XPGWifiLoginErrorCode) {
     /**
      已获取控制权限
      */
@@ -267,8 +290,7 @@ typedef NS_ENUM (NSInteger, XPGWifiLoginErrorCode)
 /**
  XPGConfigureMode枚举，描述SDK支持的设备配置方式
  */
-typedef NS_ENUM (NSInteger, XPGConfigureMode)
-{
+typedef NS_ENUM (NSInteger, XPGConfigureMode) {
     /**
      SoftAP配置模式
      */
@@ -283,48 +305,75 @@ typedef NS_ENUM (NSInteger, XPGConfigureMode)
 /**
  XPGWifiGAgentType枚举，描述SDK支持的Wifi模组类型
  */
-typedef NS_ENUM (NSInteger, XPGWifiGAgentType)
-{
+typedef NS_ENUM (NSInteger, XPGWifiGAgentType) {
     /**
-     MXCHIP模组（庆科）
+     MXCHIP 模组（庆科3162）
      */
     XPGWifiGAgentTypeMXCHIP = 0,
     
     /**
-     HF模组（汉枫）
+     HF 模组（汉枫）
      */
     XPGWifiGAgentTypeHF = 1,
 
     /**
-     RTK模组（RealTek）
+     RTK 模组（RealTek）
      */
     XPGWifiGAgentTypeRTK = 2,
 
     /**
-     WM模组（联盛德）
+     WM 模组（联盛德）
      */
     XPGWifiGAgentTypeWM = 3,
 
     /**
-     ESP模组（乐鑫）
+     ESP 模组（乐鑫）
      */
     XPGWifiGAgentTypeESP = 4,
+
+    /**
+     QCA 模组（高通）
+     */
+    XPGWifiGAgentTypeQCA = 5,
+
+    /**
+     TI 模组（TI）
+     */
+    XPGWifiGAgentTypeTI = 6,
+
+    /**
+     FSK 模组（宇音天下）
+     */
+    XPGWifiGAgentTypeFSK = 7,
+    
+    /**
+     MXCHIP3.x 协议 模组（庆科3088或5088）
+     */
+    XPGWifiGAgentTypeMXCHIP3 = 8,
+
+    /**
+     BL 模组（古北）
+     */
+    XPGWifiGAgentTypeBL = 9,
 };
 
-typedef enum _tagXPGCloudService
-{
-    XPG_PRODUCTION = 0,
-    XPG_QA = 1,
-    XPG_DEVELOPMENT = 2,
-    XPG_TENCENT = 3,
-}XPGCloudService;
-
-typedef enum _tagXPGUserAccountType
-{
+/**
+ XPGUserAccountType枚举，描述SDK支持的用户类型
+ */
+typedef NS_ENUM (NSInteger, XPGUserAccountType) {
+    /**
+     普通用户
+     */
     XPGUserAccountTypeNormal = 0,
+    /**
+     手机用户
+     */
     XPGUserAccountTypePhone = 1,
-    XPGUserAccountTypeEmail = 2,
-}XPGUserAccountType;
+    /**
+     邮箱用户
+     */
+    XPGUserAccountTypeEmail = 2
+};
 
 @class XPGWifiSDK;
 
@@ -376,8 +425,9 @@ typedef enum _tagXPGUserAccountType
  @param data 需要计算的二进制数据
  @return 返回计算出的CRC值
  @see 触发函数：[XPGWifiDevice write:]
+ @deprecated 此接口已废弃，不再提供支持
  */
-- (NSUInteger)XPGWifiSDK:(XPGWifiSDK *)wifiSDK needsCalculateCRC:(NSData *)data;
+- (NSUInteger)XPGWifiSDK:(XPGWifiSDK *)wifiSDK needsCalculateCRC:(NSData *)data DEPRECATED_ATTRIBUTE;
 
 /**
  获取设备配置文件的回调接口，返回从服务器下载到的配置
@@ -388,6 +438,9 @@ typedef enum _tagXPGUserAccountType
  */
 - (void)XPGWifiSDK:(XPGWifiSDK *)wifiSDK didUpdateProduct:(NSString *)product result:(int)result;
 
+/**
+ @deprecated 此接口已废弃，请使用替代接口：[XPGWifiSDKDelegate XPGWifiSDK:didRequestSendPhoneSMSCode:]
+ */
 - (void)XPGWifiSDK:(XPGWifiSDK *)wifiSDK didRequestSendVerifyCode:(NSNumber *)error errorMessage:(NSString *)errorMessage DEPRECATED_ATTRIBUTE;
 
 /**
@@ -399,7 +452,7 @@ typedef enum _tagXPGUserAccountType
  @param captchaURL 图片验证码网址
  @see 触发函数：[XPGWifiSDK getCaptchaCode:]
  */
-- (void)wifiSDK:(XPGWifiSDK *)wifiSDK didGetCaptchaCode:(NSError*)result token:(NSString*)token captchaId:(NSString *)captchaId captchaURL:(NSString*)captchaURL;
+- (void)wifiSDK:(XPGWifiSDK *)wifiSDK didGetCaptchaCode:(NSError*)result token:(NSString *)token captchaId:(NSString *)captchaId captchaURL:(NSString *)captchaURL;
 
 /**
  请求发送手机验证码的回调接口，返回请求结果
@@ -467,20 +520,12 @@ typedef enum _tagXPGUserAccountType
 - (void)XPGWifiSDK:(XPGWifiSDK *)wifiSDK didChangeUserPassword:(NSNumber *)error errorMessage:(NSString *)errorMessage;
 
 /**
- 修改用户邮箱的回调接口，返回修改用户邮箱的结果
- @param wifiSDK 为回调的 XPGWifiSDK 单例
- @param error 0为成功，其他失败
- @param errorMessage 错误信息（无错误则为nil）
- @see 触发函数：[XPGWifiSDK changeUserEmail:email:]
+ @deprecated 此接口已废弃，请使用替代接口：[XPGWifiSDKDelegate XPGWifiSDK:didChangeUserInfo:]
  */
 - (void)XPGWifiSDK:(XPGWifiSDK *)wifiSDK didChangeUserEmail:(NSNumber *)error errorMessage:(NSString *)errorMessage DEPRECATED_ATTRIBUTE;
 
 /**
- 修改用户手机号的回调接口，修改用户手机号结果
- @param wifiSDK 为回调的 XPGWifiSDK 单例
- @param error 0为成功，其他失败
- @param errorMessage 错误信息（无错误则为nil）
- @see 触发函数：[XPGWifiSDK changeUserPhone:phone:code:]
+ @deprecated 此接口已废弃，请使用替代接口：[XPGWifiSDKDelegate XPGWifiSDK:didChangeUserInfo:]
  */
 - (void)XPGWifiSDK:(XPGWifiSDK *)wifiSDK didChangeUserPhone:(NSNumber *)error errorMessage:(NSString *)errorMessage DEPRECATED_ATTRIBUTE;
 
@@ -521,6 +566,16 @@ typedef enum _tagXPGUserAccountType
  */
 - (void)XPGWifiSDK:(XPGWifiSDK *)wifiSDK didUnbindDevice:(NSString *)did error:(NSNumber *)error errorMessage:(NSString *)errorMessage;
 
+/*
+ 设置服务器信息的回调接口
+ @param wifiSDK 为回调的 XPGWifiSDK 单例
+ @param error 错误信息
+ @param cloudServiceInfo 服务器信息
+ @see 触发函数 [XPGWifiSDK setCloudService:openAPIPort:siteDomain:sitePort],
+ [XPGWifiSDK getCurrentCloudService]
+*/
+- (void)wifiSDK:(XPGWifiSDK *)wifiSDK didGetCurrentCloudService:(NSError*)result cloudServiceInfo: (NSDictionary *)cloudServiceInfo;
+
 @end
 
 /**
@@ -550,39 +605,41 @@ typedef enum _tagXPGUserAccountType
  读取SDK版本号
  @return XPGWifiSDK 的版本号
  */
-- (NSString*)getVersion;
++ (NSString *)getVersion;
+
+/**
+ @note 此接口已废弃，替代方法 [XPGWifiSDK setLogLevel:]
+ */
++ (void)setLogLevel:(XPGWifiLogLevel)logLevel logFile:(NSString *)logFile printDataLevel:(BOOL)bPrintDataInDebug DEPRECATED_ATTRIBUTE;
 
 /**
  设置Log级别、Log文件路径、Log内二进制输出级别
- @param logLevel 日志级别，默认 =XPGWifiLogLevelAll
+ @param logLevel 日志级别，默认 =GizLogPrintAll
  @see XPGWifiLogLevel
- @param logFile 日志文件保存在/Documents下，如果指定Nil，则不输出到文件。默认不输出到文件
- @param bPrintDataInDebug 是否打印详细的二进制数据。默认 不打印
  @note 此接口仅在[XPGWifiSDK sharedInstance]后设置有效
  */
-+ (void)setLogLevel:(XPGWifiLogLevel)logLevel logFile:(NSString *)logFile printDataLevel:(BOOL)bPrintDataInDebug;
++ (void)setLogLevel:(GizLogPrintLevel)logLevel;
 
 /**
- 注册识别 Soft AP 模式的规则
- @param ssidPrefix 识别SSID的前缀
- @note 在载入配置文件之前配置有效，默认为nil
  @deprecated 此接口已废弃，请使用替代接口：[setDeviceWifi:key:mode:softAPSSIDPrefix:timeout:]
  */
 + (void)registerSSIDs:(NSString *)ssidPrefix, ... NS_REQUIRES_NIL_TERMINATION DEPRECATED_ATTRIBUTE;
 
-#ifdef SWIFT
-+ (void)registerSSID:(NSString *)ssid;
-+ (void)clearSSIDs;
-#endif
-
-#ifdef __INTERNAL_SUPPORT_SWITCH_SERVICE_AND_LOG_CACHE__
 /*
- 设置服务地址切换，用于切换云端的调试环境和发布环境
- @param specialService XPGCloudService类型：0=生产环境 1=测试环境 2=开发环境 3=腾讯云
- @note 默认生产环境
+ 设置服务器 open-api、site 的地址和端口
+ @param openAPIDomain open-api 服务器域名
+ @param openAPIPort open-api 服务器端口
+ @param siteDomain site 服务器域名
+ @param sitePort site 服务器端口
+ @see 回调函数 [XPGWifiSDKDelegate wifiSDK:didGetCurrentCloudService:cloudServiceInfo:]
  */
-+ (void)setSwitchService:(int)specialService;
-#endif
++ (void)setCloudService:(NSString *)openAPIDomain openAPIPort:(int)openAPIPort siteDomain:(NSString *)siteDomain sitePort:(int)sitePort;
+
+/**
+ 获取当前的服务设置
+ @see 回调函数 [XPGWifiSDKDelegate wifiSDK:didGetCurrentCloudService:cloudServiceInfo:]
+ */
++ (void)getCurrentCloudService;
 
 #ifdef __INTERNAL_SUPPORT_SWITCH_SERVICE_AND_LOG_CACHE__
 /*
@@ -609,7 +666,7 @@ typedef enum _tagXPGUserAccountType
  @param deviceDID 指定设备的Did，用于获取该设备连接的M2M域名
  @result 服务名称字典 {key, value} = {CURRENT_SERVICE:当前环境}、{OPENAPI_SERVICE:业务域名}、{CONFIG_SERVICE:配置文件服务器域名}、{M2M_SERVICE:M2M域名}
  */
-+ (NSDictionary*)getUsingService:(NSString*)deviceDID;
++ (NSDictionary *)getUsingService:(NSString *)deviceDID;
 #endif
 
 /**
@@ -620,35 +677,20 @@ typedef enum _tagXPGUserAccountType
 + (void)updateDeviceFromServer:(NSString *)productKey;
 
 /**
- 配置设备连接路由的方法
- @param ssid 需要配置到路由的SSID名
- @param key 需要配置到路由的密码
- @param mode 配置方式
- @see XPGConfigureMode
- @param timeout 设备配置的超时时间 SDK默认执行的最小超时时间为30秒
- @see 对应的回调接口：[XPGWifiSDKDelegate XPGWifiSDK:didSetDeviceWifi:result:]
  @deprecated 此接口已废弃，请使用替代接口：[setDeviceWifi:key:mode:softAPSSIDPrefix:timeout:]
  */
-- (void)setDeviceWifi:(NSString*)ssid
-                  key:(NSString*)key
+- (void)setDeviceWifi:(NSString *)ssid
+                  key:(NSString *)key
                  mode:(XPGConfigureMode)mode
               timeout:(int)timeout DEPRECATED_ATTRIBUTE;
 
 /**
- 配置设备连接路由的方法
- @param ssid 需要配置到路由的SSID名
- @param key 需要配置到路由的密码
- @param mode 配置方式
- @see XPGConfigureMode
- @param softAPSSIDPrefix SoftAPMode模式下SoftAP的SSID前缀或全名（XPGWifiSDK以此判断手机当前是否连上了SoftAP，AirLink配置时该参数无意义，传nil即可）
- @param timeout 配置的超时时间 SDK默认执行的最小超时时间为30秒
- @see 对应的回调接口：[XPGWifiSDKDelegate XPGWifiSDK:didSetDeviceWifi:result:]
  @deprecated 此接口已废弃，请使用替代接口：[setDeviceWifi:key:mode:softAPSSIDPrefix:timeout:wifiGAgentType:]
  */
-- (void)setDeviceWifi:(NSString*)ssid
-                  key:(NSString*)key
+- (void)setDeviceWifi:(NSString *)ssid
+                  key:(NSString *)key
                  mode:(XPGConfigureMode)mode
-     softAPSSIDPrefix:(NSString*)softAPSSIDPrefix
+     softAPSSIDPrefix:(NSString *)softAPSSIDPrefix
               timeout:(int)timeout DEPRECATED_ATTRIBUTE;
 
 /**
@@ -662,12 +704,12 @@ typedef enum _tagXPGUserAccountType
  @param types 配置的wifi模组类型列表，存放NSNumber对象，SDK默认同时发送庆科和汉枫模组配置包；SoftAPMode模式下该参数无意义。types为nil，SDK按照默认处理。如果只想配置庆科模组，types中请加入@XPGWifiGAgentTypeMXCHIP类；如果只想配置汉枫模组，types中请加入@XPGWifiGAgentTypeHF；如果希望多种模组配置包同时传，可以把对应类型都加入到types中。XPGWifiGAgentType枚举类型定义SDK支持的所有模组类型。
  @see 对应的回调接口：[XPGWifiSDKDelegate XPGWifiSDK:didSetDeviceWifi:result:]
  */
-- (void)setDeviceWifi:(NSString*)ssid
-                  key:(NSString*)key
+- (void)setDeviceWifi:(NSString *)ssid
+                  key:(NSString *)key
                  mode:(XPGConfigureMode)mode
-     softAPSSIDPrefix:(NSString*)softAPSSIDPrefix
+     softAPSSIDPrefix:(NSString *)softAPSSIDPrefix
               timeout:(int)timeout
-       wifiGAgentType:(NSArray*)types;
+       wifiGAgentType:(NSArray *)types;
 
 /**
  在 Soft-AP 模式时，获得 SSID 列表。SSID列表通过异步回调方式返回
@@ -676,9 +718,6 @@ typedef enum _tagXPGUserAccountType
 - (void)getSSIDList;
 
 /**
- 请求向指定手机发送验证码
- @param phone 手机号
- @see 对应的回调接口：[XPGWifiSDKDelegate XPGWifiSDK:didRequestSendVerifyCode:errorMessage:]
  @deprecated 此接口已废弃，请使用替代接口：[XPGWifiSDK requestSendPhoneSMSCode:captchaId:captchaCode:phone:]
  */
 - (void)requestSendVerifyCode:(NSString *)phone DEPRECATED_ATTRIBUTE;
@@ -698,7 +737,7 @@ typedef enum _tagXPGUserAccountType
  @param phone 手机号
  @see 对应的回调接口：[XPGWifiSDKDelegate wifiSDK:didRequestSendPhoneSMSCode:]
  */
-- (void)requestSendPhoneSMSCode:(NSString *)token captchaId:(NSString*)captchaId captchaCode:(NSString*)captchaCode phone:(NSString*)phone;
+- (void)requestSendPhoneSMSCode:(NSString *)token captchaId:(NSString *)captchaId captchaCode:(NSString *)captchaCode phone:(NSString *)phone;
 
 /**
  验证手机短信验证码
@@ -707,7 +746,7 @@ typedef enum _tagXPGUserAccountType
  @param phone 手机号
  @see 对应的回调接口：[XPGWifiSDKDelegate wifiSDK:didVerifyPhoneSMSCode:]
  */
-- (void)verifyPhoneSMSCode:(NSString *)token verifyCode:(NSString*)code phone:(NSString*)phone;
+- (void)verifyPhoneSMSCode:(NSString *)token verifyCode:(NSString *)code phone:(NSString *)phone;
 
 /**
  注册普通用户（通过用户名、密码注册）
@@ -809,19 +848,12 @@ typedef enum _tagXPGUserAccountType
 - (void)changeUserPasswordByEmail:(NSString *)email;
 
 /**
- 修改用户邮箱
- @param token 登录成功后得到的token
- @param email 指定需要修改成的邮箱地址
- @see 对应的回调接口：[XPGWifiSDKDelegate XPGWifiSDK:didChangeUserEmail:errorMessage:]
+ @deprecated 此接口已废弃，请使用替代接口：[GizWifiSDK changeUserInfo:username:verifyCode:accountType:]
  */
 - (void)changeUserEmail:(NSString *)token email:(NSString *)email DEPRECATED_ATTRIBUTE;
 
 /**
- 修改用户手机号
- @param token 登录成功后得到的token
- @param phone 指定需要修改成的手机号
- @param code 指定需要修改成的手机号收到验证码（通过requestSendVerifyCode方法触发指定手机号接收短信内的验证码）
- @see 对应的回调接口：[XPGWifiSDKDelegate XPGWifiSDK:didChangeUserPhone:errorMessage:]
+ @deprecated 此接口已废弃，请使用替代接口：[GizWifiSDK changeUserInfo:username:verifyCode:accountType:]
  */
 - (void)changeUserPhone:(NSString *)token phone:(NSString *)phone code:(NSString *)code DEPRECATED_ATTRIBUTE;
 
@@ -860,7 +892,7 @@ typedef enum _tagXPGUserAccountType
  @param remark 待绑定设备的别名，无别名可传nil
  @see 对应的回调接口：[XPGWifiSDKDelegate XPGWifiSDK:didBindDevice:error:errorMessage:]
  */
-- (void)bindDeviceWithUid:(NSString *)uid token:(NSString *)token did:(NSString *)did passCode:(NSString *)passCode remark:(NSString*)remark;
+- (void)bindDeviceWithUid:(NSString *)uid token:(NSString *)token did:(NSString *)did passCode:(NSString *)passCode remark:(NSString *)remark;
 
 /**
  从服务器解绑设备
@@ -876,19 +908,29 @@ typedef enum _tagXPGUserAccountType
  获取绑定设备及本地设备列表
  @param uid 登录成功后得到的uid
  @param token 登录成功后得到的token
- @param specialProductKey 指定待筛选设备的产品标识（获取或搜索到未指定设备产品标识的设备将其过滤，指定Nil则不过滤）
+ @param specialProductKeys 指定待筛选设备的产品标识（将只返回与指定设备产品标识匹配的设备，指定Nil则不过滤）
  @see 对应的回调接口：[XPGWifiSDKDelegate XPGWifiSDK:didDiscovered:result:]
  */
-- (void)getBoundDevicesWithUid:(NSString *)uid token:(NSString *)token specialProductKeys:(NSString *)specialProductKey, ... NS_REQUIRES_NIL_TERMINATION;
+- (void)getBoundDevices:(NSString *)uid token:(NSString *)token specialProductKeys:(NSArray *)specialProductKeys;
+
+/**
+ @deprecated 此接口已废弃，请使用替代接口：[getBoundDevices:token:specialProductKeys:]
+ */
+- (void)getBoundDevicesWithUid:(NSString *)uid token:(NSString *)token specialProductKeys:(NSString *)specialProductKey, ... NS_REQUIRES_NIL_TERMINATION DEPRECATED_ATTRIBUTE;
 
 /**
  获取分组列表
  @param uid 登录成功后得到的uid
  @param token 登录成功后得到的token
- @param specialProductKey 指定待筛选的组类型标识（获取到未指定类型标识的组将其过滤，指定Nil则不过滤）
+ @param specialProductKeys 指定待筛选的组类型标识（将只返回与指定类型标识匹配的组，指定Nil则不过滤）
  @see 对应的回调接口：[XPGWifiSDKDelegate XPGWifiSDK:didGetGroups:result:]
  */
-- (void)getGroupsWithUid:(NSString *)uid token:(NSString *)token specialProductKeys:(NSString *)specialProductKey, ... NS_REQUIRES_NIL_TERMINATION;
+- (void)getGroups:(NSString *)uid token:(NSString *)token specialProductKeys:(NSArray *)specialProductKeys;
+
+/**
+ @deprecated 此接口已废弃，请使用替代接口：[getGroups:token:specialProductKeys:]
+ */
+- (void)getGroupsWithUid:(NSString *)uid token:(NSString *)token specialProductKeys:(NSString *)specialProductKey, ... NS_REQUIRES_NIL_TERMINATION DEPRECATED_ATTRIBUTE;
 
 /**
  新建设备分组
@@ -926,14 +968,7 @@ typedef enum _tagXPGUserAccountType
 - (void)editGroup:(NSString *)uid
             token:(NSString *)token
               gid:(NSString *)gid
-        groupName:(NSString*)groupName
+        groupName:(NSString *)groupName
    specialDevices:(NSArray *)specialDevices;
-
-#ifdef SWIFT
-- (void)getBoundDevice:(NSString *)uid token:(NSString *)token;
-- (void)EnableProductFilter:(BOOL)isEnable;
-- (void)RegisterProductKey:(NSString *)productKey;
-- (void)ClearProductKey;
-#endif
 
 @end

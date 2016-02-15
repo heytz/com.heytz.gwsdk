@@ -12,8 +12,8 @@
             </feature>
         </config-file>
         <source-file src="src/ios/gwsdk.m"/>
-        <source-file framework="true" src="libcrypto.a"/>
-        <source-file framework="true" src="libssl.a"/>
+        <source-file framework="true" src="libEasyLink.a"/>
+        <source-file framework="true" src="libLibSimpleConfig.a"/>
         <source-file framework="true" src="libEsptouch_v0.3.3.4_4.a"/>
         <framework src="SystemConfiguration.framework"/>
         <framework src="libc++.dylib"/>
