@@ -18,6 +18,7 @@
         <source-file framework="true" src="libssl.a"/>
         <source-file framework="true" src="libcrypto.a"/>
         <framework src="SystemConfiguration.framework"/>
+        <framework src="CoreTelephony.framework"/>
         <framework src="libc++.dylib"/>
         <framework custom="true" src="XPGWifiSDK.framework"/>
         <framework custom="true" src="openssl"/>
