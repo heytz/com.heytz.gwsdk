@@ -262,7 +262,8 @@ public class gwsdk extends CordovaPlugin {
             XPGWifiSDK.sharedInstance().startWithAppID(context, _appId);
             XPGWifiSDK.sharedInstance().setListener(wifiSDKListener);
         }
-
+        attempts = 2;
+        _controlState = true;
         this._productKey = args.getString(1);
         this.airLinkCallbackContext = callbackContext;
 
@@ -297,8 +298,7 @@ public class gwsdk extends CordovaPlugin {
             _token = args.getString(5);
             int timeout = args.getInt(6);
             String softAPSSIDPrefix = args.getString(8);
-            attempts = 2;
-            _controlState = true;
+
             XPGWifiConfigureMode xpgWifiConfigureMode = XPGWifiConfigureMode.XPGWifiConfigureModeAirLink;
             switch (args.getInt(7)) {
                 case 1:
@@ -329,9 +329,7 @@ public class gwsdk extends CordovaPlugin {
             GwsdkStateCode.setCurrentState(GwsdkStateCode.ControlCode);
             this._currentDeviceMac = args.getString(4);
             this._controlObject = args.getString(5);
-            this._controlState = true;
             List<String> products = new ArrayList<String>();
-
             for (int i = 0; i < args.getJSONArray(1).length(); i++) {
                 products.add(args.getJSONArray(1).get(i).toString());
             }

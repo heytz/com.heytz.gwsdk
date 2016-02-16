@@ -57,6 +57,7 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
     }
     _currentPairDeviceMacAddress=nil;
     isDiscoverLock=true;
+    attempts=2;//尝试两次绑定。
    self.commandHolder = command;
 }
 /*
@@ -90,7 +91,7 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
     currentState=SetDeviceWifiBindDevice;
     _uid=command.arguments[4];
     _token=command.arguments[5];
-    attempts=2;//尝试两次绑定。
+
     /**
      配置设备连接路由的方法
      @param ssid 需要配置到路由的SSID名
