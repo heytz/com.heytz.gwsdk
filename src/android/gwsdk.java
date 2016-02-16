@@ -25,7 +25,7 @@ public class gwsdk extends CordovaPlugin {
     private String _appId;
     private String _productKey;              //当前的productkey
     private String _currentDeviceMac;       //当前配对的设备Mac地址.
-    private final String TAG = "==========gwsdkwrapper==============";
+    private final String TAG = "\n===gwsdkwrapper====\n";
     private Boolean debug = true;            //debug 状态
 
     private String _uid;                     //当前用户的uid
@@ -35,7 +35,8 @@ public class gwsdk extends CordovaPlugin {
     private List<XPGWifiDevice> _devicesList;//筛选出来的设备列表
     private Object _controlObject;           //用户控制的值.
     private Boolean _controlState;           //锁定用户的控制状态
-
+    private XPGWifiDevice _currentDevice;     //当前缓存中的device
+    private int attempts;                    //尝试次数
     private XPGWifiSDKListener wifiSDKListener = new XPGWifiSDKListener() {
 
         private JSONObject toJSONObjfrom(XPGWifiDevice device) {
@@ -90,21 +91,26 @@ public class gwsdk extends CordovaPlugin {
         @Override
         public void didSetDeviceWifi(int error, XPGWifiDevice device) {
             if (error == XPGWifiErrorCode.XPGWifiError_NONE && device.getMacAddress().length() > 0) {
-                //如果存在did那么就直接返回成功,现在测试只会返回一次
-                if (_currentDeviceMac == null && device.getDid().length() > 0) {
-                    sendDeviceInfo(device);
-                } else {//否则获取配对到的设备地址,去didDiscovered 等待设备did的信息
-                    _currentDeviceMac = device.getMacAddress();
+                logDevice("\n======didsetDeviceWifi======\n", device);
+                switch (GwsdkStateCode.getCurrentState()) {
+                    case GwsdkStateCode.SetWifiCode:
+                        //如果存在did那么就直接返回成功,现在测试只会返回一次
+                        if (_currentDeviceMac == null && device.getDid().length() > 0) {
+                            sendDeviceInfo(device);
+                        } else {//否则获取配对到的设备地址,去didDiscovered 等待设备did的信息
+                            _currentDeviceMac = device.getMacAddress();
+                        }
+                        break;
+                    case GwsdkStateCode.SetDeviceWifiBindDevice:
+                        //如果存在did那么就直接返回成功,现在测试只会返回一次
+                        if (_currentDeviceMac == null && device.getDid().length() > 0) {
+                            XPGWifiSDK.sharedInstance().bindDevice(_uid, _token, device.getDid(), null, null);
+                        } else {//否则获取配对到的设备地址,去didDiscovered 等待设备did的信息
+                            _currentDeviceMac = device.getMacAddress();
+                        }
+                        break;
                 }
-                if (debug) {
-                    Log.e("didSetDevicewifi", device.getMacAddress());
-                    Log.e("didSetDevicewifi", device.getDid());
-                    Log.e("didSetDevicewifi", device.getIPAddress());
-                    Log.e("didSetDevicewifi", device.getProductKey());
-                }
-            }
-            // do nothing...
-            else if (error == XPGWifiErrorCode.XPGWifiError_CONNECT_TIMEOUT) {
+            } else if (error == XPGWifiErrorCode.XPGWifiError_CONNECT_TIMEOUT) {
                 //超时的回调
                 PluginResult pr = new PluginResult(PluginResult.Status.ERROR, error);
                 airLinkCallbackContext.sendPluginResult(pr);
@@ -179,13 +185,58 @@ public class gwsdk extends CordovaPlugin {
                         deviceLogin(_uid, _token, _currentDeviceMac);
                         Log.d(TAG, "deviceLoing()");
                         break;
+                    case GwsdkStateCode.SetDeviceWifiBindDevice:
+                        //如果当前配对的DeviceMac 存在.
+                        if (_currentDeviceMac != null) {
+                            for (int i = 0; i < devicesList.size(); i++) {
+                                logDevice("\n=====SetDeviceWifiBindDevic=====\n", devicesList.get(i));
+                                //判断did 是否为空
+                                if (devicesList.get(i).getDid().length() > 0) {
+                                    //判断当前设备是否为正在配对的设备(*Mac地址判断),
+                                    if ((devicesList.get(i).getMacAddress().indexOf(_currentDeviceMac) > -1)) {
+                                        _currentDevice = devicesList.get(i);
+                                        if (_controlState == true) {
+                                            _controlState = false;
+                                            XPGWifiSDK.sharedInstance().bindDevice(_uid, _token, devicesList.get(i).getDid(), null, null);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        break;
                     default:
 
                 }
             }
         }
 
+        @Override
+        public void didBindDevice(int result, String errorMessage, String did) {
+            if (result == XPGWifiErrorCode.XPGWifiError_NONE) {
+                Log.e("\n===binding success===\n", errorMessage + did);
 
+                //绑定设备成功，登录设备进行控制
+                PluginResult pr = new PluginResult(PluginResult.Status.OK, deviceToJsonObject(_currentDevice));
+                airLinkCallbackContext.sendPluginResult(pr);
+                //清空内存中的Mac
+                _currentDeviceMac = null;
+                _currentDevice = null;
+            } else {
+                Log.e("\n===binding error===\n", errorMessage);
+                if (attempts > 0) {
+                    _controlState = true;
+                    --attempts;
+                } else {
+                    //清空内存中的Mac
+                    _currentDeviceMac = null;
+                    _currentDevice = null;
+                    //绑定设备失败，弹出错误信息
+                    PluginResult pr = new PluginResult(PluginResult.Status.ERROR, errorMessage);
+                    airLinkCallbackContext.sendPluginResult(pr);
+                }
+            }
+
+        }
     };
 
 
@@ -240,6 +291,29 @@ public class gwsdk extends CordovaPlugin {
             this.setDeviceWifi(args.getString(2), args.getString(3), callbackContext);
             return true;
         }
+        if (action.equals("setDeviceWifiBindDevice")) {
+            GwsdkStateCode.setCurrentState(GwsdkStateCode.SetDeviceWifiBindDevice);
+            _uid = args.getString(4);
+            _token = args.getString(5);
+            int timeout = args.getInt(6);
+            String softAPSSIDPrefix = args.getString(8);
+            attempts = 2;
+            _controlState = true;
+            XPGWifiConfigureMode xpgWifiConfigureMode = XPGWifiConfigureMode.XPGWifiConfigureModeAirLink;
+            switch (args.getInt(7)) {
+                case 1:
+                    xpgWifiConfigureMode = XPGWifiConfigureMode.XPGWifiConfigureModeSoftAP;
+                    break;
+                case 2:
+                    xpgWifiConfigureMode = XPGWifiConfigureMode.XPGWifiConfigureModeAirLink;
+                    break;
+            }
+            this.setDeviceWifiBindDevice(args.getString(2), args.getString(3),
+                    xpgWifiConfigureMode,
+                    timeout, softAPSSIDPrefix, null
+                    , callbackContext);
+            return true;
+        }
         if (action.equals("getDeviceList")) {
             GwsdkStateCode.setCurrentState(GwsdkStateCode.GetDevcieListCode);
             this._uid = args.getString(2);
@@ -261,7 +335,7 @@ public class gwsdk extends CordovaPlugin {
             for (int i = 0; i < args.getJSONArray(1).length(); i++) {
                 products.add(args.getJSONArray(1).get(i).toString());
             }
-            Log.w("tag",products.toString());
+            Log.w("tag", products.toString());
             this.getDeviceList(args.getString(2), args.getString(3), products);
             return true;
         }
@@ -281,6 +355,18 @@ public class gwsdk extends CordovaPlugin {
             airLinkCallbackContext = callbackContext;
             //15.11.24 切换成新接口
             XPGWifiSDK.sharedInstance().setDeviceWifi(wifiSSID, wifiKey, XPGWifiConfigureMode.XPGWifiConfigureModeAirLink, null, 18000, null);
+        } else {
+            callbackContext.error("args is empty or null");
+        }
+    }
+
+    private void setDeviceWifiBindDevice(String wifiSSID, String wifiKey, XPGWifiConfigureMode mode, int timeout, String softAPSSIDPrefix, List<XPGWifiSDK.XPGWifiGAgentType> types, CallbackContext callbackContext) {
+        if (wifiSSID != null && wifiSSID.length() > 0 && wifiKey != null && wifiKey.length() > 0) {
+            airLinkCallbackContext = callbackContext;
+            //15.11.24 切换成新接口
+            XPGWifiSDK.sharedInstance().setDeviceWifi(wifiSSID, wifiKey,
+                    mode, softAPSSIDPrefix,
+                    timeout, null);
         } else {
             callbackContext.error("args is empty or null");
         }
@@ -454,13 +540,36 @@ public class gwsdk extends CordovaPlugin {
         XPGWifiSDK.sharedInstance().setListener(wifiSDKListener);
         _currentDeviceMac = null;
     }
+
+    public JSONObject deviceToJsonObject(XPGWifiDevice device) {
+        JSONObject json = new JSONObject();
+        try {
+            json.put("productKey", device.getProductKey());
+            json.put("did", device.getDid());
+            json.put("macAddress", device.getMacAddress());
+            json.put("passcode", device.getPasscode());
+        } catch (JSONException e) {
+
+        }
+        return json;
+    }
+
+    public void logDevice(String map, XPGWifiDevice device) {
+        if (debug) {
+            Log.e(map, device.getMacAddress());
+            Log.e(map, device.getDid());
+            Log.e(map, device.getIPAddress());
+            Log.e(map, device.getProductKey());
+        }
+    }
 }
 
 final class GwsdkStateCode {
     private static int CurrentState;
-    public static final int SetWifiCode = 0;
-    public static final int GetDevcieListCode = 1;
-    public static final int ControlCode = 2;
+    public static final int SetWifiCode = 0;            //只配对设备
+    public static final int GetDevcieListCode = 1;      //发现列表
+    public static final int ControlCode = 2;            //控制设备
+    public static final int SetDeviceWifiBindDevice = 3;   //配对设备并且绑定设备
 
     public static void setCurrentState(int currentState) {
         CurrentState = currentState;
