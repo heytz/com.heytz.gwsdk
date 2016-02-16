@@ -116,14 +116,15 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
                command.arguments[8],
               command.arguments[9]);
     }
+    NSArray *abc = [[NSArray alloc] initWithObjects:@(XPGWifiGAgentTypeHF),nil];
     //todo 如果上一次配对没有结束，下次请求会上报 -46	XPGWifiError_IS_RUNNING	当前事件正在处理 超时以后可以继续配置
     [[XPGWifiSDK  sharedInstance]
      setDeviceWifi:command.arguments[2]
      key:command.arguments[3]
      mode:[mode intValue]
-     softAPSSIDPrefix:[command.arguments objectAtIndex:8]==[NSNull null]?nil:command.arguments[8]
+     softAPSSIDPrefix:([command.arguments objectAtIndex:8]==[NSNull null])?nil:command.arguments[8]
      timeout:[timeout intValue]
-     wifiGAgentType:[command.arguments objectAtIndex:9]==[NSNull null]?nil:[command.arguments objectAtIndex:9]];
+     wifiGAgentType:nil];//[command.arguments objectAtIndex:9]==[NSNull null]?nil:[command.arguments objectAtIndex:9]];
 
 }
 /**
