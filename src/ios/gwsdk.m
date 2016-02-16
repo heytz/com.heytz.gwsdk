@@ -102,12 +102,28 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
      @param types 配置的wifi模组类型列表，存放NSNumber对象，SDK默认同时发送庆科和汉枫模组配置包；SoftAPMode模式下该参数无意义。types为nil，SDK按照默认处理。如果只想配置庆科模组，types中请加入@XPGWifiGAgentTypeMXCHIP类；如果只想配置汉枫模组，types中请加入@XPGWifiGAgentTypeHF；如果希望多种模组配置包同时传，可以把对应类型都加入到types中。XPGWifiGAgentType枚举类型定义SDK支持的所有模组类型。
      @see 对应的回调接口：[XPGWifiSDKDelegate XPGWifiSDK:didSetDeviceWifi:result:]
      */
+    NSString *timeout=[command.arguments objectAtIndex:6];
+    NSString *mode=[command.arguments objectAtIndex:7];
     //新接口 11.24
     if (_debug) {
-        NSLog(@"ssid:%@,pwd:%@",command.arguments[2],command.arguments[3]);
+        NSLog(@"ssid:%@,pwd:%@ uid:%@ token:%@ timeout:%@ mode:%@ softAPssidPrefix:%@ wifiGAgentType:%@",
+              command.arguments[2],
+              command.arguments[3],
+               command.arguments[4],
+               command.arguments[5],
+               command.arguments[6],
+               command.arguments[7],
+               command.arguments[8],
+              command.arguments[9]);
     }
     //todo 如果上一次配对没有结束，下次请求会上报 -46	XPGWifiError_IS_RUNNING	当前事件正在处理 超时以后可以继续配置
-    [[XPGWifiSDK  sharedInstance] setDeviceWifi:command.arguments[2] key:command.arguments[3] mode:command.arguments[7] softAPSSIDPrefix:command.arguments[8] timeout:command.arguments[6] wifiGAgentType:command.arguments[9]];
+    [[XPGWifiSDK  sharedInstance]
+     setDeviceWifi:command.arguments[2]
+     key:command.arguments[3]
+     mode:[mode intValue]
+     softAPSSIDPrefix:[command.arguments objectAtIndex:8]==[NSNull null]?nil:command.arguments[8]
+     timeout:[timeout intValue]
+     wifiGAgentType:[command.arguments objectAtIndex:9]==[NSNull null]?nil:[command.arguments objectAtIndex:9]];
 
 }
 /**
