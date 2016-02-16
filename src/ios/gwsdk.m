@@ -106,6 +106,7 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
     if (_debug) {
         NSLog(@"ssid:%@,pwd:%@",command.arguments[2],command.arguments[3]);
     }
+    //todo 如果上一次配对没有结束，下次请求会上报 -46	XPGWifiError_IS_RUNNING	当前事件正在处理 超时以后可以继续配置
     [[XPGWifiSDK  sharedInstance] setDeviceWifi:command.arguments[2] key:command.arguments[3] mode:XPGWifiSDKAirLinkMode softAPSSIDPrefix:nil timeout:180 wifiGAgentType:nil];
 }
 /**
@@ -145,6 +146,10 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
 
 }
 
+-(void)deviceBingding:(NSString *)did uid:(NSString *)uid token:(NSString *)token passcode:(NSString *)passcode remark:(NSString *)remark {
+
+     [[XPGWifiSDK sharedInstance] bindDeviceWithUid:_uid token:_token did:did passCode:passcode remark:remark];
+}
 /*!
  login device 的回调
  判断这个device是否登录成功，如果成功则发送控制命令
@@ -272,8 +277,19 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
                                 //判断did是否存在
                                 if ( _currentPairDeviceMacAddress==nil&&device.did.length>0) {
                                      _currentDevice=device;
-                                     //绑定设备
-                                     [[XPGWifiSDK sharedInstance] bindDeviceWithUid:_uid token:_token did:device.did passCode:nil remark:nil];
+
+//                                    NSMutableDictionary *dict = [[NSMutableDictionary alloc] init];
+//                                    [dict setValue:device.did forKey:@"did"];
+//                                    [dict setValue:_uid forKey:@"uid"];
+//                                    [dict setValue:_token forKey:@"token"];
+//                                    [dict setValue:nil forKey:@"passcode"];
+//                                    [dict setValue:nil forKey:@"remark"];
+//                                    //设置定时器 三秒以后执行一次 等待3秒，因为需要等待服务器解绑已经绑定的设备
+//                                    [NSTimer scheduledTimerWithTimeInterval:3 target:self selector:@selector(deviceBingding:uid:token:passcode:remark:) userInfo:dict repeats:NO];
+                                    // 让主线程暂停3秒，因为需要等待服务器解绑已经绑定的设备。第二种方法，可能造成app卡顿 不再使用
+                                    [NSThread sleepForTimeInterval:10];
+                                    [[XPGWifiSDK sharedInstance] bindDeviceWithUid:_uid token:_token did:device.did passCode:nil remark:nil];
+
                                 }else{
                                     _currentPairDeviceMacAddress=device.macAddress;
                                 }
@@ -298,12 +314,15 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
       }else if(result == XPGWifiError_CONFIGURE_TIMEOUT){
          if (_debug)
             NSLog(@"======timeout=====");
-        [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR] callbackId:self.commandHolder.callbackId];
+
+          CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"timeout"];
+          [self.commandDelegate sendPluginResult:pluginResult callbackId:self.commandHolder.callbackId];
         }else {
           if (_debug){
-            NSLog(@"======error code:===%d", result);
-            NSLog(@"======did===%@", device.did);
-                   }
+              NSLog(@"======error code:===%d", result);
+            }
+            CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsInt:result];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:self.commandHolder.callbackId];
         }
 }
 /**
@@ -404,6 +423,17 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
                             _currentDevice=device;
                             if(isDiscoverLock==true){
                                 isDiscoverLock=false;
+
+//                                NSMutableDictionary *dict = [[NSMutableDictionary alloc] init];
+//                                [dict setValue:device.did forKey:@"did"];
+//                                [dict setValue:_uid forKey:@"uid"];
+//                                [dict setValue:_token forKey:@"token"];
+//                                [dict setValue:nil forKey:@"passcode"];
+//                                [dict setValue:nil forKey:@"remark"];
+//                                //设置定时器 三秒以后执行一次 等待3秒，因为需要等待服务器解绑已经绑定的设备
+//                                [NSTimer scheduledTimerWithTimeInterval:3 target:self selector:@selector(deviceBingding:uid:token:passcode:remark:) userInfo:dict repeats:NO];
+                                // 让主线程暂停3秒，因为需要等待服务器解绑已经绑定的设备。第二种方法，可能造成app卡顿 不再使用
+                                [NSThread sleepForTimeInterval:10];
                                 [[XPGWifiSDK sharedInstance] bindDeviceWithUid:_uid token:_token did:device.did passCode:nil remark:nil];
                             }
                         }
@@ -423,30 +453,20 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
  * 绑定事件 回调接口
  **/
 -(void)XPGWifiSDK:(XPGWifiSDK *)wifiSDK didBindDevice:(NSString *)did error:(NSNumber *)error errorMessage:(NSString *)errorMessage{
-    if([error intValue] == XPGWifiError_NONE)
-    {
+    if([error intValue] == XPGWifiError_NONE){
         //绑定成功
         NSLog(@"\n =========binding success========\n %@",did);
-        _currentPairDeviceMacAddress=nil;
         CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[self deviceToDictionary:_currentDevice]];
-
         [self.commandDelegate sendPluginResult:pluginResult callbackId:self.commandHolder.callbackId];
-    }
-    else
-    {
-          NSLog(@"\n =========binding error========\n did:%@\n errorMessage:%@ \n attempts:%d \n",did,errorMessage,attempts);
+    } else {
         //绑定失败
-        if(attempts>0){
-            isDiscoverLock=true;
-            --attempts;
-        } else {
-             _currentPairDeviceMacAddress=nil;
-            CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:errorMessage];
-            [self.commandDelegate sendPluginResult:pluginResult callbackId:self.commandHolder.callbackId];
-        }
+         NSLog(@"\n =========binding error========\n error:%@ \n errorMessage:%@ \n",error,errorMessage);
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:errorMessage];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:self.commandHolder.callbackId];
     }
     //清空缓存
     _currentDevice=nil;
+    _currentPairDeviceMacAddress=nil;
 }
 
 /**

@@ -10,6 +10,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -199,7 +200,7 @@ public class gwsdk extends CordovaPlugin {
      * 要初始化监听的listener
      * 如果是第一次加载 那么初始化设置 第一次加载的判断为 是否存在_appId
      */
-    private void init(JSONArray args, CallbackContext callbackContext) throws JSONException {
+    private void init(CordovaArgs args, CallbackContext callbackContext) throws JSONException {
 
         if (_appId == null) {
             _appId = args.getString(0);
@@ -227,7 +228,7 @@ public class gwsdk extends CordovaPlugin {
      * @throws JSONException
      */
     @Override
-    public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
+    public boolean execute(String action, CordovaArgs args, CallbackContext callbackContext) throws JSONException {
         //销毁内存中的Listener
         if (action.equals("dealloc")) {
             this.dealloc();
@@ -243,7 +244,11 @@ public class gwsdk extends CordovaPlugin {
             GwsdkStateCode.setCurrentState(GwsdkStateCode.GetDevcieListCode);
             this._uid = args.getString(2);
             this._token = args.getString(3);
-            this.getDeviceList(args.getString(2), args.getString(3), args.getString(1));
+            List<String> products = new ArrayList<String>();
+            for (int i = 0; i < args.getJSONArray(1).length(); i++) {
+                products.add(args.getJSONArray(1).get(i).toString());
+            }
+            this.getDeviceList(args.getString(2), args.getString(3), products);
             return true;
         }
         if (action.equals("deviceControl")) {
@@ -251,7 +256,13 @@ public class gwsdk extends CordovaPlugin {
             this._currentDeviceMac = args.getString(4);
             this._controlObject = args.getString(5);
             this._controlState = true;
-            this.getDeviceList(args.getString(2), args.getString(3), args.getString(1));
+            List<String> products = new ArrayList<String>();
+
+            for (int i = 0; i < args.getJSONArray(1).length(); i++) {
+                products.add(args.getJSONArray(1).get(i).toString());
+            }
+            Log.w("tag",products.toString());
+            this.getDeviceList(args.getString(2), args.getString(3), products);
             return true;
         }
 
@@ -282,7 +293,8 @@ public class gwsdk extends CordovaPlugin {
      * @param token
      * @param productKey
      */
-    private void getDeviceList(String uid, String token, String productKey) {
+    private void getDeviceList(String uid, String token, List<String> productKey) {
+//        XPGWifiSDK.sharedInstance().getBoundDevices(uid, token, productKey);
         XPGWifiSDK.sharedInstance().getBoundDevices(uid, token, productKey);
     }
 
