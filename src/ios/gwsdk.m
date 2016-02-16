@@ -90,7 +90,7 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
     currentState=SetDeviceWifiBindDevice;
     _uid=command.arguments[4];
     _token=command.arguments[5];
-    attempts=2;
+    attempts=2;//尝试两次绑定。
     /**
      配置设备连接路由的方法
      @param ssid 需要配置到路由的SSID名
@@ -287,7 +287,7 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
 //                                    //设置定时器 三秒以后执行一次 等待3秒，因为需要等待服务器解绑已经绑定的设备
 //                                    [NSTimer scheduledTimerWithTimeInterval:3 target:self selector:@selector(deviceBingding:uid:token:passcode:remark:) userInfo:dict repeats:NO];
                                     // 让主线程暂停3秒，因为需要等待服务器解绑已经绑定的设备。第二种方法，可能造成app卡顿 不再使用
-                                    [NSThread sleepForTimeInterval:10];
+                                    //[NSThread sleepForTimeInterval:10.00f];
                                     [[XPGWifiSDK sharedInstance] bindDeviceWithUid:_uid token:_token did:device.did passCode:nil remark:nil];
 
                                 }else{
@@ -432,8 +432,9 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
 //                                [dict setValue:nil forKey:@"remark"];
 //                                //设置定时器 三秒以后执行一次 等待3秒，因为需要等待服务器解绑已经绑定的设备
 //                                [NSTimer scheduledTimerWithTimeInterval:3 target:self selector:@selector(deviceBingding:uid:token:passcode:remark:) userInfo:dict repeats:NO];
-                                // 让主线程暂停3秒，因为需要等待服务器解绑已经绑定的设备。第二种方法，可能造成app卡顿 不再使用
-                                [NSThread sleepForTimeInterval:10];
+                                  //让主线程暂停3秒，因为需要等待服务器解绑已经绑定的设备。第二种方法，可能造成app卡顿 不再使用
+                                  //[NSThread sleepForTimeInterval:10.00f];
+
                                 [[XPGWifiSDK sharedInstance] bindDeviceWithUid:_uid token:_token did:device.did passCode:nil remark:nil];
                             }
                         }
@@ -454,19 +455,30 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
  **/
 -(void)XPGWifiSDK:(XPGWifiSDK *)wifiSDK didBindDevice:(NSString *)did error:(NSNumber *)error errorMessage:(NSString *)errorMessage{
     if([error intValue] == XPGWifiError_NONE){
+
         //绑定成功
         NSLog(@"\n =========binding success========\n %@",did);
         CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[self deviceToDictionary:_currentDevice]];
         [self.commandDelegate sendPluginResult:pluginResult callbackId:self.commandHolder.callbackId];
+        //清空缓存
+        _currentDevice=nil;
+        _currentPairDeviceMacAddress=nil;
     } else {
         //绑定失败
-         NSLog(@"\n =========binding error========\n error:%@ \n errorMessage:%@ \n",error,errorMessage);
-        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:errorMessage];
-        [self.commandDelegate sendPluginResult:pluginResult callbackId:self.commandHolder.callbackId];
+        NSLog(@"\n =========binding error========\n error:%@ \n errorMessage:%@ \n attempts:%d \n",error,errorMessage,attempts);
+        if(attempts>0){
+            isDiscoverLock=true;
+            --attempts;
+        } else {
+            CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:errorMessage];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:self.commandHolder.callbackId];
+            //清空缓存
+            _currentDevice=nil;
+            _currentPairDeviceMacAddress=nil;
+        }
     }
-    //清空缓存
-    _currentDevice=nil;
-    _currentPairDeviceMacAddress=nil;
+
+
 }
 
 /**
