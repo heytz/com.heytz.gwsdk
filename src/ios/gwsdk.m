@@ -107,7 +107,8 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
         NSLog(@"ssid:%@,pwd:%@",command.arguments[2],command.arguments[3]);
     }
     //todo 如果上一次配对没有结束，下次请求会上报 -46	XPGWifiError_IS_RUNNING	当前事件正在处理 超时以后可以继续配置
-    [[XPGWifiSDK  sharedInstance] setDeviceWifi:command.arguments[2] key:command.arguments[3] mode:XPGWifiSDKAirLinkMode softAPSSIDPrefix:nil timeout:180 wifiGAgentType:nil];
+    [[XPGWifiSDK  sharedInstance] setDeviceWifi:command.arguments[2] key:command.arguments[3] mode:command.arguments[7] softAPSSIDPrefix:command.arguments[8] timeout:command.arguments[6] wifiGAgentType:command.arguments[9]];
+
 }
 /**
  * @brief 回调接口，返回发现设备的结果
