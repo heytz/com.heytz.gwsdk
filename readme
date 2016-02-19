@@ -15,3 +15,7 @@ version 0.4.2
     sha:  bf8b7be6762a149a46a52e7759643f39a5855c8e
   1.添加配网绑定方法.
   2.解决appid的切换问题
+
+version 0.4.3
+
+  1.setDevicewifi添加timeout字段.
