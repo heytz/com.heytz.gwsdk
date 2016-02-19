@@ -288,7 +288,8 @@ public class gwsdk extends CordovaPlugin {
         init(args, callbackContext);
         if (action.equals("setDeviceWifi")) {
             GwsdkStateCode.setCurrentState(GwsdkStateCode.SetWifiCode);
-            this.setDeviceWifi(args.getString(2), args.getString(3), callbackContext);
+            int timeout = args.getInt(4);
+            this.setDeviceWifi(args.getString(2), args.getString(3),timeout, callbackContext);
             return true;
         }
         if (action.equals("setDeviceWifiBindDevice")) {
@@ -347,11 +348,11 @@ public class gwsdk extends CordovaPlugin {
      * @param wifiKey
      * @param callbackContext
      */
-    private void setDeviceWifi(String wifiSSID, String wifiKey, CallbackContext callbackContext) {
+    private void setDeviceWifi(String wifiSSID, String wifiKey,int timeout, CallbackContext callbackContext) {
         if (wifiSSID != null && wifiSSID.length() > 0 && wifiKey != null && wifiKey.length() > 0) {
             airLinkCallbackContext = callbackContext;
             //15.11.24 切换成新接口
-            XPGWifiSDK.sharedInstance().setDeviceWifi(wifiSSID, wifiKey, XPGWifiConfigureMode.XPGWifiConfigureModeAirLink, null, 18000, null);
+            XPGWifiSDK.sharedInstance().setDeviceWifi(wifiSSID, wifiKey, XPGWifiConfigureMode.XPGWifiConfigureModeAirLink, null, timeout, null);
         } else {
             callbackContext.error("args is empty or null");
         }

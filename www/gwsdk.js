@@ -7,8 +7,8 @@ var productToArray = function (products) {
         proArr.push(products);
     return proArr;
 }
-exports.setDeviceWifi = function (appid, productKey, wifiSSID, wifiKey, success, error) {
-    exec(success, error, "gwsdk", "setDeviceWifi", [appid, productToArray(productKey), wifiSSID, wifiKey]);
+exports.setDeviceWifi = function (appid, productKey, wifiSSID, wifiKey,timeout, success, error) {
+    exec(success, error, "gwsdk", "setDeviceWifi", [appid, productToArray(productKey), wifiSSID, wifiKey, timeout ? timeout : 60,]);
 };
 /**
  * 配对并且绑定设备
