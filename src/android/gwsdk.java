@@ -252,16 +252,15 @@ public class gwsdk extends CordovaPlugin {
      * 如果是第一次加载 那么初始化设置 第一次加载的判断为 是否存在_appId
      */
     private void init(CordovaArgs args, CallbackContext callbackContext) throws JSONException {
-
-        if (_appId == null) {
-            _appId = args.getString(0);
-            XPGWifiSDK.sharedInstance().startWithAppID(context, _appId);
+        if (_appId == null||XPGWifiSDK.sharedInstance() == null) {
             // set listener
             XPGWifiSDK.sharedInstance().setListener(wifiSDKListener);
-        } else if (XPGWifiSDK.sharedInstance() == null) {
-            XPGWifiSDK.sharedInstance().startWithAppID(context, _appId);
-            XPGWifiSDK.sharedInstance().setListener(wifiSDKListener);
         }
+        if(_appId==null||!args.getString(0).equals(_appId)){
+            _appId = args.getString(0);
+            XPGWifiSDK.sharedInstance().startWithAppID(context, _appId);
+        }
+
         attempts = 2;
         _controlState = true;
         this._productKey = args.getString(1);
