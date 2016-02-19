@@ -48,8 +48,10 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
 }
 
 -(void)init:(CDVInvokedUrlCommand *) command{
-    if(_appId== nil){
-        _appId = command.arguments[0];
+    NSString *appId=command.arguments[0];
+    if(_appId== nil||![appId isEqualToString:_appId]){
+
+        _appId =appId;
         [XPGWifiSDK startWithAppID:_appId];
     }
     if(!([XPGWifiSDK sharedInstance].delegate)){
