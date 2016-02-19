@@ -12,10 +12,11 @@ Wi-Fi设备接入SDK for iOS & android
   8、修复设备登录时小概率崩溃
 version 0.4.2
     date: 2016.2.19 14:37
-    sha:  bf8b7be6762a149a46a52e7759643f39a5855c8e
+    sha-1:  bf8b7be6762a149a46a52e7759643f39a5855c8e
   1.添加配网绑定方法.
   2.解决appid的切换问题
 
 version 0.4.3
-
+    date: 2016.2.19 15:50
+    sha-1:  9c203b11bb2c6a9d9a1408a05b02235dc0408c42
   1.setDevicewifi添加timeout字段.
