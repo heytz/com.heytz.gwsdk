@@ -1,10 +1,11 @@
 var exec = require('cordova/exec');
 var productToArray = function (products) {
     var proArr = [];
-    if (products instanceof Array)
-        proArr = productKey;
-    else
-        proArr.push(products);
+    if (products)
+        if (products instanceof Array)
+            proArr = productKey;
+        else
+            proArr.push(products);
     return proArr;
 }
 /**
