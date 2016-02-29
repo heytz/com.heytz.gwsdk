@@ -212,12 +212,20 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
     [[XPGWifiSDK sharedInstance] getSSIDList];
 }
 /**
- *  cordova 添加device的监听
+ *  cordova 开始device的监听
  *
  *  @param command []
  */
--(void)deviceListener:(CDVInvokedUrlCommand *)command{
+-(void)startDeviceListener:(CDVInvokedUrlCommand *)command{
     listenerCommandHolder=command;
+}
+/**
+ *  cordova 停止device的监听
+ *
+ *  @param command []
+ */
+-(void)endDeviceListener:(CDVInvokedUrlCommand *)command{
+    listenerCommandHolder=nil;
 }
 /**
  * cordova 连接设备
