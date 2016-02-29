@@ -148,6 +148,8 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
 -(void)getDeviceList:(CDVInvokedUrlCommand *)command{
     [self init:command];
     currentState=GetDevcieListCode;
+    _uid=command.arguments[2];
+    _token=command.arguments[3];
     NSLog(@"\n======productkeys%@=====\n",command.arguments[1]);
     [[XPGWifiSDK sharedInstance] getBoundDevices:command.arguments[2] token:command.arguments[3] specialProductKeys:command.arguments[1]];
 }
@@ -220,18 +222,20 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
     NSString *token=command.arguments[1];
     NSString *did=command.arguments[2];
     self.commandHolder=command;
-    BOOL isExist=NO;//判断是否存在相同did的设备
+    CDVPluginResult  *pluginResult= [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"This device does not exist!"];
     for(XPGWifiDevice *device in _deviceList){
         if ([did isEqualToString:device.did]) {
-            _currentDevice=device;
-            isExist=YES;
-            [device login:uid token:token];
+            selectedDevices=device;
+            [selectedDevices login:uid token:token];
+            sleep(1000); //todo 等待10s，再去判断设备是否登陆成功，原因是didLogin无法接收回调。
+            if(selectedDevices.isConnected==YES){
+                pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[self deviceToDictionary:selectedDevices]];
+            }else{
+                 pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"device login error!!"];
+            }
         }
     }
-    if(isExist==NO){
-        CDVPluginResult  *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"This device does not exist!"];
-        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-    }
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 /**
  * cordova 断开连接
@@ -245,7 +249,7 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
     for(XPGWifiDevice *device in _deviceList){
         if ([did isEqualToString:device.did]) {
             isExist=YES;
-            [_currentDevice disconnect];
+            [selectedDevices disconnect];
             listenerCommandHolder=nil;
         }
     }
@@ -262,10 +266,10 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
 -(void)write:(CDVInvokedUrlCommand *)command{
     NSString *did=command.arguments[0];
     NSMutableDictionary *value=command.arguments[1];
-    if(_currentDevice!=nil){
-        if ([did isEqualToString:_currentDevice.did]) {
-            _currentDevice.delegate = self;
-            [self cWrite:_currentDevice objecValue:value];
+    if(selectedDevices!=nil){
+        if ([did isEqualToString:selectedDevices.did]) {
+            selectedDevices.delegate = self;
+            [self cWrite:selectedDevices objecValue:value];
         }else{
             /**
              *  设备不匹配报错
@@ -355,22 +359,67 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
     return data;
 }
 /**
- * XPGWifiDevice 转换为dictionary
- **/
+ *  XPGWifiDevice 转换为dictionary
+ *
+ *  @param device <#device description#>
+ *
+ *  @return [did,macAddress,passcode,productkey]
+ */
 -(NSDictionary *) deviceToDictionary:(XPGWifiDevice *)device{
-    NSDictionary *d = [NSDictionary dictionaryWithObjectsAndKeys:
-                       device.did, @"did",
-                       //device.ipAddress, @"ipAddress",
-                       device.macAddress, @"macAddress",
-                       device.passcode, @"passcode",
-                       device.productKey, @"productKey",
-                       //device.productName, @"productName",
-                       //device.remark, @"remark",
-                       //device.isConnected, @"isConnected",
-                       //device.isDisabled, @"isDisabled",
-                       //device.isLAN, @"isLAN",
-                       //device.isOnline, @"isOnline",
-                       nil];
+//    NSDictionary *d = [NSDictionary dictionaryWithObjectsAndKeys:
+//                       device.did, @"did",
+//                       //device.ipAddress, @"ipAddress",
+//                       device.macAddress, @"macAddress",
+//                       device.passcode, @"passcode",
+//                       device.productKey, @"productKey",
+//                       //device.productName, @"productName",
+//                       //device.remark, @"remark",
+//                       //device.isConnected, @"isConnected",
+//                       //device.isDisabled, @"isDisabled",
+//                       //device.isLAN, @"isLAN",
+//                       //device.isOnline, @"isOnline",
+//                       nil];
+//    return d;
+    //设备的物理地址。如果是 VIRTUAL:SITE，则是虚拟设备
+    NSString * mac = device.macAddress;
+    //设备云端身份标识 DID
+    NSString *did=device.did;
+    //用于控制设备的密钥
+    NSString *passcode=device.passcode;
+    //设备的小循环 IP 地址
+    NSString *ipAddress=device.ipAddress;
+    //设备的产品唯一标识符
+    NSString *productKey=device.productKey;
+    //设备名称
+    NSString *productName=device.productName;
+    //设备别名。在绑定的时候设置
+    NSString *remark=device.remark;
+    //当前设备是否已经建立连接
+    NSNumber *isConnected=[NSNumber numberWithBool:device.isConnected];
+    //当前设备是否是小循环设备
+    NSNumber *isLAN = [NSNumber numberWithBool:device.isLAN];
+    //云端判断设备是否在线
+    NSNumber *isOnline = [NSNumber numberWithBool:device.isOnline];
+    //云端判断设备是否注销
+    NSNumber *isDisabled=[NSNumber numberWithBool:device.isDisabled];
+    //设备是否跟用户绑定
+    NSNumber *isBind=[NSNumber numberWithBool:[device isBind: self.commandHolder.arguments[2]]];
+
+    NSMutableDictionary * d = [NSMutableDictionary dictionaryWithObjectsAndKeys:
+                               mac, @"macAddress",
+                               did, @"did",
+                               passcode, @"passcode",
+                               ipAddress, @"ipAddress",
+                               productKey, @"productKey",
+                               productName, @"productName",
+                               remark, @"remark",
+                               //device.ui, @"ui",
+                               isConnected, @"isConnected",
+                               isDisabled, @"isDisabled",
+                               isLAN, @"isLAN",
+                               isOnline, @"isOnline",
+                               isBind, @"isBind",
+                               nil];
     return d;
 }
 /**
@@ -433,9 +482,9 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
  *  @param device 当前连接的设备
  *  @param result 返回状态
  */
-- (void)XPGWifiDevice:(XPGWifiDevice *)device didLogin:(int)result{
+-(void)XPGWifiDevice:(XPGWifiDevice *)device didLogin:(int)result{
     if(result == 0 && device){
-        _currentDevice=device;
+        selectedDevices=device;
         [self  cWrite:device objecValue:_controlObject];
     }
 }
@@ -455,7 +504,7 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
                 if ([device macAddress].length > 0||device.macAddress.length > 0) {
                     //判断did是否存在
                     if ( _currentPairDeviceMacAddress==nil&&device.did.length>0) {
-                        _currentDevice=device;
+                        selectedDevices=device;
 
                         //                                    NSMutableDictionary *dict = [[NSMutableDictionary alloc] init];
                         //                                    [dict setValue:device.did forKey:@"did"];
@@ -531,21 +580,39 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
                     if (deviceList.count > 0) {
                         NSMutableArray *jsonArray = [[NSMutableArray alloc] init];
                         for (XPGWifiDevice *device in deviceList){
-                            NSString * did=device.did;
+                            //设备的物理地址。如果是 VIRTUAL:SITE，则是虚拟设备
                             NSString * mac = device.macAddress;
-                            NSString * isOnline =  device.isOnline ? @"1" :@"0";
-                            NSString * isLAN = device.isLAN ? @"1" : @"0";
-                            NSString * isDisabled = device.isDisabled ? @"1" : @"0";
-                            NSString * isConnected = device.isConnected ? @"1" : @"0";
-                            NSString * isBind = [device isBind: self.commandHolder.arguments[3]] ? @"1" : @"0";
+                            //设备云端身份标识 DID
+                            NSString *did=device.did;
+                            //用于控制设备的密钥
+                            NSString *passcode=device.passcode;
+                            //设备的小循环 IP 地址
+                            NSString *ipAddress=device.ipAddress;
+                            //设备的产品唯一标识符
+                            NSString *productKey=device.productKey;
+                            //设备名称
+                            NSString *productName=device.productName;
+                            //设备别名。在绑定的时候设置
+                            NSString *remark=device.remark;
+                            //当前设备是否已经建立连接
+                            NSNumber *isConnected=[NSNumber numberWithBool:device.isConnected];
+                            //当前设备是否是小循环设备
+                            NSNumber *isLAN = [NSNumber numberWithBool:device.isLAN];
+                            //云端判断设备是否在线
+                            NSNumber *isOnline = [NSNumber numberWithBool:device.isOnline];
+                            //云端判断设备是否注销
+                            NSNumber *isDisabled=[NSNumber numberWithBool:device.isDisabled];
+                            //设备是否跟用户绑定
+                            NSNumber *isBind=[NSNumber numberWithBool:[device isBind: self.commandHolder.arguments[2]]];
+
                             NSMutableDictionary * d = [NSMutableDictionary dictionaryWithObjectsAndKeys:
-                                                       did, @"did",
-                                                       // device.ipAddress, @"ipAddress",
                                                        mac, @"macAddress",
-                                                       device.passcode, @"passcode",
-                                                       device.productKey, @"productKey",
-                                                       // device.productName, @"productName",
-                                                       // device.remark, @"remark",
+                                                       did, @"did",
+                                                       passcode, @"passcode",
+                                                       ipAddress, @"ipAddress",
+                                                       productKey, @"productKey",
+                                                       productName, @"productName",
+                                                       remark, @"remark",
                                                        //device.ui, @"ui",
                                                        isConnected, @"isConnected",
                                                        isDisabled, @"isDisabled",
@@ -555,7 +622,7 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
                                                        nil];
                             [jsonArray addObject:d];
                         }
-                        _deviceList = nil;
+//                        _deviceList = nil;
                         CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:jsonArray];
                         //[pluginResult setKeepCallbackAsBool:true];
                         [self.commandDelegate sendPluginResult:pluginResult callbackId:self.commandHolder.callbackId];
@@ -570,12 +637,6 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
             case ControlCode:
                 if(isDiscoverLock){//如果锁定状态为true 那么就是控制命令已经发送成功
                     if(deviceList.count>0 && result==0){
-
-                        //_deviceList=deviceList;
-                        //                        for (int i=0; i<[deviceList count]; i++) {
-                        //                            // NSLog(@"%@",[deviceList[i] macAddress]);
-                        //                        }
-
                         for (int i=0; i<[deviceList count]; i++) {
                             NSLog(@"=======%@",[deviceList[i] macAddress]);
                             XPGWifiDevice *device = deviceList[i];
@@ -603,7 +664,7 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
                     for (XPGWifiDevice *device in deviceList){
                         [self logDevice:@"didDiscovered" device:device];
                         if([_currentPairDeviceMacAddress isEqualToString:device.macAddress]&&(device.did.length>0)){
-                            _currentDevice=device;
+                            selectedDevices=device;
                             if(isDiscoverLock==true){
                                 isDiscoverLock=false;
 
@@ -646,10 +707,10 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
 
         //绑定成功
         NSLog(@"\n =========binding success========\n %@",did);
-        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[self deviceToDictionary:_currentDevice]];
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[self deviceToDictionary:selectedDevices]];
         [self.commandDelegate sendPluginResult:pluginResult callbackId:self.commandHolder.callbackId];
         //清空缓存
-        _currentDevice=nil;
+        selectedDevices=nil;
         _currentPairDeviceMacAddress=nil;
     } else {
         //绑定失败
@@ -661,7 +722,7 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
             CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:errorMessage];
             [self.commandDelegate sendPluginResult:pluginResult callbackId:self.commandHolder.callbackId];
             //清空缓存
-            _currentDevice=nil;
+            selectedDevices=nil;
             _currentPairDeviceMacAddress=nil;
         }
     }
@@ -735,7 +796,7 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
 {
     NSLog(@"//====dealloc...====");
     _currentPairDeviceMacAddress=nil;
-    _currentDevice=nil;
+    selectedDevices=nil;
     [XPGWifiSDK sharedInstance].delegate=nil;
     [XPGWifiSDK sharedInstance].delegate=self;
 }
@@ -744,7 +805,7 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
 - (void)dispose{
     NSLog(@"//====disposed...====");
     _currentPairDeviceMacAddress=nil;
-    _currentDevice=nil;
+    selectedDevices=nil;
     [XPGWifiSDK sharedInstance].delegate=nil;
     [XPGWifiSDK sharedInstance].delegate=self;
 }

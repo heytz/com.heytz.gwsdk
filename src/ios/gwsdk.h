@@ -53,7 +53,7 @@
  *
  *  @param command []
  */
--(void)startDevcieListener:(CDVInvokedUrlCommand *)command;
+-(void)startDeviceListener:(CDVInvokedUrlCommand *)command;
 /**
  *  cordova 停止device的监听
  *

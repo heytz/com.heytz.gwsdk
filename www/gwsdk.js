@@ -1,13 +1,14 @@
 var exec = require('cordova/exec');
 var productToArray = function (products) {
     var proArr = [];
-    if (products)
+    if (products) {
         if (products instanceof Array)
             proArr = productKey;
         else
             proArr.push(products);
+    }
     return proArr;
-}
+};
 /**
  *  cordova 配对设备上网
  *
