@@ -143,7 +143,7 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
 /**
  *  cordova 获取设备列表
  *
- *  @param command <#command description#>
+ *  @param command [appid,[productkey],uid,token]
  */
 -(void)getDeviceList:(CDVInvokedUrlCommand *)command{
     [self init:command];
@@ -188,7 +188,7 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
 /**
  * cordova 获取ssid列表
  *
- *  @param command <#command description#>
+ *  @param command []
  */
 -(void)getWifiSSIDList:(CDVInvokedUrlCommand *)command{
      self.commandHolder = command;
@@ -433,8 +433,7 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
  *  @param device 当前连接的设备
  *  @param result 返回状态
  */
-- (void)XPGWifiDevice:(XPGWifiDevice *)device didLogin:(int)result
-{
+- (void)XPGWifiDevice:(XPGWifiDevice *)device didLogin:(int)result{
     if(result == 0 && device){
         _currentDevice=device;
         [self  cWrite:device objecValue:_controlObject];
@@ -677,8 +676,7 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
  *  @param data   <#data description#>
  *  @param result <#result description#>
  */
-- (void)XPGWifiDevice:(XPGWifiDevice *)device didReceiveData:(NSDictionary *)data result:(int)result
-{
+- (void)XPGWifiDevice:(XPGWifiDevice *)device didReceiveData:(NSDictionary *)data result:(int)result{
     //基本数据，与发送的数据格式⼀一致
     NSDictionary *sendData = [data valueForKey:@"data"];
     //警告
@@ -707,8 +705,7 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
  *  @param device <#device description#>
  *  @param hwInfo <#hwInfo description#>
  */
-- (void)XPGWifiDevice:(XPGWifiDevice *)device didQueryHardwareInfo: (NSDictionary *)hwInfo
-{
+- (void)XPGWifiDevice:(XPGWifiDevice *)device didQueryHardwareInfo: (NSDictionary *)hwInfo{
     NSString *hardWareInfo = [NSString stringWithFormat:@"WiFi Hardware Version: %@,\
                               WiFi Software Version: %@,\
                               MCU Hardware Version: %@,\
@@ -729,7 +726,11 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
                               , device.did, device.ipAddress, device.macAddress];
     NSLog(@"=========didQueryHardwareInfo=========\n %@",hardWareInfo);
 }
-
+/**
+ *  cordova 释放内存
+ *
+ *  @param command []
+ */
 - (void)dealloc:(CDVInvokedUrlCommand *)command
 {
     NSLog(@"//====dealloc...====");
