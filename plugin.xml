@@ -12,6 +12,7 @@
             </feature>
         </config-file>
         <source-file src="src/ios/gwsdk.m"/>
+        <source-file src="src/ios/gwsdk.h"/>
         <source-file framework="true" src="libEasyLink.a"/>
         <source-file framework="true" src="libLibSimpleConfig.a"/>
         <source-file framework="true" src="libEsptouch_v0.3.3.4_4.a"/>
@@ -30,20 +31,20 @@
             </feature>
         </config-file>
         <config-file parent="/*" target="AndroidManifest.xml"></config-file>
-        <source-file src="src/android/gwsdk.java" target-dir="src/com/heytz/gwsdk/" />
-        <source-file src="libs/armeabi/libBLEasyConfig.so" target-dir="libs/armeabi/" />
-        <source-file src="libs/armeabi/libsimpleconfiglib.so" target-dir="libs/armeabi/" />
-        <source-file src="libs/armeabi/libwavegen.so" target-dir="libs/armeabi/" />
-        <source-file src="libs/armeabi/libXPGConnect.so" target-dir="libs/armeabi/" />
+        <source-file src="src/android/gwsdk.java" target-dir="src/com/heytz/gwsdk/"/>
+        <source-file src="libs/armeabi/libBLEasyConfig.so" target-dir="libs/armeabi/"/>
+        <source-file src="libs/armeabi/libsimpleconfiglib.so" target-dir="libs/armeabi/"/>
+        <source-file src="libs/armeabi/libwavegen.so" target-dir="libs/armeabi/"/>
+        <source-file src="libs/armeabi/libXPGConnect.so" target-dir="libs/armeabi/"/>
 
 
-        <source-file src="libs/BLEasyConfig.jar" target-dir="libs" />
-        <source-file src="libs/easylink_only.jar" target-dir="libs" />
-        <source-file src="libs/json-lib-2.4-jdk15.jar" target-dir="libs" />
-        <source-file src="libs/libEsptouch_v0.3.3.4_3.jar" target-dir="libs" />
-        <source-file src="libs/LSFSK_1.0.jar" target-dir="libs" />
-        <source-file src="libs/OneShotConfig.jar" target-dir="libs" />
-        <source-file src="libs/simpleconfiglib.jar" target-dir="libs" />
-        <source-file src="libs/XPGWifiSDK.jar" target-dir="libs" />
+        <source-file src="libs/BLEasyConfig.jar" target-dir="libs"/>
+        <source-file src="libs/easylink_only.jar" target-dir="libs"/>
+        <source-file src="libs/json-lib-2.4-jdk15.jar" target-dir="libs"/>
+        <source-file src="libs/libEsptouch_v0.3.3.4_3.jar" target-dir="libs"/>
+        <source-file src="libs/LSFSK_1.0.jar" target-dir="libs"/>
+        <source-file src="libs/OneShotConfig.jar" target-dir="libs"/>
+        <source-file src="libs/simpleconfiglib.jar" target-dir="libs"/>
+        <source-file src="libs/XPGWifiSDK.jar" target-dir="libs"/>
     </platform>
 </plugin>
