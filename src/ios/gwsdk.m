@@ -1,6 +1,7 @@
 /********* gwsdkwrapper.m Cordova Plugin Implementation *******/
 
 #import "gwsdk.h"
+#import "gwsdkUtils.h"
 
 @implementation gwsdk
 
@@ -229,7 +230,7 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
             [selectedDevices login:uid token:token];
             sleep(1000); //todo 等待10s，再去判断设备是否登陆成功，原因是didLogin无法接收回调。
             if(selectedDevices.isConnected==YES){
-                pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[self deviceToDictionary:selectedDevices]];
+                pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[gwsdkUtils deviceToDictionary:selectedDevices]];
             }else{
                  pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"device login error!!"];
             }
@@ -300,7 +301,7 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
         id key=[enumerator1 nextObject];
         while (key) {
             NSString *object=[objecValue objectForKey:key];
-            NSData *data =[gwsdk stringToHex:object];
+            NSData *data =[gwsdkUtils stringToHex:object];
             NSString * encodeStr= [XPGWifiBinary encode:data];
             NSLog(@"%@===%@",object,encodeStr);
             [data1 setObject:encodeStr forKey:key];
@@ -319,123 +320,6 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
         [self.commandDelegate sendPluginResult:pluginResult callbackId:commandHolder.callbackId];
 
     }
-}
-/**
- *  方法 string 转换为Data
- *
- *  @param str <#str description#>
- *
- *  @return <#return value description#>
- */
-+(NSData *)stringToHex: (NSString *) str{
-    //-------------------
-
-    // NSString --> hex
-    const char *buf = [str UTF8String];
-    NSMutableData *data = [NSMutableData data];
-    if (buf)
-    {
-        uint32_t len = strlen(buf);
-
-        char singleNumberString[3] = {'\0', '\0', '\0'};
-        uint32_t singleNumber = 0;
-        for(uint32_t i = 0 ; i < len; i+=2)
-        {
-            if ( ((i+1) < len) && isxdigit(buf[i]) && (isxdigit(buf[i+1])) )
-            {
-                singleNumberString[0] = buf[i];
-                singleNumberString[1] = buf[i + 1];
-                sscanf(singleNumberString, "%x", &singleNumber);
-                uint8_t tmp = (uint8_t)(singleNumber & 0x000000FF);
-                [data appendBytes:(void *)(&tmp)length:1];
-            }
-            else
-            {
-                break;
-            }
-        }
-    }
-    //-------------------
-    return data;
-}
-/**
- *  XPGWifiDevice 转换为dictionary
- *
- *  @param device <#device description#>
- *
- *  @return [did,macAddress,passcode,productkey]
- */
--(NSDictionary *) deviceToDictionary:(XPGWifiDevice *)device{
-//    NSDictionary *d = [NSDictionary dictionaryWithObjectsAndKeys:
-//                       device.did, @"did",
-//                       //device.ipAddress, @"ipAddress",
-//                       device.macAddress, @"macAddress",
-//                       device.passcode, @"passcode",
-//                       device.productKey, @"productKey",
-//                       //device.productName, @"productName",
-//                       //device.remark, @"remark",
-//                       //device.isConnected, @"isConnected",
-//                       //device.isDisabled, @"isDisabled",
-//                       //device.isLAN, @"isLAN",
-//                       //device.isOnline, @"isOnline",
-//                       nil];
-//    return d;
-    //设备的物理地址。如果是 VIRTUAL:SITE，则是虚拟设备
-    NSString * mac = device.macAddress;
-    //设备云端身份标识 DID
-    NSString *did=device.did;
-    //用于控制设备的密钥
-    NSString *passcode=device.passcode;
-    //设备的小循环 IP 地址
-    NSString *ipAddress=device.ipAddress;
-    //设备的产品唯一标识符
-    NSString *productKey=device.productKey;
-    //设备名称
-    NSString *productName=device.productName;
-    //设备别名。在绑定的时候设置
-    NSString *remark=device.remark;
-    //当前设备是否已经建立连接
-    NSNumber *isConnected=[NSNumber numberWithBool:device.isConnected];
-    //当前设备是否是小循环设备
-    NSNumber *isLAN = [NSNumber numberWithBool:device.isLAN];
-    //云端判断设备是否在线
-    NSNumber *isOnline = [NSNumber numberWithBool:device.isOnline];
-    //云端判断设备是否注销
-    NSNumber *isDisabled=[NSNumber numberWithBool:device.isDisabled];
-    //设备是否跟用户绑定
-    NSNumber *isBind=[NSNumber numberWithBool:[device isBind: self.commandHolder.arguments[2]]];
-
-    NSMutableDictionary * d = [NSMutableDictionary dictionaryWithObjectsAndKeys:
-                               mac, @"macAddress",
-                               did, @"did",
-                               passcode, @"passcode",
-                               ipAddress, @"ipAddress",
-                               productKey, @"productKey",
-                               productName, @"productName",
-                               remark, @"remark",
-                               //device.ui, @"ui",
-                               isConnected, @"isConnected",
-                               isDisabled, @"isDisabled",
-                               isLAN, @"isLAN",
-                               isOnline, @"isOnline",
-                               isBind, @"isBind",
-                               nil];
-    return d;
-}
-/**
- *  方法 打印device的log
- *
- *  @param map    tag
- *  @param device 设备device对象
- */
--(void) logDevice:(NSString *)map device:(XPGWifiDevice *)device{
-    NSLog(@"\n======%@=====\n currentMac:%@ \nmacAddress:%@ \ndid:%@ \npasscode:%@\n",
-          map,
-          _currentPairDeviceMacAddress,
-          device.macAddress,
-          device.did,
-          device.passcode);
-
 }
 /**
  *  方法 验证devicelist是否匹配
@@ -497,7 +381,7 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
  */
 -(void)XPGWifiSDK:(XPGWifiSDK *)wifiSDK didSetDeviceWifi:(XPGWifiDevice *)device result:(int)result{
     if(result == XPGWifiError_NONE) {
-        [self logDevice:@"didSetDeviceWifi" device:device];
+        [gwsdkUtils logDevice:@"didSetDeviceWifi" device:device];
         switch (currentState) {
             case SetDeviceWifiBindDevice:
                 //判断mac是否存在
@@ -529,7 +413,7 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
                 if ([device macAddress].length > 0||device.macAddress.length > 0) {
                     //判断did是否存在
                     if ( _currentPairDeviceMacAddress==nil&&device.did.length>0) {
-                        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[self deviceToDictionary:device]];
+                        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[gwsdkUtils deviceToDictionary:device]];
                         [self.commandDelegate sendPluginResult:pluginResult callbackId:self.commandHolder.callbackId];
                     }else{
                         _currentPairDeviceMacAddress=device.macAddress;
@@ -566,10 +450,10 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
             case SetWifiCode:
                 if (deviceList.count > 0) {
                     for (XPGWifiDevice *device in deviceList){
-                        [self logDevice:@"didDiscovered" device:device];
+                        [gwsdkUtils logDevice:@"didDiscovered" device:device];
                         if( [_currentPairDeviceMacAddress isEqualToString:device.macAddress]&&(device.did.length>0)){
                             _currentPairDeviceMacAddress=nil;
-                            CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[self deviceToDictionary:device]];
+                            CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[gwsdkUtils deviceToDictionary:device]];
                             [self.commandDelegate sendPluginResult:pluginResult callbackId:self.commandHolder.callbackId];
                         }
                     }
@@ -662,7 +546,7 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
             case SetDeviceWifiBindDevice:
                 if (deviceList.count > 0&&_currentPairDeviceMacAddress!=nil) {
                     for (XPGWifiDevice *device in deviceList){
-                        [self logDevice:@"didDiscovered" device:device];
+                        [gwsdkUtils logDevice:@"didDiscovered" device:device];
                         if([_currentPairDeviceMacAddress isEqualToString:device.macAddress]&&(device.did.length>0)){
                             selectedDevices=device;
                             if(isDiscoverLock==true){
@@ -707,7 +591,7 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
 
         //绑定成功
         NSLog(@"\n =========binding success========\n %@",did);
-        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[self deviceToDictionary:selectedDevices]];
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[gwsdkUtils deviceToDictionary:selectedDevices]];
         [self.commandDelegate sendPluginResult:pluginResult callbackId:self.commandHolder.callbackId];
         //清空缓存
         selectedDevices=nil;
