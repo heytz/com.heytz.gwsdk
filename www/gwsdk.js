@@ -3,7 +3,7 @@ var productToArray = function (products) {
     var proArr = [];
     if (products) {
         if (products instanceof Array)
-            proArr = productKey;
+            proArr = products;
         else
             proArr.push(products);
     }
@@ -72,7 +72,7 @@ exports.getDeviceList = function (appid, productKey, uid, token, success, error)
  *
  *  @param command ["appid","uid","token","did","passcode","remark"]
  */
-exports.deviceBinding = function (appid, uid, token, did, passcode, remark) {
+exports.deviceBinding = function (appid, uid, token, did, passcode, remark,success, error) {
     exec(success, error, "gwsdk", "deviceBinding", [appid, uid, token, did, passcode, remark])
 };
 /**
