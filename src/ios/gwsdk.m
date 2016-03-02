@@ -694,22 +694,34 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
         NSLog(@"设备连接已断开 %d",result);
 
     }
-    if (listenerCommandHolder!=nil) {
-        CDVPluginResult  *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:data];
-        [pluginResult setKeepCallbackAsBool:true];
-        [self.commandDelegate sendPluginResult:pluginResult callbackId:listenerCommandHolder.callbackId];
-    }
+
     //基本数据，与发送的数据格式⼀一致
     NSDictionary *sendData = [data valueForKey:@"data"];
-    if (sendData.count == 0) {
-        return;
-    }
+//    if (sendData.count == 0) {
+////        return;
+//    }else{
+        if (listenerCommandHolder!=nil) {
+            CDVPluginResult  *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:sendData];
+            [pluginResult setKeepCallbackAsBool:true];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:listenerCommandHolder.callbackId];
+        }
+//    }
     //警告
     NSArray *alarms = [data valueForKey:@"alarms"];
     //错误
     NSArray *faults = [data valueForKey:@"faults"];
     //透传数据
-    NSDictionary *binary = [data valueForKey:@"binary"];
+//    NSDictionary *binary = [data valueForKey:@"binary"];
+   NSObject   *binary=[data valueForKey:@"binary"];
+//    if (binary.count == 0) {
+//        //        return;
+//    }else{
+        if (listenerCommandHolder!=nil) {
+            CDVPluginResult  *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArrayBuffer:binary];
+            [pluginResult setKeepCallbackAsBool:true];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:listenerCommandHolder.callbackId];
+        }
+//    }
 //    for (NSString *key in sendData) {
 //        NSLog(@"\n=====didReceiveData====\n==sendData key: %@ value: %@\n", key, sendData[key]);
 //    }
