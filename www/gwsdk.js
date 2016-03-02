@@ -76,6 +76,14 @@ exports.deviceBinding = function (appid, uid, token, did, passcode, remark,succe
     exec(success, error, "gwsdk", "deviceBinding", [appid, uid, token, did, passcode, remark])
 };
 /**
+ *  cordova 解绑设备
+ *
+ *  @param command ["appid","uid","token","did","passcode","remark"]
+ */
+exports.unbindDevice = function (appid, uid, token, did, passcode,success, error) {
+    exec(success, error, "gwsdk", "unbindDevice", [appid, uid, token, did, passcode])
+};
+/**
  *  cordova 控制设备
  *
  *  @param command ["appid",["prodctkeys"],"uid","token","mac","value"]

@@ -43,6 +43,11 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
 
 
 -(void)pluginInitialize{
+     NSString* gizwAppId = [[self.commandDelegate settings] objectForKey:@"gizwAppid"];
+    if(gizwAppId){
+        [XPGWifiSDK startWithAppID:gizwAppId];
+        self.gizwAppId=gizwApptianId;
+    }
 
 }
 /**
@@ -170,8 +175,30 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
      @param remark 待绑定设备的别名，无别名可传nil
      @see 对应的回调接口：[XPGWifiSDKDelegate XPGWifiSDK:didBindDevice:error:errorMessage:]
      */
-    [[XPGWifiSDK sharedInstance] bindDeviceWithUid:command.arguments[2] token:command.arguments[3] did:command.arguments[4] passCode:command.arguments[5] remark:command.arguments[6]];
+    _uid=command.arguments[1];
+    _token=command.arguments[2];
+    [[XPGWifiSDK sharedInstance] bindDeviceWithUid:command.arguments[1] token:command.arguments[2] did:command.arguments[3] passCode:command.arguments[4] remark:command.arguments[5]];
 }
+/**
+ *  cordova 绑定设备
+ *
+ *  @param command ["appid","prodctekey","uid","token","did","passcode"]
+ */
+-(void)unbindDevice:(CDVInvokedUrlCommand *)command{
+    [self init:command];//初始化设置appid
+    /**
+     绑定设备到服务器
+     @param token 登录成功后得到的token
+     @param uid 登录成功后得到的uid
+     @param did 待绑定设备的did
+     @param passCode 待绑定设备的passCode（能得到就传，得不到可传Nil，SDK会内部尝试获取PassCode）
+     @see 对应的回调接口：[XPGWifiSDKDelegate XPGWifiSDK:didUnbindDevice:error:errorMessage:]
+     */
+    _uid=command.arguments[1];
+    _token=command.arguments[2];
+    [[XPGWifiSDK sharedInstance] unbindDeviceWithUid:command.arguments[1] token:command.arguments[2] did:command.arguments[3] passCode:command.arguments[4]];
+}
+
 /**
  *  cordova 控制设备
  *
@@ -461,7 +488,7 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
                 }
                 break;
             case GetDevcieListCode:
-              //  if ([self hasDone:deviceList]) {
+//                if ([self hasDone:deviceList]) {
                     if (deviceList.count > 0) {
                         NSMutableArray *jsonArray = [[NSMutableArray alloc] init];
                         for (XPGWifiDevice *device in deviceList){
@@ -509,15 +536,15 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
                         }
 //                        _deviceList = nil;
                         CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:jsonArray];
-                        //[pluginResult setKeepCallbackAsBool:true];
+                        [pluginResult setKeepCallbackAsBool:true];
                         [self.commandDelegate sendPluginResult:pluginResult callbackId:self.commandHolder.callbackId];
                     }else{
                         //deviceList is zero;
                     }
-               // }
-                //else{
-                  //  _deviceList = deviceList;
-                //}
+//                }
+//                else{
+//                    _deviceList = deviceList;
+//                }
                 break;
             case ControlCode:
                 if(isDiscoverLock){//如果锁定状态为true 那么就是控制命令已经发送成功
@@ -588,10 +615,16 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
  *  @param errorMessage <#errorMessage description#>
  */
 -(void)XPGWifiSDK:(XPGWifiSDK *)wifiSDK didBindDevice:(NSString *)did error:(NSNumber *)error errorMessage:(NSString *)errorMessage{
+
     if([error intValue] == XPGWifiError_NONE){
+        CDVPluginResult *pluginResult ;
         //绑定成功
         NSLog(@"\n =========binding success========\n %@",did);
-        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[GwsdkUtils deviceToDictionary:selectedDevices uid:self.commandHolder.arguments[2]]];
+        if(selectedDevices){
+            pluginResult= [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[GwsdkUtils deviceToDictionary:selectedDevices uid:_uid]];
+        }else{
+             pluginResult= [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:did];
+        }
         [self.commandDelegate sendPluginResult:pluginResult callbackId:self.commandHolder.callbackId];
         //清空缓存
         selectedDevices=nil;
@@ -613,7 +646,28 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
 
 
 }
+/**
+ *  回调 解绑设备
+ *
+ *  @param wifiSDK      <#wifiSDK description#>
+ *  @param did          <#did description#>
+ *  @param error        <#error description#>
+ *  @param errorMessage <#errorMessage description#>
+ */
+- (void)XPGWifiSDK:(XPGWifiSDK *)wifiSDK didUnbindDevice:(NSString *)did error:(NSNumber *)error errorMessage:(NSString *)errorMessage{
+    if([error intValue] == XPGWifiError_NONE){
+        //解绑成功
+        NSLog(@"\n =========didUnbindDevice success========\n %@",did);
+         CDVPluginResult   *pluginResult= [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:did];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:self.commandHolder.callbackId];
+    } else {
+        //解绑失败
+        NSLog(@"\n =========didUnbindDevice error========\n error:%@ \n errorMessage:%@ \n",error,errorMessage);
+            CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:errorMessage];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:self.commandHolder.callbackId];
+    }
 
+}
 /**
  *  回调 这里判断发送消息是否成功和接收设备上报的数据
  *

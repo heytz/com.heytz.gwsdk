@@ -5,11 +5,13 @@
     <js-module name="gwsdk" src="www/gwsdk.js">
         <clobbers target="cordova.plugins.gwsdk"/>
     </js-module>
+    <preference name="GIZWITS_APPID"/>
     <platform name="ios">
         <config-file parent="/*" target="config.xml">
             <feature name="gwsdk">
                 <param name="ios-package" value="gwsdk"/>
             </feature>
+            <preference name="gizwAppid" value="$GIZWITS_APPID"/>
         </config-file>
         <source-file src="src/ios/gwsdk.m"/>
         <source-file src="src/ios/gwsdk.h"/>
