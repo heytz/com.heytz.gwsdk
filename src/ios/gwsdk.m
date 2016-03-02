@@ -11,7 +11,7 @@
 NSString    *_currentPairDeviceMacAddress;
 NSInteger currentState;
 bool      _debug=true;
-NSString *_appId,*_uid,*_token,*_mac;
+NSString  *_uid,*_token,*_mac;
 NSMutableDictionary *_controlObject;
 BOOL isDiscoverLock;
 XPGWifiDevice *_currentDevice;
@@ -56,12 +56,6 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
  *  @param command <#command description#>
  */
 -(void)init:(CDVInvokedUrlCommand *) command{
-    NSString *appId=command.arguments[0];
-    if(_appId== nil||![appId isEqualToString:_appId]){
-
-        _appId =appId;
-        [XPGWifiSDK startWithAppID:_appId];
-    }
     if(!([XPGWifiSDK sharedInstance].delegate)){
         [XPGWifiSDK sharedInstance].delegate = self;
     }
@@ -91,12 +85,12 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
      @param types 配置的wifi模组类型列表，存放NSNumber对象，SDK默认同时发送庆科和汉枫模组配置包；SoftAPMode模式下该参数无意义。types为nil，SDK按照默认处理。如果只想配置庆科模组，types中请加入@XPGWifiGAgentTypeMXCHIP类；如果只想配置汉枫模组，types中请加入@XPGWifiGAgentTypeHF；如果希望多种模组配置包同时传，可以把对应类型都加入到types中。XPGWifiGAgentType枚举类型定义SDK支持的所有模组类型。
      @see 对应的回调接口：[XPGWifiSDKDelegate XPGWifiSDK:didSetDeviceWifi:result:]
      */
-      NSString *timeout=[command.arguments objectAtIndex:4];
+      NSString *timeout=[command.arguments objectAtIndex:3];
     //新接口 11.24
     if (_debug) {
-        NSLog(@"ssid:%@,pwd:%@",command.arguments[2],command.arguments[3]);
+        NSLog(@"ssid:%@,pwd:%@",command.arguments[1],command.arguments[2]);
     }
-    [[XPGWifiSDK  sharedInstance] setDeviceWifi:command.arguments[2] key:command.arguments[3] mode:XPGWifiSDKAirLinkMode softAPSSIDPrefix:nil timeout:[timeout intValue] wifiGAgentType:nil];
+    [[XPGWifiSDK  sharedInstance] setDeviceWifi:command.arguments[1] key:command.arguments[2] mode:XPGWifiSDKAirLinkMode softAPSSIDPrefix:nil timeout:[timeout intValue] wifiGAgentType:nil];
 }
 /**
  *  cordova 配对上网，并且绑定这个设备
@@ -107,8 +101,8 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
 
     [self init:command];
     currentState=SetDeviceWifiBindDevice;
-    _uid=command.arguments[4];
-    _token=command.arguments[5];
+    _uid=command.arguments[3];
+    _token=command.arguments[4];
 
     /**
      配置设备连接路由的方法
@@ -121,29 +115,29 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
      @param types 配置的wifi模组类型列表，存放NSNumber对象，SDK默认同时发送庆科和汉枫模组配置包；SoftAPMode模式下该参数无意义。types为nil，SDK按照默认处理。如果只想配置庆科模组，types中请加入@XPGWifiGAgentTypeMXCHIP类；如果只想配置汉枫模组，types中请加入@XPGWifiGAgentTypeHF；如果希望多种模组配置包同时传，可以把对应类型都加入到types中。XPGWifiGAgentType枚举类型定义SDK支持的所有模组类型。
      @see 对应的回调接口：[XPGWifiSDKDelegate XPGWifiSDK:didSetDeviceWifi:result:]
      */
-    NSString *timeout=[command.arguments objectAtIndex:6];
-    NSString *mode=[command.arguments objectAtIndex:7];
+    NSString *timeout=[command.arguments objectAtIndex:5];
+    NSString *mode=[command.arguments objectAtIndex:6];
     //新接口 11.24
     if (_debug) {
         NSLog(@"ssid:%@,pwd:%@ uid:%@ token:%@ timeout:%@ mode:%@ softAPssidPrefix:%@ wifiGAgentType:%@",
+              command.arguments[1],
               command.arguments[2],
               command.arguments[3],
               command.arguments[4],
               command.arguments[5],
               command.arguments[6],
               command.arguments[7],
-              command.arguments[8],
-              command.arguments[9]);
+              command.arguments[8]);
     }
 //    NSArray *abc = [[NSArray alloc] initWithObjects:@(XPGWifiGAgentTypeHF),nil];
     //todo 如果上一次配对没有结束，下次请求会上报 -46	XPGWifiError_IS_RUNNING	当前事件正在处理 超时以后可以继续配置
     [[XPGWifiSDK  sharedInstance]
-     setDeviceWifi:command.arguments[2]
-     key:command.arguments[3]
+     setDeviceWifi:command.arguments[1]
+     key:command.arguments[2]
      mode:[mode intValue]
-     softAPSSIDPrefix:([command.arguments objectAtIndex:8]==[NSNull null])?nil:command.arguments[8]
+     softAPSSIDPrefix:([command.arguments objectAtIndex:7]==[NSNull null])?nil:command.arguments[7]
      timeout:[timeout intValue]
-     wifiGAgentType:nil];//[command.arguments objectAtIndex:9]==[NSNull null]?nil:[command.arguments objectAtIndex:9]];
+     wifiGAgentType:nil];//[command.arguments objectAtIndex:8]==[NSNull null]?nil:[command.arguments objectAtIndex:8]];
 
 }
 /**
@@ -154,10 +148,10 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
 -(void)getDeviceList:(CDVInvokedUrlCommand *)command{
     [self init:command];
     currentState=GetDevcieListCode;
-    _uid=command.arguments[2];
-    _token=command.arguments[3];
-    NSLog(@"\n======productkeys%@=====\n",command.arguments[1]);
-    [[XPGWifiSDK sharedInstance] getBoundDevices:command.arguments[2] token:command.arguments[3] specialProductKeys:command.arguments[1]];
+    _uid=command.arguments[1];
+    _token=command.arguments[2];
+    NSLog(@"\n======productkeys%@=====\n",command.arguments[0]);
+    [[XPGWifiSDK sharedInstance] getBoundDevices:command.arguments[1] token:command.arguments[2] specialProductKeys:command.arguments[0]];
 }
 /**
  *  cordova 绑定设备
@@ -175,9 +169,9 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
      @param remark 待绑定设备的别名，无别名可传nil
      @see 对应的回调接口：[XPGWifiSDKDelegate XPGWifiSDK:didBindDevice:error:errorMessage:]
      */
-    _uid=command.arguments[1];
-    _token=command.arguments[2];
-    [[XPGWifiSDK sharedInstance] bindDeviceWithUid:command.arguments[1] token:command.arguments[2] did:command.arguments[3] passCode:command.arguments[4] remark:command.arguments[5]];
+    _uid=command.arguments[0];
+    _token=command.arguments[1];
+    [[XPGWifiSDK sharedInstance] bindDeviceWithUid:command.arguments[0] token:command.arguments[1] did:command.arguments[2] passCode:command.arguments[3] remark:command.arguments[4]];
 }
 /**
  *  cordova 绑定设备
@@ -194,9 +188,9 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
      @param passCode 待绑定设备的passCode（能得到就传，得不到可传Nil，SDK会内部尝试获取PassCode）
      @see 对应的回调接口：[XPGWifiSDKDelegate XPGWifiSDK:didUnbindDevice:error:errorMessage:]
      */
-    _uid=command.arguments[1];
-    _token=command.arguments[2];
-    [[XPGWifiSDK sharedInstance] unbindDeviceWithUid:command.arguments[1] token:command.arguments[2] did:command.arguments[3] passCode:command.arguments[4]];
+    _uid=command.arguments[0];
+    _token=command.arguments[1];
+    [[XPGWifiSDK sharedInstance] unbindDeviceWithUid:command.arguments[0] token:command.arguments[1] did:command.arguments[2] passCode:command.arguments[3]];
 }
 
 /**
@@ -205,14 +199,14 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
  *  @param command ["appid",["prodctkeys"],"uid","token","mac","value"]
  */
 -(void)deviceControl:(CDVInvokedUrlCommand *)command{
-    _uid=command.arguments[2];
-    _token=command.arguments[3];
-    _mac=command.arguments[4];
-    _controlObject=command.arguments[5];//todo: back to value:5
+    _uid=command.arguments[1];
+    _token=command.arguments[2];
+    _mac=command.arguments[3];
+    _controlObject=command.arguments[4];//todo: back to value:5
 
     currentState=ControlCode;
     [self init:command];//初始化设置appid
-    [[XPGWifiSDK sharedInstance] getBoundDevices:command.arguments[2] token:command.arguments[3] specialProductKeys:command.arguments[1]];
+    [[XPGWifiSDK sharedInstance] getBoundDevices:command.arguments[1] token:command.arguments[2] specialProductKeys:command.arguments[0]];
 
 }
 /**

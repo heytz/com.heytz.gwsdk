@@ -12,15 +12,14 @@ var productToArray = function (products) {
 /**
  *  cordova 配对设备上网
  *
- *  @param command [appid,"",ssid,pwd,timeout]
+ *  @param command ["",ssid,pwd,timeout]
  */
-exports.setDeviceWifi = function (appid, productKey, wifiSSID, wifiKey, timeout, success, error) {
-    exec(success, error, "gwsdk", "setDeviceWifi", [appid, productToArray(productKey), wifiSSID, wifiKey, timeout ? timeout : 60,]);
+exports.setDeviceWifi = function (productKey, wifiSSID, wifiKey, timeout, success, error) {
+    exec(success, error, "gwsdk", "setDeviceWifi", [productToArray(productKey), wifiSSID, wifiKey, timeout ? timeout : 60,]);
 };
 /**
  * 配对并且绑定设备
  * todo ios下面: 如果同一个设备,第一次被配对上网,再去配对第二次会出现配对失败(error HTTP response error format.),再次配对才可以成功
- * @param appid
  * @param productKey
  * @param wifiSSID
  * @param wifiKey
@@ -45,9 +44,8 @@ exports.setDeviceWifi = function (appid, productKey, wifiSSID, wifiKey, timeout,
  }
  * @param error string
  */
-exports.setDeviceWifiBindDevice = function (appid, productKey, wifiSSID, wifiKey, uid, token, timeout, mode, softAPSSIDPrefix, wifiGAgentType, success, error) {
+exports.setDeviceWifiBindDevice = function (productKey, wifiSSID, wifiKey, uid, token, timeout, mode, softAPSSIDPrefix, wifiGAgentType, success, error) {
     exec(success, error, "gwsdk", "setDeviceWifiBindDevice", [
-        appid,
         productToArray(productKey),
         wifiSSID,
         wifiKey,
@@ -62,34 +60,34 @@ exports.setDeviceWifiBindDevice = function (appid, productKey, wifiSSID, wifiKey
 /**
  *  cordova 获取设备列表
  *
- *  @param command [appid,[productkey],uid,token]
+ *  @param command [[productkey],uid,token]
  */
-exports.getDeviceList = function (appid, productKey, uid, token, success, error) {
-    exec(success, error, "gwsdk", "getDeviceList", [appid, productToArray(productKey), uid, token]);
+exports.getDeviceList = function ( productKey, uid, token, success, error) {
+    exec(success, error, "gwsdk", "getDeviceList", [ productToArray(productKey), uid, token]);
 };
 /**
  *  cordova 绑定设备
  *
- *  @param command ["appid","uid","token","did","passcode","remark"]
+ *  @param command ["uid","token","did","passcode","remark"]
  */
-exports.deviceBinding = function (appid, uid, token, did, passcode, remark,success, error) {
-    exec(success, error, "gwsdk", "deviceBinding", [appid, uid, token, did, passcode, remark])
+exports.deviceBinding = function (uid, token, did, passcode, remark,success, error) {
+    exec(success, error, "gwsdk", "deviceBinding", [uid, token, did, passcode, remark])
 };
 /**
  *  cordova 解绑设备
  *
- *  @param command ["appid","uid","token","did","passcode","remark"]
+ *  @param command ["uid","token","did","passcode","remark"]
  */
-exports.unbindDevice = function (appid, uid, token, did, passcode,success, error) {
-    exec(success, error, "gwsdk", "unbindDevice", [appid, uid, token, did, passcode])
+exports.unbindDevice = function (uid, token, did, passcode,success, error) {
+    exec(success, error, "gwsdk", "unbindDevice", [uid, token, did, passcode])
 };
 /**
  *  cordova 控制设备
  *
- *  @param command ["appid",["prodctkeys"],"uid","token","mac","value"]
+ *  @param command [["prodctkeys"],"uid","token","mac","value"]
  */
-exports.deviceControl = function (appid, productKey, uid, token, mac, value, success, error) {
-    exec(success, error, "gwsdk", "deviceControl", [appid, productToArray(productKey), uid, token, mac, value]);
+exports.deviceControl = function (productKey, uid, token, mac, value, success, error) {
+    exec(success, error, "gwsdk", "deviceControl", [ productToArray(productKey), uid, token, mac, value]);
 };
 /**
  * cordova 获取ssid列表
