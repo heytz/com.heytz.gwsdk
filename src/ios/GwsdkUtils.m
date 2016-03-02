@@ -11,6 +11,13 @@
 
 @implementation GwsdkUtils
 
+    int DeviceWifiState;
+    int DeviceWifiBindDeviceState;
+    int ControlState;
+    int DeviceListState;
+
+
+
 /**
  *  方法 string 转换为Data
  *

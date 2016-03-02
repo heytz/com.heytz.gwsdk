@@ -9,12 +9,7 @@
 
 #import <XPGWifiSDK/XPGWifiSDK.h>
 
-@interface GwsdkUtils : NSObject {
-     int DeviceWifiState;
-     int DeviceWifiBindDeviceState;
-     int ControlState;
-     int DeviceListState;
-}
+@interface GwsdkUtils
 /**
  *  方法 string 转换为Data
  *
