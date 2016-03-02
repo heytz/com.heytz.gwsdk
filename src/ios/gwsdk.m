@@ -461,7 +461,7 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
                 }
                 break;
             case GetDevcieListCode:
-                if ([self hasDone:deviceList]) {
+              //  if ([self hasDone:deviceList]) {
                     if (deviceList.count > 0) {
                         NSMutableArray *jsonArray = [[NSMutableArray alloc] init];
                         for (XPGWifiDevice *device in deviceList){
@@ -514,10 +514,10 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
                     }else{
                         //deviceList is zero;
                     }
-                }
-                else{
-                    _deviceList = deviceList;
-                }
+               // }
+                //else{
+                  //  _deviceList = deviceList;
+                //}
                 break;
             case ControlCode:
                 if(isDiscoverLock){//如果锁定状态为true 那么就是控制命令已经发送成功
