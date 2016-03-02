@@ -381,6 +381,7 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
  */
 -(void)XPGWifiSDK:(XPGWifiSDK *)wifiSDK didSetDeviceWifi:(XPGWifiDevice *)device result:(int)result{
     if(result == XPGWifiError_NONE) {
+
         [GwsdkUtils logDevice:@"didSetDeviceWifi" device:device];
         switch (currentState) {
             case SetDeviceWifiBindDevice:
@@ -588,7 +589,6 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
  */
 -(void)XPGWifiSDK:(XPGWifiSDK *)wifiSDK didBindDevice:(NSString *)did error:(NSNumber *)error errorMessage:(NSString *)errorMessage{
     if([error intValue] == XPGWifiError_NONE){
-
         //绑定成功
         NSLog(@"\n =========binding success========\n %@",did);
         CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[GwsdkUtils deviceToDictionary:selectedDevices uid:self.commandHolder.arguments[2]]];

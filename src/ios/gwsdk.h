@@ -9,8 +9,11 @@
 #import <Cordova/CDV.h>
 #import <XPGWifiSDK/XPGWifiSDK.h>
 
+
 @interface gwsdk : CDVPlugin<XPGWifiDeviceDelegate,XPGWifiSDKDelegate> {
     // Member variables go here.
+    //当前操作的值
+    XPGWifiDevice *selectedDevices;
 }
 /**
  *  cordova 配对设备上网
