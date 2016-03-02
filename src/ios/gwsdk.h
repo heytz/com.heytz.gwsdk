@@ -15,6 +15,7 @@
     //当前操作的值
     XPGWifiDevice *selectedDevices;
 }
+@property (nonatomic, strong) NSString *gizwAppId;
 /**
  *  cordova 配对设备上网
  *

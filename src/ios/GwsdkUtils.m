@@ -27,14 +27,14 @@
  */
 +(NSData *)stringToHex: (NSString *) str{
     //-------------------
-    
+
     // NSString --> hex
     const char *buf = [str UTF8String];
     NSMutableData *data = [NSMutableData data];
     if (buf)
     {
         uint32_t len = strlen(buf);
-        
+
         char singleNumberString[3] = {'\0', '\0', '\0'};
         uint32_t singleNumber = 0;
         for(uint32_t i = 0 ; i < len; i+=2)
@@ -103,7 +103,7 @@
     //设备是否跟用户绑定
 //    NSNumber *isBind=[NSNumber numberWithBool:[device isBind: self.commandHolder.arguments[2]]];
     NSNumber *isBind=[NSNumber numberWithBool:[device isBind: uid]];
-    
+
     NSMutableDictionary * d = [NSMutableDictionary dictionaryWithObjectsAndKeys:
                                mac, @"macAddress",
                                did, @"did",
@@ -133,7 +133,7 @@
           device.macAddress,
           device.did,
           device.passcode);
-    
+
 }
 
 /**
