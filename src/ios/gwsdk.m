@@ -231,7 +231,7 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
  *
  *  @param command []
  */
--(void)endDeviceListener:(CDVInvokedUrlCommand *)command{
+-(void)stopDeviceListener:(CDVInvokedUrlCommand *)command{
     listenerCommandHolder=nil;
 }
 /**
@@ -244,20 +244,27 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
     NSString *token=command.arguments[1];
     NSString *did=command.arguments[2];
     self.commandHolder=command;
-    CDVPluginResult  *pluginResult= [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"This device does not exist!"];
+    BOOL isExist=false;
     for(XPGWifiDevice *device in _deviceList){
         if ([did isEqualToString:device.did]) {
             selectedDevices=device;
-            [selectedDevices login:uid token:token];
-            sleep(1000); //todo 等待10s，再去判断设备是否登陆成功，原因是didLogin无法接收回调。
-            if(selectedDevices.isConnected==YES){
-                pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[GwsdkUtils deviceToDictionary:selectedDevices uid:self.commandHolder.arguments[2]]];
+            selectedDevices.delegate=self;
+            isExist=true;
+            //判断是否是登陆状态，如果是的话就直接返回成功。
+            if (selectedDevices.isConnected==YES) {
+                [selectedDevices getHardwareInfo];
+               CDVPluginResult  *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[GwsdkUtils deviceToDictionary:selectedDevices uid:_uid]];
+                 [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
             }else{
-                 pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"device login error!!"];
+                [selectedDevices login:uid token:token];
             }
         }
     }
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+    if(isExist==false){
+         CDVPluginResult  *pluginResult= [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"This device does not exist!"];
+         [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+    }
+
 }
 /**
  * cordova 断开连接
@@ -272,6 +279,8 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
         if ([did isEqualToString:device.did]) {
             isExist=YES;
             [selectedDevices disconnect];
+            selectedDevices.delegate=nil;
+            selectedDevices=nil;
             listenerCommandHolder=nil;
         }
     }
@@ -387,16 +396,25 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
  *  @param device 当前连接的设备
  *  @param result 返回状态
  */
--(void)XPGWifiDevice:(XPGWifiDevice *)device didLogin:(int)result{
+- (void)XPGWifiDevice:(XPGWifiDevice *)device didLogin:(int)result{
     if(result == 0 && device){
+//        if(_controlObject!=nil){
+//            [self  cWrite:device objecValue:_controlObject];
+//        }
+        [GwsdkUtils  logDevice:@"===didLogin=success===" device:device];
         selectedDevices=device;
-        [self  cWrite:device objecValue:_controlObject];
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[GwsdkUtils deviceToDictionary:selectedDevices uid:_uid]];
+         [self.commandDelegate sendPluginResult:pluginResult callbackId:self.commandHolder.callbackId];
+    }else{
+         NSLog(@"===didLogin=error===%d", result);
+         CDVPluginResult  *pluginResult= [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsInt:result];
+         [self.commandDelegate sendPluginResult:pluginResult callbackId:self.commandHolder.callbackId];
     }
 }
 /**
  *  回调  设备配对状态的返回
  *
- *  @param wifiSDK <#wifiSDK description#>
+ *  @param wifiSDK
  *  @param device  <#device description#>
  *  @param result  <#result description#>
  */
@@ -482,6 +500,7 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
                 }
                 break;
             case GetDevcieListCode:
+                _deviceList=deviceList;
 //                if ([self hasDone:deviceList]) {
                     if (deviceList.count > 0) {
                         NSMutableArray *jsonArray = [[NSMutableArray alloc] init];
@@ -509,7 +528,7 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
                             //云端判断设备是否注销
                             NSNumber *isDisabled=[NSNumber numberWithBool:device.isDisabled];
                             //设备是否跟用户绑定
-                            NSNumber *isBind=[NSNumber numberWithBool:[device isBind: self.commandHolder.arguments[2]]];
+                            NSNumber *isBind=[NSNumber numberWithBool:[device isBind: _uid]];
 
                             NSMutableDictionary * d = [NSMutableDictionary dictionaryWithObjectsAndKeys:
                                                        mac, @"macAddress",
@@ -528,7 +547,6 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
                                                        nil];
                             [jsonArray addObject:d];
                         }
-//                        _deviceList = nil;
                         CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:jsonArray];
                         [pluginResult setKeepCallbackAsBool:true];
                         [self.commandDelegate sendPluginResult:pluginResult callbackId:self.commandHolder.callbackId];
@@ -670,26 +688,35 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
  *  @param result <#result description#>
  */
 - (void)XPGWifiDevice:(XPGWifiDevice *)device didReceiveData:(NSDictionary *)data result:(int)result{
+    [GwsdkUtils logDevice:@"didReceiveData" device:device];
+    NSLog(@"\n======================================\n收到了:%d上报: %@\n======================================", result, data);
+    if (result == -7) {
+        NSLog(@"设备连接已断开 %d",result);
+
+    }
+    if (listenerCommandHolder!=nil) {
+        CDVPluginResult  *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:data];
+        [pluginResult setKeepCallbackAsBool:true];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:listenerCommandHolder.callbackId];
+    }
     //基本数据，与发送的数据格式⼀一致
     NSDictionary *sendData = [data valueForKey:@"data"];
+    if (sendData.count == 0) {
+        return;
+    }
     //警告
     NSArray *alarms = [data valueForKey:@"alarms"];
     //错误
     NSArray *faults = [data valueForKey:@"faults"];
     //透传数据
     NSDictionary *binary = [data valueForKey:@"binary"];
-    for (NSString *key in sendData) {
-        NSLog(@"\n=====didReceiveData====\n==sendData key: %@ value: %@\n", key, sendData[key]);
-    }
-     NSLog(@"====didReceiveData===\n 警告:%@ 错误:%@ ",alarms,faults);
-    for (NSString *key in binary) {
-        NSLog(@"\n=====didReceiveData====\n binary:key: %@ value: %@\n", key, binary[key]);
-    }
-    if (listenerCommandHolder!=nil) {
-        CDVPluginResult  *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:binary];
-        [pluginResult setKeepCallbackAsBool:true];
-        [self.commandDelegate sendPluginResult:pluginResult callbackId:listenerCommandHolder.callbackId];
-    }
+//    for (NSString *key in sendData) {
+//        NSLog(@"\n=====didReceiveData====\n==sendData key: %@ value: %@\n", key, sendData[key]);
+//    }
+//    for (NSString *key in binary) {
+//        NSLog(@"\n=====didReceiveData====\n binary:key: %@ value: %@\n", key, binary[key]);
+//    }
+
 
 }
 /**

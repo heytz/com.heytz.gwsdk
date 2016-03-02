@@ -103,7 +103,7 @@ exports.getWifiSSIDList = function (success, error) {
  *  @param command []
  */
 exports.startDevcieListener = function (success, error) {
-    exec(success, error, "gwsdk", "startDevcieListener", []);
+    exec(success, error, "gwsdk", "startDeviceListener", []);
 };
 /**
  *  cordova 停止device的监听
