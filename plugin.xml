@@ -11,7 +11,7 @@
             <feature name="gwsdk">
                 <param name="ios-package" value="gwsdk"/>
             </feature>
-            <preference name="gizwAppid" value="$GIZWITS_APPID"/>
+            <preference name="gizwappid" value="$GIZWITS_APPID"/>
         </config-file>
         <source-file src="src/ios/gwsdk.m"/>
         <source-file src="src/ios/gwsdk.h"/>
