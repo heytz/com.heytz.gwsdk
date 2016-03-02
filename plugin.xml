@@ -33,7 +33,12 @@
             </feature>
         </config-file>
         <config-file parent="/*" target="AndroidManifest.xml"></config-file>
-        <source-file src="src/android/gwsdk.java" target-dir="src/com/heytz/gwsdk/"/>
+        <source-file src="src/android/Gwsdk.java" target-dir="src/com/heytz/gwsdk/"/>
+        <source-file src="src/android/HeytzApp.java" target-dir="src/com/heytz/gwsdk/"/>
+        <source-file src="src/android/HeytzUtil.java" target-dir="src/com/heytz/gwsdk/"/>
+        <source-file src="src/android/HeytzXPGWifiSDKListener.java" target-dir="src/com/heytz/gwsdk/"/>
+        <source-file src="src/android/Operation.java" target-dir="src/com/heytz/gwsdk/"/>
+
         <source-file src="libs/armeabi/libBLEasyConfig.so" target-dir="libs/armeabi/"/>
         <source-file src="libs/armeabi/libsimpleconfiglib.so" target-dir="libs/armeabi/"/>
         <source-file src="libs/armeabi/libwavegen.so" target-dir="libs/armeabi/"/>
