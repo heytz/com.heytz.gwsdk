@@ -313,9 +313,6 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
                 selectedDevices=device;
                 selectedDevices.delegate=self;
                 isExist=true;
-                if (device.productKey.length>0) {
-                    [XPGWifiSDK updateDeviceFromServer:device.productKey];
-                }
                 NSDictionary *data=nil;
                 NSMutableDictionary * data1 = [NSMutableDictionary dictionaryWithDictionary: value];
                 @try {
