@@ -16,8 +16,10 @@ NSMutableDictionary *_controlObject;
 BOOL isDiscoverLock;
 XPGWifiDevice *_currentDevice;
 NSArray *_memoryDeviceList; //内存中的device列表。
+NSString *currentUpdateProductKey;//当前更新的设备
 
 CDVInvokedUrlCommand *listenerCommandHolder;//添加listener的callback
+CDVInvokedUrlCommand *updateDeviceFromServerCommandHolder;//
 int attempts;//尝试次数
 /**
  *  控制状态枚举
@@ -250,6 +252,10 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
             selectedDevices=device;
             selectedDevices.delegate=self;
             isExist=true;
+            if (device.productKey.length>0) {
+                [XPGWifiSDK updateDeviceFromServer:device.productKey];
+            }
+
             //判断是否是登陆状态，如果是的话就直接返回成功。
             if (selectedDevices.isConnected==YES) {
                 [selectedDevices getHardwareInfo];
@@ -316,7 +322,48 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
         [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
     }
 }
-
+/**
+ *  cordova 获取设备配置文件 配置文件，是定义 APP 与指定设备通信的规则
+ *
+ *  @param command ["productKey"]
+ */
+-(void)updateDeviceFromServer:(CDVInvokedUrlCommand *)command{
+    updateDeviceFromServerCommandHolder=command;
+    currentUpdateProductKey=command.arguments[0];
+    [XPGWifiSDK updateDeviceFromServer:command.arguments[0]];
+}
+/**
+ *  回调
+ *
+ *  @param wifiSDK wifiSDK
+ *  @param product product
+ *  @param result  int
+ */
+-(void)XPGWifiSDK:(XPGWifiSDK *)wifiSDK didUpdateProduct:(NSString *)product result:(int)result{
+    if (updateDeviceFromServerCommandHolder!=nil) {
+        if(currentUpdateProductKey!=nil&&[product isEqualToString:currentUpdateProductKey]){
+                //说明下载的是这个产品
+                if(result == XPGWifiError_NONE){
+                    CDVPluginResult  *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:product];
+                    [self.commandDelegate sendPluginResult:pluginResult callbackId:commandHolder.callbackId];
+                }else{
+                    CDVPluginResult  *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsInt:result];
+                    [self.commandDelegate sendPluginResult:pluginResult callbackId:commandHolder.callbackId];
+            }
+                currentUpdateProductKey=nil;
+        }
+    }
+    if(result == XPGWifiError_NONE)
+    {
+        //下载配置成功
+        NSLog(@"======didUpdateProduct===\nproduct:%@\n====\nresult:%d",product,result);
+    }
+    else
+    {
+        //下载配置失败
+         NSLog(@"======didUpdateProduct===\nproduct:%@\n====\nresult:%d",product,result);
+    }
+}
 /**
  *  方法 发送控制命令
  *  必须是已经配对的设备，并且连接
@@ -697,38 +744,26 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
 
     //基本数据，与发送的数据格式⼀一致
     NSDictionary *sendData = [data valueForKey:@"data"];
-//    if (sendData.count == 0) {
-////        return;
-//    }else{
-        if (listenerCommandHolder!=nil) {
-            CDVPluginResult  *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:sendData];
-            [pluginResult setKeepCallbackAsBool:true];
-            [self.commandDelegate sendPluginResult:pluginResult callbackId:listenerCommandHolder.callbackId];
-        }
-//    }
     //警告
     NSArray *alarms = [data valueForKey:@"alarms"];
     //错误
     NSArray *faults = [data valueForKey:@"faults"];
     //透传数据
-//    NSDictionary *binary = [data valueForKey:@"binary"];
-   NSObject   *binary=[data valueForKey:@"binary"];
-//    if (binary.count == 0) {
-//        //        return;
-//    }else{
-        if (listenerCommandHolder!=nil) {
-            CDVPluginResult  *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArrayBuffer:binary];
-            [pluginResult setKeepCallbackAsBool:true];
-            [self.commandDelegate sendPluginResult:pluginResult callbackId:listenerCommandHolder.callbackId];
-        }
-//    }
-//    for (NSString *key in sendData) {
-//        NSLog(@"\n=====didReceiveData====\n==sendData key: %@ value: %@\n", key, sendData[key]);
-//    }
-//    for (NSString *key in binary) {
-//        NSLog(@"\n=====didReceiveData====\n binary:key: %@ value: %@\n", key, binary[key]);
-//    }
+    //NSDictionary *binary = [data valueForKey:@"binary"];
+    NSObject *binary=[data valueForKey:@"binary"];
 
+
+//    NSMutableDictionary * d = [NSMutableDictionary dictionaryWithObjectsAndKeys:
+//                               sendData, @"data",
+//                                binary, @"binary",
+//                               alarms, @"alarms",
+//                               faults, @"faults",
+//                               nil];
+//        if (listenerCommandHolder!=nil) {
+//            CDVPluginResult  *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:d];
+//            [pluginResult setKeepCallbackAsBool:true];
+//            [self.commandDelegate sendPluginResult:pluginResult callbackId:listenerCommandHolder.callbackId];
+//        }
 
 }
 /**
@@ -768,6 +803,7 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
     NSLog(@"//====dealloc...====");
     _currentPairDeviceMacAddress=nil;
     selectedDevices=nil;
+     currentUpdateProductKey=nil;
     [XPGWifiSDK sharedInstance].delegate=nil;
     [XPGWifiSDK sharedInstance].delegate=self;
 }
@@ -777,6 +813,7 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
     NSLog(@"//====disposed...====");
     _currentPairDeviceMacAddress=nil;
     selectedDevices=nil;
+     currentUpdateProductKey=nil;
     [XPGWifiSDK sharedInstance].delegate=nil;
     [XPGWifiSDK sharedInstance].delegate=self;
 }

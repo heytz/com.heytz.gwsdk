@@ -138,6 +138,15 @@ exports.write = function (did, value, success, error) {
     exec(success, error, "gwsdk", "write", [did, value]);
 };
 /**
+ * cordova 下载产品配置文件 配置文件，是定义 APP 与指定设备通信的规则
+ * @param productKey
+ * @param success
+ * @param error
+ */
+exports.updateDeviceFromServer = function (productKey, success, error) {
+    exec(success, error, "gwsdk", "updateDeviceFromServer", [productKey]);
+};
+/**
  *  cordova 释放内存
  *
  *  @param command []
