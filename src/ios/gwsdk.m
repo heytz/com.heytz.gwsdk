@@ -305,7 +305,7 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
     NSString *did=command.arguments[0];
     NSMutableDictionary *value=command.arguments[1];
     BOOL isExist=false;
-    writeCommandHolder=command;
+
     for(XPGWifiDevice *device in _deviceList){
         if ([did isEqualToString:device.did]) {
             //判断是否是登陆状态，如果是的话就直接返回成功。
@@ -313,35 +313,16 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
                 selectedDevices=device;
                 selectedDevices.delegate=self;
                 isExist=true;
-                NSDictionary *data=nil;
-                NSMutableDictionary * data1 = [NSMutableDictionary dictionaryWithDictionary: value];
-                @try {
-                    NSEnumerator *enumerator1= [value keyEnumerator];
-                    id key=[enumerator1 nextObject];
-                    while (key) {
-                        NSString *object=[value objectForKey:key];
-                        NSData *data =[GwsdkUtils stringToHex:object];
-                        NSString * encodeStr= [XPGWifiBinary encode:data];
-                        NSLog(@"%@===%@",object,encodeStr);
-                        [data1 setObject:encodeStr forKey:key];
-                        key=[enumerator1 nextObject];
-                    }
-
-                    data=@{@"cmd":@1,@"entity0":data1};
-                    NSLog(@"Write data: %@", data);
-                    [device write:data];
-                }@catch (NSException *exception) {
-                    CDVPluginResult  *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:[exception reason]];
-                    [self.commandDelegate sendPluginResult:pluginResult callbackId:writeCommandHolder.callbackId];
-                }
-
-
+                value=@{@"cmd":@1,@"entity0":value};
+                NSLog(@"Write data: %@", value);
+                [device write:value];
+                 writeCommandHolder=command;
             } else {
                 /**
                  *  设备没有连接
                  */
                 CDVPluginResult  *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"The device is not connected!"];
-                [self.commandDelegate sendPluginResult:pluginResult callbackId:writeCommandHolder.callbackId];
+                [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
             }
         }
     }
@@ -768,6 +749,16 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
     NSLog(@"\n================didReceiveData=====================\n收到了:%d\n上报: %@\n===================end==================", result, data);
     if (result == -7) {
         NSLog(@"设备连接已断开 %d",result);
+    }
+    if (writeCommandHolder!=nil) {
+        if (result==0) {
+            CDVPluginResult  *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:writeCommandHolder.callbackId];
+        }else{
+            CDVPluginResult  *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsInt:result];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:writeCommandHolder.callbackId];
+        }
+        writeCommandHolder=nil;
     }
     //基本数据，与发送的数据格式⼀一致
     NSDictionary *sendData = [data valueForKey:@"data"];
