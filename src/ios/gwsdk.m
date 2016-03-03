@@ -285,10 +285,7 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
     for(XPGWifiDevice *device in _deviceList){
         if ([did isEqualToString:device.did]) {
             isExist=YES;
-            [selectedDevices disconnect];
-            selectedDevices.delegate=nil;
-            selectedDevices=nil;
-            listenerCommandHolder=nil;
+            [device disconnect];
         }
     }
     if(isExist==NO){
@@ -439,7 +436,8 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
  */
 -(void)XPGWifiDeviceDidDisconnected:(XPGWifiDevice *)device result:(int)result{
     if (result==0) {
-        CDVPluginResult  *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"success"];
+         NSString *did=device.did;
+        CDVPluginResult  *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:did];
         [self.commandDelegate sendPluginResult:pluginResult callbackId:self.commandHolder.callbackId];
     }else{
         CDVPluginResult  *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsInt:result];
