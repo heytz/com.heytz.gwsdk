@@ -19,10 +19,9 @@ import java.util.List;
  * This class wrapping Gizwits WifiSDK called from JavaScript.
  */
 public class gwsdk extends CordovaPlugin {
-
+    private static final String GIZ_APP_ID = "gizwappid";
     private CallbackContext airLinkCallbackContext;
     private Context context;
-    private String _appId;
     private String _productKey;              //当前的productkey
     private String _currentDeviceMac;       //当前配对的设备Mac地址.
     private final String TAG = "\n===gwsdkwrapper====\n";
@@ -245,25 +244,21 @@ public class gwsdk extends CordovaPlugin {
         super.initialize(cordova, webView);
         // your init code here
         context = cordova.getActivity().getApplicationContext();
+        String appId = webView.getPreferences().getString(GIZ_APP_ID, "");
+        XPGWifiSDK.sharedInstance().startWithAppID(context, appId);
     }
 
     /**
      * 要初始化监听的listener
-     * 如果是第一次加载 那么初始化设置 第一次加载的判断为 是否存在_appId
+     * 如果是第一次加载 那么初始化设置
      */
     private void init(CordovaArgs args, CallbackContext callbackContext) throws JSONException {
-        if (_appId == null||XPGWifiSDK.sharedInstance() == null) {
+        if (XPGWifiSDK.sharedInstance() == null) {
             // set listener
             XPGWifiSDK.sharedInstance().setListener(wifiSDKListener);
         }
-        if(_appId==null||!args.getString(0).equals(_appId)){
-            _appId = args.getString(0);
-            XPGWifiSDK.sharedInstance().startWithAppID(context, _appId);
-        }
-
         attempts = 2;
         _controlState = true;
-        this._productKey = args.getString(1);
         this.airLinkCallbackContext = callbackContext;
 
     }
@@ -288,19 +283,21 @@ public class gwsdk extends CordovaPlugin {
         init(args, callbackContext);
         if (action.equals("setDeviceWifi")) {
             GwsdkStateCode.setCurrentState(GwsdkStateCode.SetWifiCode);
-            int timeout = args.getInt(4);
-            this.setDeviceWifi(args.getString(2), args.getString(3),timeout, callbackContext);
+            this._productKey = args.getString(0);
+            int timeout = args.getInt(3);
+            this.setDeviceWifi(args.getString(1), args.getString(2), timeout, callbackContext);
             return true;
         }
         if (action.equals("setDeviceWifiBindDevice")) {
             GwsdkStateCode.setCurrentState(GwsdkStateCode.SetDeviceWifiBindDevice);
-            _uid = args.getString(4);
-            _token = args.getString(5);
-            int timeout = args.getInt(6);
-            String softAPSSIDPrefix = args.getString(8);
-
+            this._productKey = args.getString(0);
+            String ssid = args.getString(1);
+            String ssidWifi = args.getString(2);
+            _uid = args.getString(3);
+            _token = args.getString(4);
+            int timeout = args.getInt(5);
             XPGWifiConfigureMode xpgWifiConfigureMode = XPGWifiConfigureMode.XPGWifiConfigureModeAirLink;
-            switch (args.getInt(7)) {
+            switch (args.getInt(6)) {
                 case 1:
                     xpgWifiConfigureMode = XPGWifiConfigureMode.XPGWifiConfigureModeSoftAP;
                     break;
@@ -308,7 +305,8 @@ public class gwsdk extends CordovaPlugin {
                     xpgWifiConfigureMode = XPGWifiConfigureMode.XPGWifiConfigureModeAirLink;
                     break;
             }
-            this.setDeviceWifiBindDevice(args.getString(2), args.getString(3),
+            String softAPSSIDPrefix = args.getString(7);
+            this.setDeviceWifiBindDevice(ssid, ssidWifi,
                     xpgWifiConfigureMode,
                     timeout, softAPSSIDPrefix, null
                     , callbackContext);
@@ -316,28 +314,30 @@ public class gwsdk extends CordovaPlugin {
         }
         if (action.equals("getDeviceList")) {
             GwsdkStateCode.setCurrentState(GwsdkStateCode.GetDevcieListCode);
-            this._uid = args.getString(2);
-            this._token = args.getString(3);
             List<String> products = new ArrayList<String>();
-            for (int i = 0; i < args.getJSONArray(1).length(); i++) {
-                products.add(args.getJSONArray(1).get(i).toString());
+            for (int i = 0; i < args.getJSONArray(0).length(); i++) {
+                products.add(args.getJSONArray(0).get(i).toString());
             }
-            this.getDeviceList(args.getString(2), args.getString(3), products);
+            this._uid = args.getString(1);
+            this._token = args.getString(2);
+            this.getDeviceList(args.getString(1), args.getString(2), products);
             return true;
         }
         if (action.equals("deviceControl")) {
             GwsdkStateCode.setCurrentState(GwsdkStateCode.ControlCode);
-            this._currentDeviceMac = args.getString(4);
-            this._controlObject = args.getString(5);
             List<String> products = new ArrayList<String>();
-            for (int i = 0; i < args.getJSONArray(1).length(); i++) {
-                products.add(args.getJSONArray(1).get(i).toString());
+            for (int i = 0; i < args.getJSONArray(0).length(); i++) {
+                products.add(args.getJSONArray(0).get(i).toString());
             }
+            this._uid = args.getString(1);
+            this._token = args.getString(2);
+            this._currentDeviceMac = args.getString(3);
+            this._controlObject = args.getString(4);
+
             Log.w("tag", products.toString());
-            this.getDeviceList(args.getString(2), args.getString(3), products);
+            this.getDeviceList(args.getString(1), args.getString(2), products);
             return true;
         }
-
         return false;
     }
 
@@ -348,7 +348,7 @@ public class gwsdk extends CordovaPlugin {
      * @param wifiKey
      * @param callbackContext
      */
-    private void setDeviceWifi(String wifiSSID, String wifiKey,int timeout, CallbackContext callbackContext) {
+    private void setDeviceWifi(String wifiSSID, String wifiKey, int timeout, CallbackContext callbackContext) {
         if (wifiSSID != null && wifiSSID.length() > 0 && wifiKey != null && wifiKey.length() > 0) {
             airLinkCallbackContext = callbackContext;
             //15.11.24 切换成新接口
