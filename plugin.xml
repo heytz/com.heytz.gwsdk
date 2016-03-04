@@ -33,6 +33,7 @@
             <feature name="gwsdk">
                 <param name="android-package" value="com.heytz.gwsdk.gwsdk"/>
             </feature>
+            <preference name="gizwappid" value="$GIZWITS_APPID"/>
         </config-file>
         <config-file parent="/*" target="AndroidManifest.xml"></config-file>
         <source-file src="src/android/gwsdk.java" target-dir="src/com/heytz/gwsdk/"/>
