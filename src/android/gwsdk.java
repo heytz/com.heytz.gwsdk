@@ -128,12 +128,6 @@ public class gwsdk extends CordovaPlugin {
                         //如果当前配对的DeviceMac 存在.
                         if (_currentDeviceMac != null) {
                             for (int i = 0; i < devicesList.size(); i++) {
-                                if (debug) {
-                                    Log.e("didDiscovered", devicesList.get(i).getMacAddress());
-                                    Log.e("didDiscovered", devicesList.get(i).getDid());
-                                    Log.e("didDiscovered", devicesList.get(i).getIPAddress());
-                                    Log.e("didDiscovered", devicesList.get(i).getProductKey());
-                                }
                                 //判断did 是否为空
                                 if (devicesList.get(i).getDid().length() > 0) {
                                     //判断当前设备是否为正在配对的设备(*Mac地址判断),
@@ -141,24 +135,6 @@ public class gwsdk extends CordovaPlugin {
                                         //清空内存中的Mac
                                         _currentDeviceMac = null;
                                         sendDeviceInfo(devicesList.get(i));
-//                                        JSONObject json = new JSONObject();
-//                                        try {
-//                                            json.put("productKey", devicesList.get(i).getProductKey());
-//                                            json.put("did", devicesList.get(i).getDid());
-//                                            json.put("macAddress", devicesList.get(i).getMacAddress());
-//                                            json.put("passcode", devicesList.get(i).getPasscode());
-//                                        } catch (JSONException e) {
-//                                            if (debug)
-//                                                Log.e("====parseJSON====", e.getMessage());
-//                                            //异常处理
-//                                            PluginResult pr = new PluginResult(PluginResult.Status.ERROR, e.getMessage());
-//                                            airLinkCallbackContext.sendPluginResult(pr);
-//                                        }
-//                                        if (debug)
-//                                            Log.e("====didDiscovered====", "success:" + devicesList.get(i).getDid());
-//                                        //成功的返回
-//                                        PluginResult pr = new PluginResult(PluginResult.Status.OK, json);
-//                                        airLinkCallbackContext.sendPluginResult(pr);
                                     }
                                 } else {
                                     if (debug)
@@ -173,9 +149,9 @@ public class gwsdk extends CordovaPlugin {
                             for (int i = 0; i < devicesList.size(); i++) {
                                 cdvResult.put(toJSONObjfrom(devicesList.get(i)));
                             }
-                            _devicesList = null;
+                            PluginResult pr = new PluginResult(PluginResult.Status.ERROR, cdvResult);
+                            pr.setKeepCallback(true);
                             airLinkCallbackContext.success(cdvResult);
-
                         } else {
                             _devicesList = devicesList;
                         }
@@ -225,7 +201,7 @@ public class gwsdk extends CordovaPlugin {
                 Log.e("\n===binding error===\n", errorMessage);
                 if (attempts > 0) {
                     _controlState = true;
-                    --attempts;
+                    attempts = attempts - 1;
                 } else {
                     //清空内存中的Mac
                     _currentDeviceMac = null;
@@ -247,7 +223,7 @@ public class gwsdk extends CordovaPlugin {
         context = cordova.getActivity().getApplicationContext();
         String appId = webView.getPreferences().getString(GIZ_APP_ID, "");
         XPGWifiSDK.sharedInstance().startWithAppID(context, appId);
-         // set listener
+        // set listener
         XPGWifiSDK.sharedInstance().setListener(wifiSDKListener);
     }
 
