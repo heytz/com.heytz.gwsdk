@@ -103,6 +103,7 @@ public class gwsdk extends CordovaPlugin {
                     case GwsdkStateCode.SetDeviceWifiBindDevice:
                         //如果存在did那么就直接返回成功,现在测试只会返回一次
                         if (_currentDeviceMac == null && device.getDid().length() > 0) {
+                            _currentDevice = device;
                             XPGWifiSDK.sharedInstance().bindDevice(_uid, _token, device.getDid(), null, null);
                         } else {//否则获取配对到的设备地址,去didDiscovered 等待设备did的信息
                             _currentDeviceMac = device.getMacAddress();
@@ -246,6 +247,8 @@ public class gwsdk extends CordovaPlugin {
         context = cordova.getActivity().getApplicationContext();
         String appId = webView.getPreferences().getString(GIZ_APP_ID, "");
         XPGWifiSDK.sharedInstance().startWithAppID(context, appId);
+         // set listener
+        XPGWifiSDK.sharedInstance().setListener(wifiSDKListener);
     }
 
     /**
@@ -253,10 +256,6 @@ public class gwsdk extends CordovaPlugin {
      * 如果是第一次加载 那么初始化设置
      */
     private void init(CordovaArgs args, CallbackContext callbackContext) throws JSONException {
-        if (XPGWifiSDK.sharedInstance() == null) {
-            // set listener
-            XPGWifiSDK.sharedInstance().setListener(wifiSDKListener);
-        }
         attempts = 2;
         _controlState = true;
         this.airLinkCallbackContext = callbackContext;
