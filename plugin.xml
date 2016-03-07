@@ -31,12 +31,18 @@
     <platform name="android">
         <config-file parent="/*" target="res/xml/config.xml">
             <feature name="gwsdk">
-                <param name="android-package" value="com.heytz.gwsdk.gwsdk"/>
+                <param name="android-package" value="com.heytz.gwsdk.Gwsdk"/>
             </feature>
             <preference name="gizwappid" value="$GIZWITS_APPID"/>
         </config-file>
         <config-file parent="/*" target="AndroidManifest.xml"></config-file>
-        <source-file src="src/android/gwsdk.java" target-dir="src/com/heytz/gwsdk/"/>
+        <source-file src="src/android/Gwsdk.java" target-dir="src/com/heytz/gwsdk/"/>
+        <source-file src="src/android/GwsdkStateCode.java" target-dir="src/com/heytz/gwsdk/"/>
+        <source-file src="src/android/HeytzApp.java" target-dir="src/com/heytz/gwsdk/"/>
+        <source-file src="src/android/HeytzUtil.java" target-dir="src/com/heytz/gwsdk/"/>
+        <source-file src="src/android/HeytzXPGWifiDeviceListener.java" target-dir="src/com/heytz/gwsdk/"/>
+        <source-file src="src/android/HeytzXPGWifiSDKListener.java" target-dir="src/com/heytz/gwsdk/"/>
+        <source-file src="src/android/Operation.java" target-dir="src/com/heytz/gwsdk/"/>
         <source-file src="libs/armeabi/libBLEasyConfig.so" target-dir="libs/armeabi/"/>
         <source-file src="libs/armeabi/libsimpleconfiglib.so" target-dir="libs/armeabi/"/>
         <source-file src="libs/armeabi/libwavegen.so" target-dir="libs/armeabi/"/>
