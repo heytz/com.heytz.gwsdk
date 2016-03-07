@@ -102,7 +102,7 @@ exports.getWifiSSIDList = function (success, error) {
  *
  *  @param command []
  */
-exports.startDevcieListener = function (success, error) {
+exports.startDeviceListener = function (success, error) {
     exec(success, error, "gwsdk", "startDeviceListener", []);
 };
 /**
