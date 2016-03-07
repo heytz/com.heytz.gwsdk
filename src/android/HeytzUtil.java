@@ -16,14 +16,21 @@ public class HeytzUtil {
     public static JSONObject deviceToJsonObject(XPGWifiDevice device, String uid) {
         JSONObject json = new JSONObject();
         try {
-            json.put("did", device.getDid());
             json.put("macAddress", device.getMacAddress());
-            json.put("isLAN", device.isLAN() ? "1" : "0");
-            json.put("isOnline", device.isOnline() ? "1" : "0");
-            json.put("isConnected", device.isConnected() ? "1" : "0");
-            json.put("isDisabled", device.isDisabled() ? "1" : "0");
+            json.put("did", device.getDid());
+            json.put("passcode", device.getPasscode());
+            json.put("ipAddress", device.getIPAddress());
+            json.put("productKey", device.getProductKey());
+            json.put("productName", device.getProductName());
+            json.put("remark", device.getRemark());
+            json.put("isConnected", device.isConnected());
+            json.put("isDisabled", device.isDisabled());
+            json.put("isLAN", device.isLAN());
+            json.put("isOnline", device.isOnline());
             if (uid != null) {
-                json.put("isBind", device.isBind(uid) ? "1" : "0");
+                json.put("isBind", device.isBind(uid));
+            } else {
+                json.put("isBind", null);
             }
         } catch (JSONException e) {
         } finally {
@@ -65,6 +72,7 @@ public class HeytzUtil {
             arrayOfByte[(i / 2)] = ((byte) Integer.valueOf(str, 16).intValue());
         }
     }
+
     /**
      * 方法 发送控制命令的方法  第三步
      *
