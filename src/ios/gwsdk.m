@@ -227,6 +227,7 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
  *  @param command []
  */
 -(void)startDeviceListener:(CDVInvokedUrlCommand *)command{
+    listenerCommandHolder=nil;
     listenerCommandHolder=command;
 }
 /**
@@ -745,9 +746,7 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
     [GwsdkUtils logDevice:@"didReceiveData" device:device];
     NSString *did=device.did;
     NSLog(@"\n================didReceiveData=====================\n收到了:%d\n上报: %@\n===================end==================", result, data);
-    if (result == -7) {
-        NSLog(@"设备连接已断开 %d",result);
-    }
+
     if (writeCommandHolder!=nil) {
         if (result==0) {
             CDVPluginResult  *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
@@ -758,46 +757,58 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
         }
         writeCommandHolder=nil;
     }
-    //基本数据，与发送的数据格式⼀一致
-    NSDictionary *sendData = [data valueForKey:@"data"];
-    if (sendData.count==0) {
-        return;
-    }
-    //警告
-    NSData *alerts = [data valueForKey:@"alerts"];
-    //错误
-    NSData *faults = [data valueForKey:@"faults"];
-    //透传数据
-    //NSDictionary *binary = [data valueForKey:@"binary"];
-    //    NSObject *binary=[data valueForKey:@"binary"];
-    NSNumber *cmd= [[data valueForKey:@"data"] valueForKey:@"cmd"];
 
-    if([cmd isEqualToNumber:[NSNumber numberWithInteger:1]]==YES){
-        //    向设备发送控制指令	1
-        NSLog(@"\n================向设备发送控制指令====\ndid:%@",did);
-        if (writeCommandHolder!=nil) {
-            CDVPluginResult  *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-            [self.commandDelegate sendPluginResult:pluginResult callbackId:writeCommandHolder.callbackId];
+
+
+    if(result==XPGWifiError_NONE){
+        //基本数据，与发送的数据格式⼀一致
+        NSDictionary *sendData = [data valueForKey:@"data"];
+        if (sendData.count==0) {
+            return;
         }
-    }else if([cmd isEqualToNumber:[NSNumber numberWithInteger:2]]==YES){
-        //    向设备请求设备状态	2
-    }else if([cmd isEqualToNumber:[NSNumber numberWithInteger:3]]==YES){
-        //    设备返回请求的设备状态	3
-    }else if([cmd isEqualToNumber:[NSNumber numberWithInteger:4]]==YES){
-        //    设备推送当前设备状态	4
-        NSMutableDictionary * d = [NSMutableDictionary dictionaryWithObjectsAndKeys:
-                                   sendData, @"data",
-                                   alerts, @"alerts",
-                                   faults, @"faults",
-                                   did,@"did",
-                                   nil];
+        //警告
+        NSData *alerts = [data valueForKey:@"alerts"];
+        //错误
+        NSData *faults = [data valueForKey:@"faults"];
+
+        NSNumber *cmd= [[data valueForKey:@"data"] valueForKey:@"cmd"];
+
+        if([cmd isEqualToNumber:[NSNumber numberWithInteger:1]]==YES){
+            //    向设备发送控制指令	1
+            NSLog(@"\n================向设备发送控制指令====\ndid:%@",did);
+            if (writeCommandHolder!=nil) {
+                CDVPluginResult  *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+                [self.commandDelegate sendPluginResult:pluginResult callbackId:writeCommandHolder.callbackId];
+            }
+        }else if([cmd isEqualToNumber:[NSNumber numberWithInteger:2]]==YES){
+            //    向设备请求设备状态	2
+        }else if([cmd isEqualToNumber:[NSNumber numberWithInteger:3]]==YES){
+            //    设备返回请求的设备状态	3
+        }else if([cmd isEqualToNumber:[NSNumber numberWithInteger:4]]==YES){
+            //    设备推送当前设备状态	4
+            NSMutableDictionary * d = [NSMutableDictionary dictionaryWithObjectsAndKeys:
+                                       sendData, @"data",
+                                       alerts, @"alerts",
+                                       faults, @"faults",
+                                       did,@"did",
+                                       nil];
+            if (listenerCommandHolder!=nil) {
+                CDVPluginResult  *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:d];
+                [pluginResult setKeepCallbackAsBool:true];
+                [self.commandDelegate sendPluginResult:pluginResult callbackId:listenerCommandHolder.callbackId];
+            }
+        }
+    }else if(result==XPGWifiError_RAW_DATA_TRANSMIT){
+        //透传数据
+        NSData *binary=[data valueForKey:@"binary"];
         if (listenerCommandHolder!=nil) {
-            CDVPluginResult  *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:d];
+            CDVPluginResult  *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArrayBuffer:binary];
             [pluginResult setKeepCallbackAsBool:true];
             [self.commandDelegate sendPluginResult:pluginResult callbackId:listenerCommandHolder.callbackId];
         }
+    }else if (result == -7) {
+        NSLog(@"设备连接已断开 %d",result);
     }
-
 
 }
 /**
