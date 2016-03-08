@@ -36,8 +36,7 @@
             <preference name="gizwappid" value="$GIZWITS_APPID"/>
         </config-file>
         <config-file parent="/*" target="AndroidManifest.xml"></config-file>
-        <source-file src="src/android/Gwsdk.java" target-dir="src/com/heytz/gwsdk/"/>
-        <source-file src="src/android/GwsdkStateCode.java" target-dir="src/com/heytz/gwsdk/"/>
+        <source-file src="src/android/Gwsdk.java" target-dir="src/com/heytz/gwsdk/"/>s
         <source-file src="src/android/HeytzApp.java" target-dir="src/com/heytz/gwsdk/"/>
         <source-file src="src/android/HeytzUtil.java" target-dir="src/com/heytz/gwsdk/"/>
         <source-file src="src/android/HeytzXPGWifiDeviceListener.java" target-dir="src/com/heytz/gwsdk/"/>
