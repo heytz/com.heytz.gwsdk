@@ -49,6 +49,7 @@ public class HeytzXPGWifiSDKListener extends XPGWifiSDKListener {
             if (app.getCallbackContext(Operation.SET_DEVICE_WIFI_AND_BIND.getMethod()) != null) {
                 //如果存在did那么就直接返回成功,现在测试只会返回一次
                 if (currentDeviceMac == null && device.getDid().length() > 0) {
+                    app.setCurrentDevice(device);
                     XPGWifiSDK.sharedInstance().bindDevice(app.getUid(), app.getToken(), device.getDid(), null, null);
                 } else {//否则获取配对到的设备地址,去didDiscovered 等待设备did的信息
                     app.setMac(device.getMacAddress()); //_currentDeviceMac = device.getMacAddress();
@@ -86,7 +87,7 @@ public class HeytzXPGWifiSDKListener extends XPGWifiSDKListener {
                         //判断当前设备是否为正在配对的设备(*Mac地址判断),
                         if ((devicesList.get(i).getMacAddress().indexOf(currentDeviceMac) > -1)) {
                             //清空内存中的Mac
-                            app.setMac(null);//_currentDeviceMac = null;
+                            app.setMac(null);
                             PluginResult pr = new PluginResult(PluginResult.Status.OK, HeytzUtil.deviceToJsonObject(devicesList.get(i), app.getUid()));
                             app.getCallbackContext(Operation.SET_DEVICE_WIFI.getMethod()).sendPluginResult(pr);
                             app.removeCallbackContext(Operation.SET_DEVICE_WIFI.getMethod());

@@ -17,12 +17,7 @@ import java.util.List;
  */
 public class Gwsdk extends CordovaPlugin {
     private static final String GIZ_APP_ID = "gizwappid";
-    //    private CallbackContext airLinkCallbackContext;
     private Context context;
-    private final String TAG = "\n===gwsdkwrapper====\n";
-    private Boolean debug = true;            //debug 状态
-    //private Object _controlObject;           //用户控制的值.
-    //private Boolean _controlState;           //锁定用户的控制状态
     private HeytzApp app = new HeytzApp();
     private HeytzXPGWifiSDKListener wifiSDKListener = new HeytzXPGWifiSDKListener();
 
