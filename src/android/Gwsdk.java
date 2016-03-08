@@ -5,6 +5,7 @@ import com.xtremeprog.xpgconnect.XPGWifiDevice;
 import com.xtremeprog.xpgconnect.XPGWifiSDK;
 import com.xtremeprog.xpgconnect.XPGWifiSDK.XPGWifiConfigureMode;
 import org.apache.cordova.*;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -56,7 +57,7 @@ public class Gwsdk extends CordovaPlugin {
             this.setDeviceWifi(args.getString(1), args.getString(2), timeout);
             return true;
         }
-        if (action.equals(Operation.SET_DEVICE_WIFI_AND_BIND)) {
+        if (action.equals(Operation.SET_DEVICE_WIFI_AND_BIND.getMethod())) {
             app.setCallbackContext(Operation.SET_DEVICE_WIFI_AND_BIND.getMethod(), callbackContext);
             wifiSDKListener.setAttempts(2);
             List<String> list = new ArrayList<String>();
@@ -79,10 +80,23 @@ public class Gwsdk extends CordovaPlugin {
                     break;
             }
             String softAPSSIDPrefix = args.getString(7);
+            List<XPGWifiSDK.XPGWifiGAgentType> xpgWifiGAgentTypeList = new ArrayList<XPGWifiSDK.XPGWifiGAgentType>();
+            JSONArray productkeys = args.getJSONArray(8);
+
+            if (productkeys != null && productkeys.length() > 0) {
+                for (int i = 0; i < productkeys.length(); i++) {
+                    XPGWifiSDK.XPGWifiGAgentType xpgWifiGAgentType = HeytzXPGWifiGAgentType.getHeytzXPGWifiGAgentType(productkeys.getInt(i));
+                    if (xpgWifiGAgentType != null) {
+                        xpgWifiGAgentTypeList.add(xpgWifiGAgentType);
+                    }
+                }
+            }
             this.setDeviceWifiBindDevice(ssid, ssidWifi,
                     xpgWifiConfigureMode,
-                    timeout, softAPSSIDPrefix, null
-                    , callbackContext);
+                    timeout,
+                    softAPSSIDPrefix,
+                    xpgWifiGAgentTypeList
+            );
             return true;
         }
         /**
@@ -173,7 +187,7 @@ public class Gwsdk extends CordovaPlugin {
             String did = args.getString(0);
             Object value = args.getJSONObject(1);
             app.setControlObject(value);
-            this.write(did,args.getJSONObject(1));
+            this.write(did, args.getJSONObject(1));
             return true;
         }
 
@@ -216,14 +230,14 @@ public class Gwsdk extends CordovaPlugin {
      * @param timeout
      * @param softAPSSIDPrefix
      * @param types
-     * @param callbackContext
      */
-    private void setDeviceWifiBindDevice(String wifiSSID, String wifiKey, XPGWifiConfigureMode mode, int timeout, String softAPSSIDPrefix, List<XPGWifiSDK.XPGWifiGAgentType> types, CallbackContext callbackContext) {
+    private void setDeviceWifiBindDevice(String wifiSSID, String wifiKey, XPGWifiConfigureMode mode, int timeout, String softAPSSIDPrefix, List<XPGWifiSDK.XPGWifiGAgentType> types) {
         if (wifiSSID != null && wifiSSID.length() > 0 && wifiKey != null && wifiKey.length() > 0) {
+
             //15.11.24 切换成新接口
             XPGWifiSDK.sharedInstance().setDeviceWifi(wifiSSID, wifiKey,
-                    mode, softAPSSIDPrefix,
-                    timeout, null);
+                    mode, null,
+                    timeout, types);
         } else {
             app.getCallbackContext(Operation.SET_DEVICE_WIFI_AND_BIND.getMethod()).error("args is empty or null");
             app.removeCallbackContext(Operation.SET_DEVICE_WIFI_AND_BIND.getMethod());
@@ -298,10 +312,11 @@ public class Gwsdk extends CordovaPlugin {
 
     /**
      * 方法  发送控制命令
+     *
      * @param did
      * @param jsonObject
      */
-    private void write(String did,JSONObject jsonObject) {
+    private void write(String did, JSONObject jsonObject) {
         List<XPGWifiDevice> list = app.getDeviceList();
         boolean isExist = false;
         for (XPGWifiDevice aList : list) {

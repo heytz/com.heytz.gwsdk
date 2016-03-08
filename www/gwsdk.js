@@ -53,8 +53,8 @@ exports.setDeviceWifiBindDevice = function (productKey, wifiSSID, wifiKey, uid, 
         token,
         timeout ? timeout : 60,
         mode ? mode : XPGConfigureMode.XPGWifiSDKAirLinkMode,
-        softAPSSIDPrefix,
-        wifiGAgentType
+        softAPSSIDPrefix ? softAPSSIDPrefix : null,
+        wifiGAgentType ? softAPSSIDPrefix : null
     ]);
 };
 /**
@@ -62,15 +62,15 @@ exports.setDeviceWifiBindDevice = function (productKey, wifiSSID, wifiKey, uid, 
  *
  *  @param command [[productkey],uid,token]
  */
-exports.getDeviceList = function ( productKey, uid, token, success, error) {
-    exec(success, error, "gwsdk", "getDeviceList", [ productToArray(productKey), uid, token]);
+exports.getDeviceList = function (productKey, uid, token, success, error) {
+    exec(success, error, "gwsdk", "getDeviceList", [productToArray(productKey), uid, token]);
 };
 /**
  *  cordova 绑定设备
  *
  *  @param command ["uid","token","did","passcode","remark"]
  */
-exports.deviceBinding = function (uid, token, did, passcode, remark,success, error) {
+exports.deviceBinding = function (uid, token, did, passcode, remark, success, error) {
     exec(success, error, "gwsdk", "deviceBinding", [uid, token, did, passcode, remark])
 };
 /**
@@ -78,7 +78,7 @@ exports.deviceBinding = function (uid, token, did, passcode, remark,success, err
  *
  *  @param command ["uid","token","did","passcode","remark"]
  */
-exports.unbindDevice = function (uid, token, did, passcode,success, error) {
+exports.unbindDevice = function (uid, token, did, passcode, success, error) {
     exec(success, error, "gwsdk", "unbindDevice", [uid, token, did, passcode])
 };
 /**
@@ -87,7 +87,7 @@ exports.unbindDevice = function (uid, token, did, passcode,success, error) {
  *  @param command [["prodctkeys"],"uid","token","mac","value"]
  */
 exports.deviceControl = function (productKey, uid, token, mac, value, success, error) {
-    exec(success, error, "gwsdk", "deviceControl", [ productToArray(productKey), uid, token, mac, value]);
+    exec(success, error, "gwsdk", "deviceControl", [productToArray(productKey), uid, token, mac, value]);
 };
 /**
  * cordova 获取ssid列表

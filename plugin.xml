@@ -42,6 +42,7 @@
         <source-file src="src/android/HeytzXPGWifiDeviceListener.java" target-dir="src/com/heytz/gwsdk/"/>
         <source-file src="src/android/HeytzXPGWifiSDKListener.java" target-dir="src/com/heytz/gwsdk/"/>
         <source-file src="src/android/Operation.java" target-dir="src/com/heytz/gwsdk/"/>
+        <source-file src="src/android/HeytzXPGWifiGAgentType.java" target-dir="src/com/heytz/gwsdk/"/>
         <source-file src="libs/armeabi/libBLEasyConfig.so" target-dir="libs/armeabi/"/>
         <source-file src="libs/armeabi/libsimpleconfiglib.so" target-dir="libs/armeabi/"/>
         <source-file src="libs/armeabi/libwavegen.so" target-dir="libs/armeabi/"/>
