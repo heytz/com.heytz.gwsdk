@@ -351,10 +351,10 @@ public class Gwsdk extends CordovaPlugin {
     private void write(String did, JSONObject jsonObject) {
         List<XPGWifiDevice> list = app.getDeviceList();
         boolean isExist = false;
-        for (XPGWifiDevice aList : list) {
-            if (aList.getDid().equals(did)) {
+        for (XPGWifiDevice xpgWifiDevice : list) {
+            if (xpgWifiDevice.getDid().equals(did)) {
                 isExist = true;
-                if (aList.isConnected()) {
+                if (xpgWifiDevice.isConnected()) {
                     JSONObject jsonsend = new JSONObject();
                     //写入命令字段（所有产品一致）
                     try {
@@ -365,7 +365,10 @@ public class Gwsdk extends CordovaPlugin {
                         app.getCallbackContext(Operation.WRITE.getMethod()).sendPluginResult(pluginResult);
                         app.removeCallbackContext(Operation.WRITE.getMethod());
                     }
-                    aList.write(jsonsend.toString());
+                    app.setCurrentDevice(xpgWifiDevice);
+                    heytzXPGWifiDeviceListener.setApp(app);
+                    xpgWifiDevice.setListener(heytzXPGWifiDeviceListener);
+                    xpgWifiDevice.write(jsonsend.toString());
                 } else {
                     PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR, "The device is not connected!");
                     app.getCallbackContext(Operation.WRITE.getMethod()).sendPluginResult(pluginResult);
