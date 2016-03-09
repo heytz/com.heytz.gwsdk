@@ -54,6 +54,7 @@ public class HeytzXPGWifiDeviceListener extends XPGWifiDeviceListener {
 
     @Override
     public void didDeviceOnline(XPGWifiDevice device, boolean isOnline) {
+        Log.d(HeytzApp.TAG, "didDeviceOnline..." + isOnline);
     }
 
     @Override
