@@ -83,24 +83,33 @@ public class HeytzXPGWifiDeviceListener extends XPGWifiDeviceListener {
             //普通数据点类型，有布尔型、整形和枚举型数据，该种类型一般为可读写
             if (dataMap.get("data") != null) {
                 Log.i("info", (String) dataMap.get("data"));
-
             }
-            //设备报警数据点类型，该种数据点只读，设备发生报警后该字段有内容，没有发生报警则没内容
-            if (dataMap.get("alerts") != null) {
-                Log.i("info", (String) dataMap.get("alerts"));
-
+            /**
+             *  设备报警数据点类型，该种数据点只读，设备发生报警后该字段有内容，没有发生报警则没内容
+             *  todo 在ios 中 alerts  在android 中 alters
+             */
+            if (dataMap.get("alters") != null) {
+                Log.i("info", (String) dataMap.get("alters"));
             }
             //设备错误数据点类型，该种数据点只读，设备发生错误后该字段有内容，没有发生报警则没内容
             if (dataMap.get("faults") != null) {
                 Log.i("info", (String) dataMap.get("faults"));
-
             }
             if (app.getCallbackContext(Operation.START_DEVICE_LISTENER.getMethod()) != null) {
                 JSONObject jsonObject = new JSONObject();
                 try {
-                    jsonObject.put("data", dataMap.get("data"));
-                    jsonObject.put("alerts", dataMap.get("alerts"));
-                    jsonObject.put("faults", dataMap.get("faults"));
+                    if (dataMap.get("data") != null) {
+                        JSONObject dataJson = new JSONObject(dataMap.get("data").toString());
+                        jsonObject.put("data", dataJson);
+                    }
+                    if (dataMap.get("alters") != null) {
+                        JSONObject altersJson = new JSONObject(dataMap.get("alters").toString());
+                        jsonObject.put("alerts", altersJson);
+                    }
+                    if (dataMap.get("faults") != null) {
+                        JSONObject faultsJson = new JSONObject(dataMap.get("alters").toString());
+                        jsonObject.put("faults", faultsJson);
+                    }
                     jsonObject.put("did", device.getDid());
                 } catch (JSONException e) {
                 } finally {
@@ -109,21 +118,23 @@ public class HeytzXPGWifiDeviceListener extends XPGWifiDeviceListener {
                     app.getCallbackContext(Operation.START_DEVICE_LISTENER.getMethod()).sendPluginResult(pluginResult);
                 }
             }
+
             if (app.getCallbackContext(Operation.WRITE.getMethod()) != null) {
                 JSONObject data = (JSONObject) dataMap.get("data");
                 if (dataMap.get("data") != null && data.has("cmd") != false) {
                     try {
                         if (data.getInt("cmd") == 1) {
-                            app.getCallbackContext(Operation.START_DEVICE_LISTENER.getMethod()).success();
+                            app.getCallbackContext(Operation.WRITE.getMethod()).success();
+                            app.removeCallbackContext(Operation.WRITE.getMethod());
                         }
                     } catch (JSONException e) {
-                        PluginResult pr = new PluginResult(PluginResult.Status.OK, result);
-                        app.getCallbackContext(Operation.START_DEVICE_LISTENER.getMethod()).sendPluginResult(pr);
+                        PluginResult pr = new PluginResult(PluginResult.Status.ERROR, result);
+                        app.getCallbackContext(Operation.WRITE.getMethod()).sendPluginResult(pr);
+                        app.removeCallbackContext(Operation.WRITE.getMethod());
                     }
                 }
             }
-        } else if (result == XPGWifiErrorCode.XPGWifiError_RAW_DATA_TRANSMIT) {
-            // 设备上报的数据内容，result为－48时返回透传数据，binary有值；
+        } else if (result == XPGWifiErrorCode.XPGWifiError_RAW_DATA_TRANSMIT) { // 设备上报的数据内容，result为－48时返回透传数据，binary有值；
             //二进制数据点类型，适合开发者自行解析二进制数据
             if (dataMap.get("binary") != null) {
                 Log.i("info", "Binary data:");
@@ -132,7 +143,10 @@ public class HeytzXPGWifiDeviceListener extends XPGWifiDeviceListener {
             if (app.getCallbackContext(Operation.START_DEVICE_LISTENER.getMethod()) != null) {
                 JSONObject jsonObject = new JSONObject();
                 try {
-                    jsonObject.put("binary", dataMap.get("binary"));
+                    if (dataMap.get("binary") != null) {
+                        JSONObject faultsJson = new JSONObject(dataMap.get("binary").toString());
+                        jsonObject.put("binary", faultsJson);
+                    }
                 } catch (JSONException e) {
                 } finally {
                     PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, jsonObject);
@@ -140,14 +154,46 @@ public class HeytzXPGWifiDeviceListener extends XPGWifiDeviceListener {
                     app.getCallbackContext(Operation.START_DEVICE_LISTENER.getMethod()).sendPluginResult(pluginResult);
                 }
             }
-
+        } else {
+            if (app.getCallbackContext(Operation.WRITE.getMethod()) != null) {
+                PluginResult pr = new PluginResult(PluginResult.Status.ERROR, result);
+                app.getCallbackContext(Operation.WRITE.getMethod()).sendPluginResult(pr);
+                app.removeCallbackContext(Operation.WRITE.getMethod());
+            }
         }
-
-
     }
 
     @Override
     public void didQueryHardwareInfo(XPGWifiDevice device, int result, java.util.concurrent.ConcurrentHashMap<String, String> hardwareInfo) {
+        if (app.getCallbackContext(Operation.GET_HARDWARE_INFO.getMethod()) != null) {
+            if (result == XPGWifiErrorCode.XPGWifiError_NONE) {
+                JSONObject jsonObject = new JSONObject();
+                try {
+                    // 字符串类型，GAgent模组硬件版本号
+                    jsonObject.put("XPGWifiDeviceHardwareWifiHardVerKey", hardwareInfo.get("XPGWifiDeviceHardwareWifiHardVerKey"));
+                    // 字符串类型，GAgent模组软件版本号
+                    jsonObject.put("XPGWifiDeviceHardwareWifiSoftVerKey", hardwareInfo.get("XPGWifiDeviceHardwareWifiSoftVerKey"));
+                    // 字符串类型，设备硬件版本号
+                    jsonObject.put("XPGWifiDeviceHardwareMCUHardVerKey", hardwareInfo.get("XPGWifiDeviceHardwareMCUHardVerKey"));
+                    // 字符串类型，固件Id
+                    jsonObject.put("XPGWifiDeviceHardwareFirmwareIdKey", hardwareInfo.get("XPGWifiDeviceHardwareFirmwareIdKey"));
+                    // 字符串类型，固件版本号
+                    jsonObject.put("XPGWifiDeviceHardwareFirmwareVerKey", hardwareInfo.get("XPGWifiDeviceHardwareFirmwareVerKey"));
+                    // 字符串类型，设备的Productkey
+                    jsonObject.put("XPGWifiDeviceHardwareProductKey", hardwareInfo.get("XPGWifiDeviceHardwareProductKey"));
+                } catch (JSONException e) {
+                } finally {
+                    PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, jsonObject);
+                    app.getCallbackContext(Operation.GET_HARDWARE_INFO.getMethod()).sendPluginResult(pluginResult);
+                    app.removeCallbackContext(Operation.GET_HARDWARE_INFO.getMethod());
+                }
+            } else {
+                PluginResult pr = new PluginResult(PluginResult.Status.ERROR, result);
+                app.getCallbackContext(Operation.GET_HARDWARE_INFO.getMethod()).sendPluginResult(pr);
+                app.removeCallbackContext(Operation.GET_HARDWARE_INFO.getMethod());
+            }
+        }
+
     }
 
     public HeytzApp getApp() {

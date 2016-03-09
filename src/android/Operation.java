@@ -15,6 +15,7 @@ public enum Operation {
     STOP_DEVICE_LISTENER("stopDeviceListener"),             //停止监听设备信息
     CONNECT("connect"),                                     //连接
     DISCONNECT("disconnect"),                               //断开连接
+    GET_HARDWARE_INFO("getHardwareInfo"),                     //获取设备硬件信息
     WRITE("write"),                                         //发送消息
     DEALLOC("dealloc"),
     UPDATE_DEVICE_FROM_SERVER("updateDeviceFromServer");//下载产品配置

@@ -281,28 +281,25 @@ public class HeytzXPGWifiSDKListener extends XPGWifiSDKListener {
             controlState = false;
             app.setCurrentDevice(d);
             heytzXPGWifiDeviceListener.setApp(app);
+            d.setListener(heytzXPGWifiDeviceListener);
             //判断这个设备的状态,
             if (!d.isConnected()) {
                 (d).login(uid, token);
-                d.setListener(heytzXPGWifiDeviceListener);
             } else {//如果设备已经登陆,直接控制.
-                if (app.getCallbackContext(Operation.CONTROL_DEVICE.getMethod()) != null) {
-//                cWrite(d, controlObject);
-                    JSONObject jsonsend = new JSONObject();
-                    //写入命令字段（所有产品一致）
-                    try {
-                        JSONObject arr = new JSONObject(app.getControlObject().toString());
-                        jsonsend.put("cmd", 1);
-                        jsonsend.put("entity0", arr);
-                    } catch (JSONException e) {
+                JSONObject jsonsend = new JSONObject();
+                //写入命令字段（所有产品一致）
+                try {
+                    JSONObject arr = new JSONObject(app.getControlObject().toString());
+                    jsonsend.put("cmd", 1);
+                    jsonsend.put("entity0", arr);
+                } catch (JSONException e) {
 
-                    }
+                } finally {
                     d.write(jsonsend.toString());
                     app.getCallbackContext(Operation.CONTROL_DEVICE.getMethod()).success();
                     app.removeCallbackContext(Operation.CONTROL_DEVICE.getMethod());
                 }
             }
-
         }
 
     }

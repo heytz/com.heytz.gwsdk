@@ -21,6 +21,7 @@ public class Gwsdk extends CordovaPlugin {
     private Context context;
     private HeytzApp app = new HeytzApp();
     private HeytzXPGWifiSDKListener wifiSDKListener = new HeytzXPGWifiSDKListener();
+    private HeytzXPGWifiDeviceListener heytzXPGWifiDeviceListener = new HeytzXPGWifiDeviceListener();
 
     @Override
     public void initialize(CordovaInterface cordova, CordovaWebView webView) {
@@ -53,6 +54,7 @@ public class Gwsdk extends CordovaPlugin {
 
         if (action.equals(Operation.SET_DEVICE_WIFI.getMethod())) {
             app.setCallbackContext(Operation.SET_DEVICE_WIFI.getMethod(), callbackContext);
+
             int timeout = args.getInt(3);
             this.setDeviceWifi(args.getString(1), args.getString(2), timeout);
             return true;
@@ -81,13 +83,15 @@ public class Gwsdk extends CordovaPlugin {
             }
             String softAPSSIDPrefix = args.getString(7);
             List<XPGWifiSDK.XPGWifiGAgentType> xpgWifiGAgentTypeList = new ArrayList<XPGWifiSDK.XPGWifiGAgentType>();
-            JSONArray productkeys = args.getJSONArray(8);
-
-            if (productkeys != null && productkeys.length() > 0) {
-                for (int i = 0; i < productkeys.length(); i++) {
-                    XPGWifiSDK.XPGWifiGAgentType xpgWifiGAgentType = HeytzXPGWifiGAgentType.getHeytzXPGWifiGAgentType(productkeys.getInt(i));
-                    if (xpgWifiGAgentType != null) {
-                        xpgWifiGAgentTypeList.add(xpgWifiGAgentType);
+            JSONArray productkeys = new JSONArray();
+            if (!args.isNull(8)) {
+                productkeys = args.getJSONArray(8);
+                if (productkeys != null && productkeys.length() > 0) {
+                    for (int i = 0; i < productkeys.length(); i++) {
+                        XPGWifiSDK.XPGWifiGAgentType xpgWifiGAgentType = HeytzXPGWifiGAgentType.getHeytzXPGWifiGAgentType(productkeys.getInt(i));
+                        if (xpgWifiGAgentType != null) {
+                            xpgWifiGAgentTypeList.add(xpgWifiGAgentType);
+                        }
                     }
                 }
             }
@@ -182,6 +186,13 @@ public class Gwsdk extends CordovaPlugin {
             this.disconnact(did);
             return true;
         }
+        if (action.equals(Operation.GET_HARDWARE_INFO.getMethod())) {
+            app.setCallbackContext(Operation.GET_HARDWARE_INFO.getMethod(), callbackContext);
+            String did = args.getString(0);
+            this.getHardwareInfo(did);
+            return true;
+        }
+
         if (action.equals(Operation.WRITE.getMethod())) {
             app.setCallbackContext(Operation.WRITE.getMethod(), callbackContext);
             String did = args.getString(0);
@@ -264,15 +275,18 @@ public class Gwsdk extends CordovaPlugin {
     private void connact(String did) {
         List<XPGWifiDevice> list = app.getDeviceList();
         boolean isExist = false;
-        for (XPGWifiDevice aList : list) {
-            if (aList.getDid().equals(did)) {
+        for (XPGWifiDevice xpgWifiDevice : list) {
+            if (xpgWifiDevice.getDid().equals(did)) {
                 isExist = true;
-                if (aList.isConnected()) {
-                    PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, HeytzUtil.deviceToJsonObject(aList, app.getUid()));
+                app.setCurrentDevice(xpgWifiDevice);
+                heytzXPGWifiDeviceListener.setApp(app);
+                xpgWifiDevice.setListener(heytzXPGWifiDeviceListener);
+                if (xpgWifiDevice.isConnected()) {
+                    PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, HeytzUtil.deviceToJsonObject(xpgWifiDevice, app.getUid()));
                     app.getCallbackContext(Operation.CONNECT.getMethod()).sendPluginResult(pluginResult);
                     app.removeCallbackContext(Operation.CONNECT.getMethod());
                 } else {
-                    aList.login(app.getUid(), app.getToken());
+                    xpgWifiDevice.login(app.getUid(), app.getToken());
                 }
             }
         }
@@ -307,6 +321,24 @@ public class Gwsdk extends CordovaPlugin {
             PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR, "This device does not exist!");
             app.getCallbackContext(Operation.DISCONNECT.getMethod()).sendPluginResult(pluginResult);
             app.removeCallbackContext(Operation.DISCONNECT.getMethod());
+        }
+    }
+    private void getHardwareInfo(String did) {
+        List<XPGWifiDevice> list = app.getDeviceList();
+        boolean isExist = false;
+        for (XPGWifiDevice xpgWifiDevice : list) {
+            if (xpgWifiDevice.getDid().equals(did)) {
+                isExist = true;
+                app.setCurrentDevice(xpgWifiDevice);
+                heytzXPGWifiDeviceListener.setApp(app);
+                xpgWifiDevice.setListener(heytzXPGWifiDeviceListener);
+                xpgWifiDevice.getHardwareInfo();
+            }
+        }
+        if (!isExist) {
+            PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR, "This device does not exist!");
+            app.getCallbackContext(Operation.GET_HARDWARE_INFO.getMethod()).sendPluginResult(pluginResult);
+            app.removeCallbackContext(Operation.GET_HARDWARE_INFO.getMethod());
         }
     }
 
