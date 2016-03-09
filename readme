@@ -20,3 +20,5 @@ version 0.4.3
     date: 2016.2.19 15:50
     sha-1:  9c203b11bb2c6a9d9a1408a05b02235dc0408c42
   1.setDevicewifi添加timeout字段.
+version 0.5.1
+    date: 2016.3.9 12:42
