@@ -22,3 +22,6 @@ version 0.4.3
   1.setDevicewifi添加timeout字段.
 version 0.5.1
     date: 2016.3.9 12:42
+
+   1.添加android 和ios 小循环接口
+   2.优化android 代码
