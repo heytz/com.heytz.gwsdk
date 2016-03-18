@@ -20,13 +20,11 @@ public enum HeytzXPGWifiGAgentType {
 
     private XPGWifiSDK.XPGWifiGAgentType value;
 
-    private HeytzXPGWifiGAgentType(int key) {
+    private HeytzXPGWifiGAgentType(int key, XPGWifiSDK.XPGWifiGAgentType xpgWifiGAgentType) {
         this.key = key;
+        this.value=xpgWifiGAgentType;
     }
 
-    HeytzXPGWifiGAgentType(int i, XPGWifiSDK.XPGWifiGAgentType xpgWifiGAgentTypeBL) {
-
-    }
     public static XPGWifiSDK.XPGWifiGAgentType getHeytzXPGWifiGAgentType(int i) {
         for (HeytzXPGWifiGAgentType o : HeytzXPGWifiGAgentType.values()) {
             if (o.key == i) {
