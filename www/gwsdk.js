@@ -54,7 +54,7 @@ exports.setDeviceWifiBindDevice = function (productKey, wifiSSID, wifiKey, uid, 
         timeout ? timeout : 60,
         mode ? mode : XPGConfigureMode.XPGWifiSDKAirLinkMode,
         softAPSSIDPrefix ? softAPSSIDPrefix : null,
-        wifiGAgentType ? softAPSSIDPrefix : null
+        wifiGAgentType ? wifiGAgentType : null
     ]);
 };
 /**
