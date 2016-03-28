@@ -254,13 +254,8 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
             selectedDevices=device;
             selectedDevices.delegate=self;
             isExist=true;
-            if (device.productKey.length>0) {
-                [XPGWifiSDK updateDeviceFromServer:device.productKey];
-            }
-
             //判断是否是登陆状态，如果是的话就直接返回成功。
             if (selectedDevices.isConnected==YES) {
-                [selectedDevices getHardwareInfo];
                CDVPluginResult  *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[GwsdkUtils deviceToDictionary:selectedDevices uid:_uid]];
                  [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
             }else{
@@ -555,9 +550,9 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
                 }
                 break;
             case GetDevcieListCode:
-                _deviceList=deviceList;
 //                if ([self hasDone:deviceList]) {
                     if (deviceList.count > 0) {
+                         _deviceList=deviceList;
                         NSMutableArray *jsonArray = [[NSMutableArray alloc] init];
                         for (XPGWifiDevice *device in deviceList){
                             //设备的物理地址。如果是 VIRTUAL:SITE，则是虚拟设备
