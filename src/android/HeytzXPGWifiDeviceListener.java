@@ -121,19 +121,19 @@ public class HeytzXPGWifiDeviceListener extends XPGWifiDeviceListener {
             }
 
             if (app.getCallbackContext(Operation.WRITE.getMethod()) != null) {
-                JSONObject data = (JSONObject) dataMap.get("data");
-                if (dataMap.get("data") != null && data.has("cmd") != false) {
-                    try {
-                        if (data.getInt("cmd") == 1) {
-                            app.getCallbackContext(Operation.WRITE.getMethod()).success();
-                            app.removeCallbackContext(Operation.WRITE.getMethod());
-                        }
-                    } catch (JSONException e) {
-                        PluginResult pr = new PluginResult(PluginResult.Status.ERROR, result);
-                        app.getCallbackContext(Operation.WRITE.getMethod()).sendPluginResult(pr);
-                        app.removeCallbackContext(Operation.WRITE.getMethod());
-                    }
-                }
+//                JSONObject data = (JSONObject) dataMap.get("data");
+//                if (dataMap.get("data") != null && data.has("cmd") != false) {
+//                    try {
+//                        if (data.getInt("cmd") == 1) {
+//                            app.getCallbackContext(Operation.WRITE.getMethod()).success();
+//                            app.removeCallbackContext(Operation.WRITE.getMethod());
+//                        }
+//                    } catch (JSONException e) {
+//                        PluginResult pr = new PluginResult(PluginResult.Status.ERROR, result);
+//                        app.getCallbackContext(Operation.WRITE.getMethod()).sendPluginResult(pr);
+//                        app.removeCallbackContext(Operation.WRITE.getMethod());
+//                    }
+//                }
             }
         } else if (result == XPGWifiErrorCode.XPGWifiError_RAW_DATA_TRANSMIT) { // 设备上报的数据内容，result为－48时返回透传数据，binary有值；
             //二进制数据点类型，适合开发者自行解析二进制数据
