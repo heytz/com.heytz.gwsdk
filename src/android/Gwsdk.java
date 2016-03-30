@@ -1,6 +1,7 @@
 package com.heytz.gwsdk;
 
 import android.content.Context;
+import android.os.Handler;
 import com.xtremeprog.xpgconnect.XPGWifiDevice;
 import com.xtremeprog.xpgconnect.XPGWifiSDK;
 import com.xtremeprog.xpgconnect.XPGWifiSDK.XPGWifiConfigureMode;
@@ -11,6 +12,8 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 
 /**
@@ -22,6 +25,8 @@ public class Gwsdk extends CordovaPlugin {
     private HeytzApp app = new HeytzApp();
     private HeytzXPGWifiSDKListener wifiSDKListener = new HeytzXPGWifiSDKListener();
     private HeytzXPGWifiDeviceListener heytzXPGWifiDeviceListener = new HeytzXPGWifiDeviceListener();
+    private Handler handler = new Handler();
+    private Timer timer = new Timer(true);
 
     @Override
     public void initialize(CordovaInterface cordova, CordovaWebView webView) {
@@ -36,6 +41,7 @@ public class Gwsdk extends CordovaPlugin {
         // set listener
         XPGWifiSDK.sharedInstance().setListener(wifiSDKListener);
         wifiSDKListener.setApp(app);
+
     }
 
     /**
@@ -144,6 +150,20 @@ public class Gwsdk extends CordovaPlugin {
             this.getDeviceList(args.getString(1), args.getString(2), products);
             return true;
         }
+        ///{products,uid,token,timeInterval}
+        if (action.equals(Operation.START_GET_DEVICE_LIST.getMethod())) {
+            app.setCallbackContext(Operation.START_GET_DEVICE_LIST.getMethod(), callbackContext);
+            List<String> products = new ArrayList<String>();
+            for (int i = 0; i < args.getJSONArray(0).length(); i++) {
+                products.add(args.getJSONArray(0).get(i).toString());
+            }
+            app.seProductKeys(products);
+            app.setUid(args.getString(1));
+            app.setToken(args.getString(2));
+            this.startGetDeviceList(args.getString(1), args.getString(2), products, args.getInt(3));
+            return true;
+        }
+
         if (action.equals(Operation.CONTROL_DEVICE.getMethod())) {
             wifiSDKListener.setControlState(true);
             app.setCallbackContext(Operation.CONTROL_DEVICE.getMethod(), callbackContext);
@@ -264,8 +284,49 @@ public class Gwsdk extends CordovaPlugin {
      * @param productKey
      */
     private void getDeviceList(String uid, String token, List<String> productKey) {
+
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                XPGWifiSDK.sharedInstance().getBoundDevices(app.getUid(), app.getToken(), app.getProductKeys());
+                handler.postDelayed(this, 2000);
+            }
+        };
+        handler.postDelayed(runnable, 2000);//每两秒执行一次runnable
+
         XPGWifiSDK.sharedInstance().getBoundDevices(uid, token, productKey);
     }
+
+    /**
+     * 方法 获取设备列表
+     *
+     * @param uid
+     * @param token
+     * @param productKey
+     */
+    private void startGetDeviceList(String uid, String token, List<String> productKey, final int interval) {
+
+//        Runnable runnable = new Runnable() {
+//            @Override
+//            public void run() {
+//                XPGWifiSDK.sharedInstance().getBoundDevices(app.getUid(), app.getToken(), app.getProductKeys());
+//                handler.postDelayed(this, interval);
+//            }
+//        };
+//        if (interval > 0) {
+//            handler.postDelayed(runnable, interval);//每interval执行一次runnable
+//        }
+        timer.schedule(task, interval);
+//        while (true) {
+//            XPGWifiSDK.sharedInstance().getBoundDevices(app.getUid(), app.getToken(), app.getProductKeys());
+//        }
+//        XPGWifiSDK.sharedInstance().getBoundDevices(uid, token, productKey);
+    }
+    private TimerTask task = new TimerTask() {
+        public void run() {
+            XPGWifiSDK.sharedInstance().getBoundDevices(app.getUid(), app.getToken(), app.getProductKeys());
+        }
+    };
 
     /**
      * 方法 连接设备
@@ -369,17 +430,17 @@ public class Gwsdk extends CordovaPlugin {
                         app.removeCallbackContext(Operation.WRITE.getMethod());
                     } catch (JSONException e) {
                         PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR, "Field error");
-                        HeytzUtil.sendAndRemoveCallback(app,Operation.WRITE.getMethod(),pluginResult);
+                        HeytzUtil.sendAndRemoveCallback(app, Operation.WRITE.getMethod(), pluginResult);
                     }
                 } else {
                     PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR, "The device is not connected!");
-                    HeytzUtil.sendAndRemoveCallback(app,Operation.WRITE.getMethod(),pluginResult);
+                    HeytzUtil.sendAndRemoveCallback(app, Operation.WRITE.getMethod(), pluginResult);
                 }
             }
         }
         if (!isExist) {
             PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR, "This device does not exist!");
-            HeytzUtil.sendAndRemoveCallback(app,Operation.WRITE.getMethod(),pluginResult);
+            HeytzUtil.sendAndRemoveCallback(app, Operation.WRITE.getMethod(), pluginResult);
         }
     }
 

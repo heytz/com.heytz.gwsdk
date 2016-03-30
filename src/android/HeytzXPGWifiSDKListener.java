@@ -117,6 +117,17 @@ public class HeytzXPGWifiSDKListener extends XPGWifiSDKListener {
                     app.getCallbackContext(Operation.GET_DEVICE_LIST.getMethod()).sendPluginResult(pr);
                 }
             }
+            if (app.getCallbackContext(Operation.START_GET_DEVICE_LIST.getMethod()) != null) {
+                if (devicesList.size() > 0) {
+                    JSONArray cdvResult = new JSONArray();
+                    for (int i = 0; i < devicesList.size(); i++) {
+                        cdvResult.put(HeytzUtil.deviceToJsonObject(devicesList.get(i), app.getUid()));
+                    }
+                    PluginResult pr = new PluginResult(PluginResult.Status.OK, cdvResult);
+                    pr.setKeepCallback(true);
+                    app.getCallbackContext(Operation.START_GET_DEVICE_LIST.getMethod()).sendPluginResult(pr);
+                }
+            }
             if (app.getCallbackContext(Operation.CONTROL_DEVICE.getMethod()) != null) {
                 Log.d(HeytzApp.TAG, "deviceLoing()");
                 deviceLogin(app.getUid(), app.getToken(), currentDeviceMac);

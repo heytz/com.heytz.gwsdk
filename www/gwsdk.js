@@ -65,6 +65,9 @@ exports.setDeviceWifiBindDevice = function (productKey, wifiSSID, wifiKey, uid, 
 exports.getDeviceList = function (productKey, uid, token, success, error) {
     exec(success, error, "gwsdk", "getDeviceList", [productToArray(productKey), uid, token]);
 };
+exports.startGetDeviceList = function (productKey, uid, token,interval,success, error) {
+    exec(success, error, "gwsdk", "startGetDeviceList", [productToArray(productKey), uid, token,interval]);
+};
 /**
  *  cordova 绑定设备
  *

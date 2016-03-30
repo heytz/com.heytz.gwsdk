@@ -7,6 +7,8 @@ public enum Operation {
     SET_DEVICE_WIFI("setDeviceWifi"),                       //只配对设备
     SET_DEVICE_WIFI_AND_BIND("setDeviceWifiBindDevice"),    //配对设备并且绑定设备
     GET_DEVICE_LIST("getDeviceList"),                       //发现列表
+    START_GET_DEVICE_LIST("startGetDeviceList"),            //开始发现列表
+    STOP_GET_DEVICE_LIST("stopGetDeviceList"),              //结束发现列表
     DEVICE_BINDING("deviceBinding"),                        //绑定设备
     UNBIND_DEVICE("unbindDevice"),                          //解绑设备
     CONTROL_DEVICE("deviceControl"),                        //控制设备
