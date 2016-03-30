@@ -40,8 +40,7 @@ public class HeytzXPGWifiSDKListener extends XPGWifiSDKListener {
                 //如果存在did那么就直接返回成功,现在测试只会返回一次
                 if (currentDeviceMac == null && device.getDid().length() > 0) {
                     PluginResult pr = new PluginResult(PluginResult.Status.OK, HeytzUtil.deviceToJsonObject(device, app.getUid()));
-                    app.getCallbackContext(Operation.SET_DEVICE_WIFI.getMethod()).sendPluginResult(pr);
-                    app.removeCallbackContext(Operation.SET_DEVICE_WIFI.getMethod());
+                    HeytzUtil.sendAndRemoveCallback(app, Operation.SET_DEVICE_WIFI.getMethod(), pr);
                 } else {//否则获取配对到的设备地址,去didDiscovered 等待设备did的信息
                     app.setMac(device.getMacAddress());
                 }
@@ -58,14 +57,8 @@ public class HeytzXPGWifiSDKListener extends XPGWifiSDKListener {
         } else {
             //  error:-21 超时
             PluginResult pr = new PluginResult(PluginResult.Status.ERROR, error);
-            if (app.getCallbackContext(Operation.SET_DEVICE_WIFI.getMethod()) != null) {
-                app.getCallbackContext(Operation.SET_DEVICE_WIFI.getMethod()).sendPluginResult(pr);
-                app.removeCallbackContext(Operation.SET_DEVICE_WIFI.getMethod());
-            }
-            if (app.getCallbackContext(Operation.SET_DEVICE_WIFI_AND_BIND.getMethod()) != null) {
-                app.getCallbackContext(Operation.SET_DEVICE_WIFI_AND_BIND.getMethod()).sendPluginResult(pr);
-                app.removeCallbackContext(Operation.SET_DEVICE_WIFI_AND_BIND.getMethod());
-            }
+            HeytzUtil.sendAndRemoveCallback(app, Operation.SET_DEVICE_WIFI.getMethod(), pr);
+            HeytzUtil.sendAndRemoveCallback(app, Operation.SET_DEVICE_WIFI_AND_BIND.getMethod(), pr);
         }
     }
 
@@ -89,8 +82,7 @@ public class HeytzXPGWifiSDKListener extends XPGWifiSDKListener {
                             //清空内存中的Mac
                             app.setMac(null);
                             PluginResult pr = new PluginResult(PluginResult.Status.OK, HeytzUtil.deviceToJsonObject(devicesList.get(i), app.getUid()));
-                            app.getCallbackContext(Operation.SET_DEVICE_WIFI.getMethod()).sendPluginResult(pr);
-                            app.removeCallbackContext(Operation.SET_DEVICE_WIFI.getMethod());
+                            HeytzUtil.sendAndRemoveCallback(app, Operation.SET_DEVICE_WIFI.getMethod(), pr);
                         }
                     } else {
                         if (HeytzApp.DEBUG)
@@ -116,7 +108,6 @@ public class HeytzXPGWifiSDKListener extends XPGWifiSDKListener {
             }
             if (app.getCallbackContext(Operation.GET_DEVICE_LIST.getMethod()) != null) {
                 if (devicesList.size() > 0) {
-//                    if (app.hasDone(devicesList)) {
                     JSONArray cdvResult = new JSONArray();
                     for (int i = 0; i < devicesList.size(); i++) {
                         cdvResult.put(HeytzUtil.deviceToJsonObject(devicesList.get(i), app.getUid()));
@@ -124,7 +115,6 @@ public class HeytzXPGWifiSDKListener extends XPGWifiSDKListener {
                     PluginResult pr = new PluginResult(PluginResult.Status.OK, cdvResult);
                     pr.setKeepCallback(true);
                     app.getCallbackContext(Operation.GET_DEVICE_LIST.getMethod()).sendPluginResult(pr);
-//                    }
                 }
             }
             if (app.getCallbackContext(Operation.CONTROL_DEVICE.getMethod()) != null) {
@@ -148,16 +138,15 @@ public class HeytzXPGWifiSDKListener extends XPGWifiSDKListener {
             if (app.getCallbackContext(Operation.SET_DEVICE_WIFI_AND_BIND.getMethod()) != null) {
                 //绑定设备成功，登录设备进行控制
                 PluginResult pr = new PluginResult(PluginResult.Status.OK, HeytzUtil.deviceToJsonObject(app.getCurrentDevice(), app.getUid()));
-                app.getCallbackContext(Operation.SET_DEVICE_WIFI_AND_BIND.getMethod()).sendPluginResult(pr);
-                app.removeCallbackContext(Operation.SET_DEVICE_WIFI_AND_BIND.getMethod());
+                HeytzUtil.sendAndRemoveCallback(app, Operation.SET_DEVICE_WIFI_AND_BIND.getMethod(), pr);
+
                 //清空内存中的Mac
                 app.setMac(null);
                 app.setCurrentDevice(null);
             }
             if (app.getCallbackContext(Operation.DEVICE_BINDING.getMethod()) != null) {
                 PluginResult pr = new PluginResult(PluginResult.Status.OK, did);
-                app.getCallbackContext(Operation.DEVICE_BINDING.getMethod()).sendPluginResult(pr);
-                app.removeCallbackContext(Operation.DEVICE_BINDING.getMethod());
+                HeytzUtil.sendAndRemoveCallback(app, Operation.DEVICE_BINDING.getMethod(), pr);
             }
         } else {
             Log.e("\n===binding error===\n", errorMessage);
@@ -171,14 +160,12 @@ public class HeytzXPGWifiSDKListener extends XPGWifiSDKListener {
                     app.setCurrentDevice(null);
                     //绑定设备失败，弹出错误信息
                     PluginResult pr = new PluginResult(PluginResult.Status.ERROR, errorMessage);
-                    app.getCallbackContext(Operation.SET_DEVICE_WIFI_AND_BIND.getMethod()).sendPluginResult(pr);
-                    app.removeCallbackContext(Operation.SET_DEVICE_WIFI_AND_BIND.getMethod());
+                    HeytzUtil.sendAndRemoveCallback(app, Operation.SET_DEVICE_WIFI_AND_BIND.getMethod(), pr);
                 }
             }
             if (app.getCallbackContext(Operation.DEVICE_BINDING.getMethod()) != null) {
                 PluginResult pr = new PluginResult(PluginResult.Status.ERROR, errorMessage);
-                app.getCallbackContext(Operation.DEVICE_BINDING.getMethod()).sendPluginResult(pr);
-                app.removeCallbackContext(Operation.DEVICE_BINDING.getMethod());
+                HeytzUtil.sendAndRemoveCallback(app, Operation.DEVICE_BINDING.getMethod(), pr);
             }
         }
 
@@ -197,15 +184,13 @@ public class HeytzXPGWifiSDKListener extends XPGWifiSDKListener {
             if (app.getCallbackContext(Operation.UNBIND_DEVICE.getMethod()) != null) {
                 //解除绑定设备成功，返回设备列表
                 PluginResult pr = new PluginResult(PluginResult.Status.OK, did);
-                app.getCallbackContext(Operation.UNBIND_DEVICE.getMethod()).sendPluginResult(pr);
-                app.removeCallbackContext(Operation.UNBIND_DEVICE.getMethod());
+                HeytzUtil.sendAndRemoveCallback(app, Operation.UNBIND_DEVICE.getMethod(), pr);
             }
         } else {
             if (app.getCallbackContext(Operation.UNBIND_DEVICE.getMethod()) != null) {
                 //解除绑定设备失败，弹出错误信息
                 PluginResult pr = new PluginResult(PluginResult.Status.ERROR, errorMessage);
-                app.getCallbackContext(Operation.UNBIND_DEVICE.getMethod()).sendPluginResult(pr);
-                app.removeCallbackContext(Operation.UNBIND_DEVICE.getMethod());
+                HeytzUtil.sendAndRemoveCallback(app, Operation.UNBIND_DEVICE.getMethod(), pr);
             }
         }
     }
@@ -225,14 +210,12 @@ public class HeytzXPGWifiSDKListener extends XPGWifiSDKListener {
                     jsonArray.put(ssidInfoList.get(i));
                 }
                 PluginResult pr = new PluginResult(PluginResult.Status.OK, jsonArray);
-                app.getCallbackContext(Operation.GET_WIFI_SSID_LIST.getMethod()).sendPluginResult(pr);
-                app.removeCallbackContext(Operation.GET_WIFI_SSID_LIST.getMethod());
+                HeytzUtil.sendAndRemoveCallback(app, Operation.GET_WIFI_SSID_LIST.getMethod(), pr);
             }
         } else {
             if (app.getCallbackContext(Operation.GET_WIFI_SSID_LIST.getMethod()) != null) {
                 PluginResult pr = new PluginResult(PluginResult.Status.ERROR, error);
-                app.getCallbackContext(Operation.GET_WIFI_SSID_LIST.getMethod()).sendPluginResult(pr);
-                app.removeCallbackContext(Operation.GET_WIFI_SSID_LIST.getMethod());
+                HeytzUtil.sendAndRemoveCallback(app, Operation.GET_WIFI_SSID_LIST.getMethod(), pr);
             }
         }
 

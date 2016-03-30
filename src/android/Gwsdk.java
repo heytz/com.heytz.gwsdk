@@ -323,6 +323,7 @@ public class Gwsdk extends CordovaPlugin {
             app.removeCallbackContext(Operation.DISCONNECT.getMethod());
         }
     }
+
     private void getHardwareInfo(String did) {
         List<XPGWifiDevice> list = app.getDeviceList();
         boolean isExist = false;
@@ -355,31 +356,30 @@ public class Gwsdk extends CordovaPlugin {
             if (xpgWifiDevice.getDid().equals(did)) {
                 isExist = true;
                 if (xpgWifiDevice.isConnected()) {
-                    JSONObject jsonsend = new JSONObject();
                     //写入命令字段（所有产品一致）
                     try {
+                        JSONObject jsonsend = new JSONObject();
                         jsonsend.put("cmd", 1);
                         jsonsend.put("entity0", jsonObject);
+                        app.setCurrentDevice(xpgWifiDevice);
+                        heytzXPGWifiDeviceListener.setApp(app);
+                        xpgWifiDevice.setListener(heytzXPGWifiDeviceListener);
+                        xpgWifiDevice.write(jsonsend.toString());
+                        app.getCallbackContext(Operation.WRITE.getMethod()).success();
+                        app.removeCallbackContext(Operation.WRITE.getMethod());
                     } catch (JSONException e) {
                         PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR, "Field error");
-                        app.getCallbackContext(Operation.WRITE.getMethod()).sendPluginResult(pluginResult);
-                        app.removeCallbackContext(Operation.WRITE.getMethod());
+                        HeytzUtil.sendAndRemoveCallback(app,Operation.WRITE.getMethod(),pluginResult);
                     }
-                    app.setCurrentDevice(xpgWifiDevice);
-                    heytzXPGWifiDeviceListener.setApp(app);
-                    xpgWifiDevice.setListener(heytzXPGWifiDeviceListener);
-                    xpgWifiDevice.write(jsonsend.toString());
                 } else {
                     PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR, "The device is not connected!");
-                    app.getCallbackContext(Operation.WRITE.getMethod()).sendPluginResult(pluginResult);
-                    app.removeCallbackContext(Operation.WRITE.getMethod());
+                    HeytzUtil.sendAndRemoveCallback(app,Operation.WRITE.getMethod(),pluginResult);
                 }
             }
         }
         if (!isExist) {
             PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR, "This device does not exist!");
-            app.getCallbackContext(Operation.WRITE.getMethod()).sendPluginResult(pluginResult);
-            app.removeCallbackContext(Operation.WRITE.getMethod());
+            HeytzUtil.sendAndRemoveCallback(app,Operation.WRITE.getMethod(),pluginResult);
         }
     }
 

@@ -4,6 +4,7 @@ import android.util.Base64;
 import android.util.Log;
 import com.xtremeprog.xpgconnect.XPGWifiDevice;
 import org.apache.cordova.CallbackContext;
+import org.apache.cordova.PluginResult;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -117,4 +118,10 @@ public class HeytzUtil {
         }
     }
 
+    public static void sendAndRemoveCallback(HeytzApp app, String operation, PluginResult pr) {
+        if (app.getCallbackContext(operation) != null) {
+            app.getCallbackContext(operation).sendPluginResult(pr);
+            app.removeCallbackContext(operation);
+        }
+    }
 }

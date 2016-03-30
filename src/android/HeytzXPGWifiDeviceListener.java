@@ -17,37 +17,33 @@ public class HeytzXPGWifiDeviceListener extends XPGWifiDeviceListener {
     @Override
     public void didLogin(XPGWifiDevice device, int result) {
         if (result == XPGWifiErrorCode.XPGWifiError_NONE) {
-            //cWrite(device, controlObject);
             if (app.getCallbackContext(Operation.CONTROL_DEVICE.getMethod()) != null) {
-//                cWrite(d, controlObject);
-                JSONObject jsonsend = new JSONObject();
                 //写入命令字段（所有产品一致）
                 try {
+                    JSONObject jsonsend = new JSONObject();
                     JSONObject arr = new JSONObject(app.getControlObject().toString());
                     jsonsend.put("cmd", 1);
                     jsonsend.put("entity0", arr);
+                    app.getCurrentDevice().write(jsonsend.toString());
+                    app.getCallbackContext(Operation.CONTROL_DEVICE.getMethod()).success();
+                    app.removeCallbackContext(Operation.CONTROL_DEVICE.getMethod());
                 } catch (JSONException e) {
-
+                    app.getCallbackContext(Operation.CONTROL_DEVICE.getMethod()).error(e.getMessage());
+                    app.removeCallbackContext(Operation.CONTROL_DEVICE.getMethod());
                 }
-                app.getCurrentDevice().write(jsonsend.toString());
-                app.getCallbackContext(Operation.CONTROL_DEVICE.getMethod()).success();
-                app.removeCallbackContext(Operation.CONTROL_DEVICE.getMethod());
             }
             if (app.getCallbackContext(Operation.CONNECT.getMethod()) != null) {
                 PluginResult pr = new PluginResult(PluginResult.Status.OK, HeytzUtil.deviceToJsonObject(device, app.getUid()));
-                app.getCallbackContext(Operation.CONNECT.getMethod()).sendPluginResult(pr);
-                app.removeCallbackContext(Operation.CONNECT.getMethod());
+                HeytzUtil.sendAndRemoveCallback(app, Operation.CONNECT.getMethod(), pr);
             }
         } else {
             if (app.getCallbackContext(Operation.CONTROL_DEVICE.getMethod()) != null) {
                 PluginResult pr = new PluginResult(PluginResult.Status.ERROR, result);
-                app.getCallbackContext(Operation.CONTROL_DEVICE.getMethod()).sendPluginResult(pr);
-                app.removeCallbackContext(Operation.CONTROL_DEVICE.getMethod());
+                HeytzUtil.sendAndRemoveCallback(app, Operation.CONTROL_DEVICE.getMethod(), pr);
             }
             if (app.getCallbackContext(Operation.CONNECT.getMethod()) != null) {
                 PluginResult pr = new PluginResult(PluginResult.Status.ERROR, result);
-                app.getCallbackContext(Operation.CONNECT.getMethod()).sendPluginResult(pr);
-                app.removeCallbackContext(Operation.CONNECT.getMethod());
+                HeytzUtil.sendAndRemoveCallback(app, Operation.CONNECT.getMethod(), pr);
             }
         }
     }
@@ -65,14 +61,12 @@ public class HeytzXPGWifiDeviceListener extends XPGWifiDeviceListener {
         if (result == XPGWifiErrorCode.XPGWifiError_NONE) {
             if (app.getCallbackContext(Operation.DISCONNECT.getMethod()) != null) {
                 PluginResult pr = new PluginResult(PluginResult.Status.OK, device.getDid());
-                app.getCallbackContext(Operation.DISCONNECT.getMethod()).sendPluginResult(pr);
-                app.removeCallbackContext(Operation.DISCONNECT.getMethod());
+                HeytzUtil.sendAndRemoveCallback(app, Operation.DISCONNECT.getMethod(), pr);
             }
         } else {
             if (app.getCallbackContext(Operation.DISCONNECT.getMethod()) != null) {
                 PluginResult pr = new PluginResult(PluginResult.Status.ERROR, result);
-                app.getCallbackContext(Operation.DISCONNECT.getMethod()).sendPluginResult(pr);
-                app.removeCallbackContext(Operation.DISCONNECT.getMethod());
+                HeytzUtil.sendAndRemoveCallback(app, Operation.DISCONNECT.getMethod(), pr);
             }
         }
     }
@@ -97,8 +91,8 @@ public class HeytzXPGWifiDeviceListener extends XPGWifiDeviceListener {
                 Log.i("info", (String) dataMap.get("faults"));
             }
             if (app.getCallbackContext(Operation.START_DEVICE_LISTENER.getMethod()) != null) {
-                JSONObject jsonObject = new JSONObject();
                 try {
+                    JSONObject jsonObject = new JSONObject();
                     if (dataMap.get("data") != null) {
                         JSONObject dataJson = new JSONObject(dataMap.get("data").toString());
                         jsonObject.put("data", dataJson);
@@ -112,45 +106,49 @@ public class HeytzXPGWifiDeviceListener extends XPGWifiDeviceListener {
                         jsonObject.put("faults", faultsJson);
                     }
                     jsonObject.put("did", device.getDid());
-                } catch (JSONException e) {
-                } finally {
                     PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, jsonObject);
+                    pluginResult.setKeepCallback(true);
+                    app.getCallbackContext(Operation.START_DEVICE_LISTENER.getMethod()).sendPluginResult(pluginResult);
+                } catch (JSONException e) {
+                    PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, e.getMessage());
                     pluginResult.setKeepCallback(true);
                     app.getCallbackContext(Operation.START_DEVICE_LISTENER.getMethod()).sendPluginResult(pluginResult);
                 }
             }
 
             if (app.getCallbackContext(Operation.WRITE.getMethod()) != null) {
-//                JSONObject data = (JSONObject) dataMap.get("data");
-//                if (dataMap.get("data") != null && data.has("cmd") != false) {
-//                    try {
-//                        if (data.getInt("cmd") == 1) {
-//                            app.getCallbackContext(Operation.WRITE.getMethod()).success();
-//                            app.removeCallbackContext(Operation.WRITE.getMethod());
-//                        }
-//                    } catch (JSONException e) {
-//                        PluginResult pr = new PluginResult(PluginResult.Status.ERROR, result);
-//                        app.getCallbackContext(Operation.WRITE.getMethod()).sendPluginResult(pr);
-//                        app.removeCallbackContext(Operation.WRITE.getMethod());
-//                    }
-//                }
+                if (dataMap.get("data") != null) {
+                    try {
+                        JSONObject data = new JSONObject(dataMap.get("data").toString());
+                        if (data.has("cmd")) {
+                            if (data.getInt("cmd") == 1) {
+                                app.getCallbackContext(Operation.WRITE.getMethod()).success();
+                                app.removeCallbackContext(Operation.WRITE.getMethod());
+                            }
+                        }
+                    } catch (JSONException e) {
+                        PluginResult pr = new PluginResult(PluginResult.Status.ERROR, e.getMessage());
+                        HeytzUtil.sendAndRemoveCallback(app, Operation.WRITE.getMethod(), pr);
+                    }
+                }
             }
         } else if (result == XPGWifiErrorCode.XPGWifiError_RAW_DATA_TRANSMIT) { // 设备上报的数据内容，result为－48时返回透传数据，binary有值；
             //二进制数据点类型，适合开发者自行解析二进制数据
             if (dataMap.get("binary") != null) {
                 Log.i("info", "Binary data:");
-                //收到后自行解析
             }
             if (app.getCallbackContext(Operation.START_DEVICE_LISTENER.getMethod()) != null) {
-                JSONObject jsonObject = new JSONObject();
                 try {
+                    JSONObject jsonObject = new JSONObject();
                     if (dataMap.get("binary") != null) {
                         JSONObject faultsJson = new JSONObject(dataMap.get("binary").toString());
                         jsonObject.put("binary", faultsJson);
                     }
-                } catch (JSONException e) {
-                } finally {
                     PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, jsonObject);
+                    pluginResult.setKeepCallback(true);
+                    app.getCallbackContext(Operation.START_DEVICE_LISTENER.getMethod()).sendPluginResult(pluginResult);
+                } catch (JSONException e) {
+                    PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR, e.getMessage());
                     pluginResult.setKeepCallback(true);
                     app.getCallbackContext(Operation.START_DEVICE_LISTENER.getMethod()).sendPluginResult(pluginResult);
                 }
@@ -158,8 +156,7 @@ public class HeytzXPGWifiDeviceListener extends XPGWifiDeviceListener {
         } else {
             if (app.getCallbackContext(Operation.WRITE.getMethod()) != null) {
                 PluginResult pr = new PluginResult(PluginResult.Status.ERROR, result);
-                app.getCallbackContext(Operation.WRITE.getMethod()).sendPluginResult(pr);
-                app.removeCallbackContext(Operation.WRITE.getMethod());
+                HeytzUtil.sendAndRemoveCallback(app, Operation.WRITE.getMethod(), pr);
             }
         }
     }
@@ -182,16 +179,16 @@ public class HeytzXPGWifiDeviceListener extends XPGWifiDeviceListener {
                     jsonObject.put("XPGWifiDeviceHardwareFirmwareVerKey", hardwareInfo.get("XPGWifiDeviceHardwareFirmwareVerKey"));
                     // 字符串类型，设备的Productkey
                     jsonObject.put("XPGWifiDeviceHardwareProductKey", hardwareInfo.get("XPGWifiDeviceHardwareProductKey"));
-                } catch (JSONException e) {
-                } finally {
                     PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, jsonObject);
-                    app.getCallbackContext(Operation.GET_HARDWARE_INFO.getMethod()).sendPluginResult(pluginResult);
-                    app.removeCallbackContext(Operation.GET_HARDWARE_INFO.getMethod());
+                    HeytzUtil.sendAndRemoveCallback(app, Operation.GET_HARDWARE_INFO.getMethod(), pluginResult);
+                } catch (JSONException e) {
+                    PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR, e.getMessage());
+                    HeytzUtil.sendAndRemoveCallback(app, Operation.GET_HARDWARE_INFO.getMethod(), pluginResult);
                 }
             } else {
                 PluginResult pr = new PluginResult(PluginResult.Status.ERROR, result);
-                app.getCallbackContext(Operation.GET_HARDWARE_INFO.getMethod()).sendPluginResult(pr);
-                app.removeCallbackContext(Operation.GET_HARDWARE_INFO.getMethod());
+                HeytzUtil.sendAndRemoveCallback(app, Operation.GET_HARDWARE_INFO.getMethod(), pr);
+
             }
         }
 
