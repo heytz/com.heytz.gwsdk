@@ -308,33 +308,34 @@ public class Gwsdk extends CordovaPlugin {
      * @param interval
      */
     private void startGetDeviceList(int interval) {
-
-        if (timer == null && interval > 0) {
-            timer = new Timer(true);
-            timer.schedule(getDeviceListTask, 0, interval);
+        if (timer == null) {
+            if (interval > 0) {
+                timer = new Timer(true);
+                timer.schedule(new TimerTask() {
+                    public void run() {
+                        XPGWifiSDK.sharedInstance().getBoundDevices(app.getUid(), app.getToken(), app.getProductKeys());
+                    }
+                }, 0, interval);
+            } else {
+                app.getCallbackContext(Operation.START_DEVICE_LISTENER.getMethod()).error("interval is zero!");
+                app.removeCallbackContext(Operation.START_DEVICE_LISTENER.getMethod());
+            }
         }
-        XPGWifiSDK.sharedInstance().getBoundDevices(app.getUid(), app.getToken(), app.getProductKeys());
     }
-
-    /**
-     * 获取设备列表的task
-     */
-    private TimerTask getDeviceListTask = new TimerTask() {
-        public void run() {
-            XPGWifiSDK.sharedInstance().getBoundDevices(app.getUid(), app.getToken(), app.getProductKeys());
-        }
-    };
-
     /**
      * 停止当前的定时器
      */
     private void stopGetDeviceList() {
         if (timer != null) {
             timer.cancel();
+            timer.purge();
             timer = null;
+            app.getCallbackContext(Operation.STOP_DEVICE_LISTENER.getMethod()).success();
+            app.removeCallbackContext(Operation.STOP_DEVICE_LISTENER.getMethod());
+        } else {
+            app.getCallbackContext(Operation.STOP_DEVICE_LISTENER.getMethod()).error("timer is null!");
+            app.removeCallbackContext(Operation.STOP_DEVICE_LISTENER.getMethod());
         }
-        app.getCallbackContext(Operation.STOP_DEVICE_LISTENER.getMethod()).success();
-        app.removeCallbackContext(Operation.STOP_DEVICE_LISTENER.getMethod());
     }
 
     /**
