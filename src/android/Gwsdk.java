@@ -26,7 +26,7 @@ public class Gwsdk extends CordovaPlugin {
     private HeytzXPGWifiSDKListener wifiSDKListener = new HeytzXPGWifiSDKListener();
     private HeytzXPGWifiDeviceListener heytzXPGWifiDeviceListener = new HeytzXPGWifiDeviceListener();
     private Handler handler = new Handler();
-    private Timer timer = new Timer(true);
+    private Timer timer;
 
     @Override
     public void initialize(CordovaInterface cordova, CordovaWebView webView) {
@@ -160,7 +160,12 @@ public class Gwsdk extends CordovaPlugin {
             app.seProductKeys(products);
             app.setUid(args.getString(1));
             app.setToken(args.getString(2));
-            this.startGetDeviceList(args.getString(1), args.getString(2), products, args.getInt(3));
+            this.startGetDeviceList(args.getInt(3));
+            return true;
+        }
+        if (action.equals(Operation.STOP_GET_DEVICE_LIST.getMethod())) {
+            app.setCallbackContext(Operation.STOP_GET_DEVICE_LIST.getMethod(), callbackContext);
+            this.stopGetDeviceList();
             return true;
         }
 
@@ -298,41 +303,46 @@ public class Gwsdk extends CordovaPlugin {
     }
 
     /**
-     * 方法 获取设备列表
+     * 根据间隔时间 请求列表
      *
-     * @param uid
-     * @param token
-     * @param productKey
+     * @param interval
      */
-    private void startGetDeviceList(String uid, String token, List<String> productKey, final int interval) {
+    private void startGetDeviceList(int interval) {
 
-//        Runnable runnable = new Runnable() {
-//            @Override
-//            public void run() {
-//                XPGWifiSDK.sharedInstance().getBoundDevices(app.getUid(), app.getToken(), app.getProductKeys());
-//                handler.postDelayed(this, interval);
-//            }
-//        };
-//        if (interval > 0) {
-//            handler.postDelayed(runnable, interval);//每interval执行一次runnable
-//        }
-        timer.schedule(task, interval);
-//        while (true) {
-//            XPGWifiSDK.sharedInstance().getBoundDevices(app.getUid(), app.getToken(), app.getProductKeys());
-//        }
-//        XPGWifiSDK.sharedInstance().getBoundDevices(uid, token, productKey);
+        if (timer == null && interval > 0) {
+            timer = new Timer(true);
+            timer.schedule(getDeviceListTask, 0, interval);
+        }
+        XPGWifiSDK.sharedInstance().getBoundDevices(app.getUid(), app.getToken(), app.getProductKeys());
     }
-    private TimerTask task = new TimerTask() {
+
+    /**
+     * 获取设备列表的task
+     */
+    private TimerTask getDeviceListTask = new TimerTask() {
         public void run() {
             XPGWifiSDK.sharedInstance().getBoundDevices(app.getUid(), app.getToken(), app.getProductKeys());
         }
     };
 
     /**
+     * 停止当前的定时器
+     */
+    private void stopGetDeviceList() {
+        if (timer != null) {
+            timer.cancel();
+            timer = null;
+        }
+        app.getCallbackContext(Operation.STOP_DEVICE_LISTENER.getMethod()).success();
+        app.removeCallbackContext(Operation.STOP_DEVICE_LISTENER.getMethod());
+    }
+
+    /**
      * 方法 连接设备
      *
      * @param did
      */
+
     private void connact(String did) {
         List<XPGWifiDevice> list = app.getDeviceList();
         boolean isExist = false;
