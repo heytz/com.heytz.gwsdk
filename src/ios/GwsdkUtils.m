@@ -63,7 +63,7 @@
  *
  *  @return [did,macAddress,passcode,productkey]
  */
--(NSDictionary *) deviceToDictionary:(XPGWifiDevice *)device uid:(NSString *)uid{
++ (NSDictionary *)deviceToDictionary:(XPGWifiDevice *)device uid:(NSString *)uid{
     //    NSDictionary *d = [NSDictionary dictionaryWithObjectsAndKeys:
     //                       device.did, @"did",
     //                       //device.ipAddress, @"ipAddress",
@@ -127,7 +127,7 @@
  *  @param map    tag
  *  @param device 设备device对象
  */
--(void) logDevice:(NSString *)map device:(XPGWifiDevice *)device{
++ (void)logDevice:(NSString *)map device:(XPGWifiDevice *)device{
     //设备的物理地址。如果是 VIRTUAL:SITE，则是虚拟设备
     NSString * mac = device.macAddress;
     //设备云端身份标识 DID

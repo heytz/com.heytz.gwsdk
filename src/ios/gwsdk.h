@@ -34,6 +34,8 @@
  *  @param command [appid,[productkey],uid,token]
  */
 -(void)getDeviceList:(CDVInvokedUrlCommand *)command;
+-(void)startGetDeviceList:(CDVInvokedUrlCommand *)command;
+-(void)stopGetDeviceList:(CDVInvokedUrlCommand *)command;
 /**
  *  cordova 绑定设备
  *

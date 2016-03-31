@@ -25,12 +25,12 @@
  *
  *  @return [did,macAddress,passcode,productkey]
  */
--(NSDictionary *) deviceToDictionary:(XPGWifiDevice *)device uid:(NSString *)uid;
++ (NSDictionary *)deviceToDictionary:(XPGWifiDevice *)device uid:(NSString *)uid;
 /**
  *  方法 打印device的log
  *
  *  @param map    tag
  *  @param device 设备device对象
  */
--(void) logDevice:(NSString *)map device:(XPGWifiDevice *)device;
++ (void)logDevice:(NSString *)map device:(XPGWifiDevice *)device;
 @end
