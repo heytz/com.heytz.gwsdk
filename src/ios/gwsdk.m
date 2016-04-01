@@ -190,6 +190,7 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
     NSLog(@"=======%@====",@"startScan");
     NSString *uid=[[timer userInfo] objectForKey:@"uid"];
      NSString *token=[[timer userInfo] objectForKey:@"token"];
+      [XPGWifiSDK sharedInstance].delegate = self;
     [[XPGWifiSDK sharedInstance] getBoundDevices:uid
                                            token:token
                               specialProductKeys:nil];
