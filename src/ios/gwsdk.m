@@ -361,7 +361,9 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
                 value=@{@"cmd":@1,@"entity0":value};
                 NSLog(@"Write data: %@", value);
                 [device write:value];
-                 writeCommandHolder=command;
+//                 writeCommandHolder=command;
+                CDVPluginResult  *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"success!"];
+                [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
             } else {
                 /**
                  *  设备没有连接
@@ -542,7 +544,8 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
                         //                                    [NSTimer scheduledTimerWithTimeInterval:3 target:self selector:@selector(deviceBingding:uid:token:passcode:remark:) userInfo:dict repeats:NO];
                         // 让主线程暂停3秒，因为需要等待服务器解绑已经绑定的设备。第二种方法，可能造成app卡顿 不再使用
                         //[NSThread sleepForTimeInterval:10.00f];
-                        [[XPGWifiSDK sharedInstance] bindDeviceWithUid:_uid token:_token did:device.did passCode:nil remark:nil];
+                          NSString *passcode=device.passcode;
+                        [[XPGWifiSDK sharedInstance] bindDeviceWithUid:_uid token:_token did:device.did passCode:passcode remark:nil];
 
                     }else{
                         _currentPairDeviceMacAddress=device.macAddress;
@@ -715,8 +718,9 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
                                 //                                [NSTimer scheduledTimerWithTimeInterval:3 target:self selector:@selector(deviceBingding:uid:token:passcode:remark:) userInfo:dict repeats:NO];
                                 //让主线程暂停3秒，因为需要等待服务器解绑已经绑定的设备。第二种方法，可能造成app卡顿 不再使用
                                 //[NSThread sleepForTimeInterval:10.00f];
-
-                                [[XPGWifiSDK sharedInstance] bindDeviceWithUid:_uid token:_token did:device.did passCode:nil remark:nil];
+                                //用于控制设备的密钥
+                                NSString *passcode=device.passcode;
+                                [[XPGWifiSDK sharedInstance] bindDeviceWithUid:_uid token:_token did:device.did passCode:passcode remark:nil];
                             }
                         }
                     }
@@ -805,16 +809,16 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
     NSString *did=device.did;
     NSLog(@"\n================didReceiveData=====================\n收到了:%d\n上报: %@\n===================end==================", result, data);
 
-    if (writeCommandHolder!=nil) {
-        if (result==0) {
-            CDVPluginResult  *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-            [self.commandDelegate sendPluginResult:pluginResult callbackId:writeCommandHolder.callbackId];
-        }else{
-            CDVPluginResult  *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsInt:result];
-            [self.commandDelegate sendPluginResult:pluginResult callbackId:writeCommandHolder.callbackId];
-        }
-        writeCommandHolder=nil;
-    }
+//    if (writeCommandHolder!=nil) {
+//        if (result==0) {
+//            CDVPluginResult  *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+//            [self.commandDelegate sendPluginResult:pluginResult callbackId:writeCommandHolder.callbackId];
+//        }else{
+//            CDVPluginResult  *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsInt:result];
+//            [self.commandDelegate sendPluginResult:pluginResult callbackId:writeCommandHolder.callbackId];
+//        }
+//        writeCommandHolder=nil;
+//    }
 
 
 
