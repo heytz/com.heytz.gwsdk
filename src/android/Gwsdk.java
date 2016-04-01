@@ -289,16 +289,6 @@ public class Gwsdk extends CordovaPlugin {
      * @param productKey
      */
     private void getDeviceList(String uid, String token, List<String> productKey) {
-
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                XPGWifiSDK.sharedInstance().getBoundDevices(app.getUid(), app.getToken(), app.getProductKeys());
-                handler.postDelayed(this, 2000);
-            }
-        };
-        handler.postDelayed(runnable, 2000);//每两秒执行一次runnable
-
         XPGWifiSDK.sharedInstance().getBoundDevices(uid, token, productKey);
     }
 
