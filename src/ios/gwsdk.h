@@ -8,7 +8,8 @@
 
 #import <Cordova/CDV.h>
 #import <XPGWifiSDK/XPGWifiSDK.h>
-
+#import "HeytzXPGWifiGAgentType.h"
+#import "HeytzApp.h"
 
 @interface gwsdk : CDVPlugin<XPGWifiDeviceDelegate,XPGWifiSDKDelegate> {
     // Member variables go here.

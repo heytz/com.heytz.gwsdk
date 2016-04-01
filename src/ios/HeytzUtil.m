@@ -1,23 +1,14 @@
 //
-//  gwsdkUtils.m
-//  乐利水泵
-//
-//  Created by 陈东东 on 16/2/29.
-//
+// Created by 陈东东 on 16/3/31.
 //
 
-#import <Foundation/Foundation.h>
-#import "GwsdkUtils.h"
-
-@implementation GwsdkUtils
-
-    int DeviceWifiState;
-    int DeviceWifiBindDeviceState;
-    int ControlState;
-    int DeviceListState;
+#import <XPGWifiSDK/XPGWifiSDK.h>
+#import "HeytzUtil.h"
 
 
+@implementation HeytzUtil {
 
+}
 /**
  *  方法 string 转换为Data
  *
@@ -90,20 +81,20 @@
     NSNumber *isBind=[NSNumber numberWithBool:[device isBind: uid]];
 
     NSMutableDictionary * d = [NSMutableDictionary dictionaryWithObjectsAndKeys:
-                               mac, @"macAddress",
-                               did, @"did",
-                               passcode, @"passcode",
-                               ipAddress, @"ipAddress",
-                               productKey, @"productKey",
-                               productName, @"productName",
-                               remark, @"remark",
-                               //device.ui, @"ui",
-                               isConnected, @"isConnected",
-                               isDisabled, @"isDisabled",
-                               isLAN, @"isLAN",
-                               isOnline, @"isOnline",
-                               isBind, @"isBind",
-                               nil];
+            mac, @"macAddress",
+            did, @"did",
+            passcode, @"passcode",
+            ipAddress, @"ipAddress",
+            productKey, @"productKey",
+            productName, @"productName",
+            remark, @"remark",
+            //device.ui, @"ui",
+            isConnected, @"isConnected",
+            isDisabled, @"isDisabled",
+            isLAN, @"isLAN",
+            isOnline, @"isOnline",
+            isBind, @"isBind",
+                    nil];
     return d;
 }
 /**
@@ -138,87 +129,20 @@
     //设备是否跟用户绑定
 //    NSNumber *isBind=[NSNumber numberWithBool:[device isBind: _uid]];
     NSLog(@"\n======%@=====\n currentMac:%@ \n \ndid:%@ \npasscode:%@\nipAddress:%@\nproductKey:%@\nproductName:%@\nremark:%@\nisConnected:%@\nisLAN:%@\nisOnline:%@\nisDisabled:%@\n",
-          map,
-          mac,
-          did,
-          passcode,
-          ipAddress,
-          productKey,
-          productName,
-          remark,
-          isConnected,
-          isLAN,
-          isOnline,
-          isDisabled
-          );
+            map,
+            mac,
+            did,
+            passcode,
+            ipAddress,
+            productKey,
+            productName,
+            remark,
+            isConnected,
+            isLAN,
+            isOnline,
+            isDisabled
+    );
 
 }
-
-/**
- *  设置DeviceWifi方法的状态
- *
- *  @param state int
- */
--(void) setDeviceWifiState:(int *)state{
-    DeviceWifiState=*state;
-}
-/**
- *  获取DeviceWifi方法的状态
- *
- *  @return int
- */
--(int) getDeviceWifiState{
-    return DeviceWifiState?DeviceWifiState:0;
-}
-/**
- *  设置DeviceWifiBindDevice方法的状态
- *
- *  @param state int
- */
--(void) setDeviceWifiBindDeviceState:(int *)state{
-    DeviceWifiBindDeviceState=*state;
-}
-/**
- *  获取DeviceWifiBindDevice方法的状态
- *
- *  @return int
- */
--(int) getDeviceWifiBindDeviceState{
-    return DeviceWifiBindDeviceState?DeviceWifiBindDeviceState:0;
-}
-/**
- *  设置Control方法的状态
- *
- *  @param state int
- */
--(void) setControlState:(int *)state{
-    ControlState=*state;
-}
-/**
- *  获取Control方法的状态
- *
- *  @return int
- */
--(int) getControlState{
-    return ControlState?ControlState:0;
-}
-/**
- *  设置DeviceList方法的状态
- *
- *  @param state int
- */
--(void) setDeviceListState:(int *)state{
-    DeviceListState=*state;
-}
-/**
- *  获取DeviceList方法的状态
- *
- *  @return int
- */
--(int) getDeviceListState{
-   return DeviceListState?DeviceListState:0;
-}
-
-
 
 @end
