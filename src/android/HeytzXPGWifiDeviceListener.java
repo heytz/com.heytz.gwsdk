@@ -115,23 +115,6 @@ public class HeytzXPGWifiDeviceListener extends XPGWifiDeviceListener {
                     app.getCallbackContext(Operation.START_DEVICE_LISTENER.getMethod()).sendPluginResult(pluginResult);
                 }
             }
-
-            if (app.getCallbackContext(Operation.WRITE.getMethod()) != null) {
-                if (dataMap.get("data") != null) {
-                    try {
-                        JSONObject data = new JSONObject(dataMap.get("data").toString());
-                        if (data.has("cmd")) {
-                            if (data.getInt("cmd") == 1) {
-                                app.getCallbackContext(Operation.WRITE.getMethod()).success();
-                                app.removeCallbackContext(Operation.WRITE.getMethod());
-                            }
-                        }
-                    } catch (JSONException e) {
-                        PluginResult pr = new PluginResult(PluginResult.Status.ERROR, e.getMessage());
-                        HeytzUtil.sendAndRemoveCallback(app, Operation.WRITE.getMethod(), pr);
-                    }
-                }
-            }
         } else if (result == XPGWifiErrorCode.XPGWifiError_RAW_DATA_TRANSMIT) { // 设备上报的数据内容，result为－48时返回透传数据，binary有值；
             //二进制数据点类型，适合开发者自行解析二进制数据
             if (dataMap.get("binary") != null) {
@@ -154,10 +137,7 @@ public class HeytzXPGWifiDeviceListener extends XPGWifiDeviceListener {
                 }
             }
         } else {
-            if (app.getCallbackContext(Operation.WRITE.getMethod()) != null) {
-                PluginResult pr = new PluginResult(PluginResult.Status.ERROR, result);
-                HeytzUtil.sendAndRemoveCallback(app, Operation.WRITE.getMethod(), pr);
-            }
+
         }
     }
 
