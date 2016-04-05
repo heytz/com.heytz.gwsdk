@@ -620,9 +620,8 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
                 }
                 break;
             case GetDevcieListCode:
-//                if ([self hasDone:deviceList]) {
-                    if (deviceList.count > 0) {
-                         _deviceList=deviceList;
+                if (deviceList.count > 0) {
+                    if ([self hasDone:deviceList]) {
                         NSMutableArray *jsonArray = [[NSMutableArray alloc] init];
                         for (XPGWifiDevice *device in deviceList){
                             //设备的物理地址。如果是 VIRTUAL:SITE，则是虚拟设备
@@ -671,8 +670,12 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
                         [pluginResult setKeepCallbackAsBool:true];
                         [self.commandDelegate sendPluginResult:pluginResult callbackId:self.commandHolder.callbackId];
                     }else{
-                        //deviceList is zero;
+                        _deviceList=deviceList;
                     }
+                }else{
+                    //deviceList is zero;
+                }
+
                 break;
             case ControlCode:
                 if(isDiscoverLock){//如果锁定状态为true 那么就是控制命令已经发送成功
