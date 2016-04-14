@@ -153,6 +153,14 @@ exports.write = function (did, value, success, error) {
     exec(success, error, "gwsdk", "write", [did, value]);
 };
 /**
+ * cordova 获取设备硬件信息
+ *
+ *  @param command ["did","value"]
+ */
+exports.getHardwareInfo = function (did, success, error) {
+    exec(success, error, "gwsdk", "getHardwareInfo", [did]);
+};
+/**
  * cordova 下载产品配置文件 配置文件，是定义 APP 与指定设备通信的规则
  * @param productKey
  * @param success

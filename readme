@@ -25,3 +25,7 @@ version 0.5.1
 
    1.添加android 和ios 小循环接口
    2.优化android 代码
+version 0.5.2
+    date: 2016.4.14 18:25
+
+   1.添加getHardwareInfo 接口

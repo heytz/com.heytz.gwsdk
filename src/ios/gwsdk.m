@@ -23,6 +23,7 @@ CDVInvokedUrlCommand *listenerCommandHolder;//添加listener的callback
 CDVInvokedUrlCommand *updateDeviceFromServerCommandHolder;//更新本地配置信息，必须
 CDVInvokedUrlCommand *writeCommandHolder;//写入设备的callbackId
 CDVInvokedUrlCommand *startDeviceListCommandHolder;//获取设备列表的回调
+CDVInvokedUrlCommand *getHardwareInfoCommandHolder;//获取设备详细信息
 int attempts;//尝试次数
 /**
  *  控制状态枚举
@@ -376,6 +377,21 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
     if(isExist==false){
         CDVPluginResult  *pluginResult= [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"This device does not exist!"];
         [self.commandDelegate sendPluginResult:pluginResult callbackId:writeCommandHolder.callbackId];
+    }
+}
+-(void)getHardwareInfo:(CDVInvokedUrlCommand *)command{
+    getHardwareInfoCommandHolder=command;
+    NSString *did=command.arguments[0];
+    BOOL isExist=NO;//判断是否存在相同did的设备
+    for(XPGWifiDevice *device in _deviceList){
+        if ([did isEqualToString:device.did]) {
+            isExist=YES;
+            [device getHardwareInfo];
+        }
+    }
+    if(isExist==NO){
+        CDVPluginResult  *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"This device does not exist!"];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
     }
 }
 /**
@@ -901,7 +917,22 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
                               , [hwInfo valueForKey:XPGWifiDeviceHardwareFirmwareVerKey]
                               , [hwInfo valueForKey:XPGWifiDeviceHardwareProductKey]
                               , device.did, device.ipAddress, device.macAddress];
-    NSLog(@"=========didQueryHardwareInfo=========\n %@",hardWareInfo);
+      NSLog(@"=========didQueryHardwareInfo=========\n %@",hardWareInfo);
+
+    NSMutableDictionary * dInfo = [NSMutableDictionary dictionaryWithObjectsAndKeys:
+                                [hwInfo valueForKey:XPGWifiDeviceHardwareWifiHardVerKey], @"XPGWifiDeviceHardwareWifiHardVer",
+                                [hwInfo valueForKey:XPGWifiDeviceHardwareWifiSoftVerKey], @"XPGWifiDeviceHardwareWifiSoftVer",
+                                [hwInfo valueForKey:XPGWifiDeviceHardwareMCUHardVerKey], @"XPGWifiDeviceHardwareMCUHardVer",
+                               [hwInfo valueForKey:XPGWifiDeviceHardwareMCUSoftVerKey], @"XPGWifiDeviceHardwareMCUSoftVer",
+                               [hwInfo valueForKey:XPGWifiDeviceHardwareFirmwareIdKey], @"XPGWifiDeviceHardwareFirmwareId",
+                               [hwInfo valueForKey:XPGWifiDeviceHardwareFirmwareVerKey], @"XPGWifiDeviceHardwareFirmwareVer",
+                              [hwInfo valueForKey:XPGWifiDeviceHardwareProductKey],@"XPGWifiDeviceHardwareProductKey",
+                               device.did, @"did",
+                               device.macAddress,@"macAddress",
+                               nil];
+    CDVPluginResult  *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:dInfo];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:getHardwareInfoCommandHolder.callbackId];
+
 }
 /**
  *  cordova 释放内存
