@@ -148,19 +148,19 @@ public class HeytzXPGWifiDeviceListener extends XPGWifiDeviceListener {
                 JSONObject jsonObject = new JSONObject();
                 try {
                     // 字符串类型，GAgent模组硬件版本号
-                    jsonObject.put("XPGWifiDeviceHardwareWifiHardVer", hardwareInfo.get("XPGWifiDeviceHardwareWifiHardVerKey"));
+                    jsonObject.put("XPGWifiDeviceHardwareWifiHardVer", hardwareInfo.get(XPGWifiDevice.XPGWifiDeviceHardwareWifiHardVerKey));
                     // 字符串类型，GAgent模组软件版本号
-                    jsonObject.put("XPGWifiDeviceHardwareWifiSoftVer", hardwareInfo.get("XPGWifiDeviceHardwareWifiSoftVerKey"));
+                    jsonObject.put("XPGWifiDeviceHardwareWifiSoftVer", hardwareInfo.get(XPGWifiDevice.XPGWifiDeviceHardwareWifiSoftVerKey));
                     // 字符串类型，设备硬件版本号
-                    jsonObject.put("XPGWifiDeviceHardwareMCUHardVer", hardwareInfo.get("XPGWifiDeviceHardwareMCUHardVerKey"));
+                    jsonObject.put("XPGWifiDeviceHardwareMCUHardVer", hardwareInfo.get(XPGWifiDevice.XPGWifiDeviceHardwareMCUHardVerKey));
                     //MCU软件版本
                     jsonObject.put("XPGWifiDeviceHardwareMCUSoftVer", hardwareInfo.get(XPGWifiDevice.XPGWifiDeviceHardwareMCUSoftVerKey));
                     // 字符串类型，固件Id
-                    jsonObject.put("XPGWifiDeviceHardwareFirmwareId", hardwareInfo.get("XPGWifiDeviceHardwareFirmwareIdKey"));
+                    jsonObject.put("XPGWifiDeviceHardwareFirmwareId", hardwareInfo.get(XPGWifiDevice.XPGWifiDeviceHardwareFirmwareIdKey));
                     // 字符串类型，固件版本号
-                    jsonObject.put("XPGWifiDeviceHardwareFirmwareVer", hardwareInfo.get("XPGWifiDeviceHardwareFirmwareVerKey"));
+                    jsonObject.put("XPGWifiDeviceHardwareFirmwareVer", hardwareInfo.get(XPGWifiDevice.XPGWifiDeviceHardwareFirmwareVerKey));
                     // 字符串类型，设备的Productkey
-                    jsonObject.put("XPGWifiDeviceHardwareProductKey", hardwareInfo.get("XPGWifiDeviceHardwareProductKey"));
+                    jsonObject.put("XPGWifiDeviceHardwareProductKey", hardwareInfo.get(XPGWifiDevice.XPGWifiDeviceHardwareProductKey));
                     jsonObject.put("did", device.getDid());
                     jsonObject.put("macAddress", device.getMacAddress());
                     PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, jsonObject);

@@ -930,7 +930,7 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
                                device.did, @"did",
                                device.macAddress,@"macAddress",
                                nil];
-    CDVPluginResult  *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:dInfo];
+    CDVPluginResult  *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:dInfo];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:getHardwareInfoCommandHolder.callbackId];
 
 }
