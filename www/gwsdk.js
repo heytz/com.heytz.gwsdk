@@ -74,8 +74,8 @@ exports.getDeviceList = function (productKey, uid, token, success, error) {
  * @param success
  * @param error
  */
-exports.startGetDeviceList = function (productKey, uid, token,interval,success, error) {
-    exec(success, error, "gwsdk", "startGetDeviceList", [productToArray(productKey), uid, token,interval]);
+exports.startGetDeviceList = function (productKey, uid, token, interval, success, error) {
+    exec(success, error, "gwsdk", "startGetDeviceList", [productToArray(productKey), uid, token, interval]);
 };
 exports.stopGetDeviceList = function (success, error) {
     exec(success, error, "gwsdk", "stopGetDeviceList", []);
@@ -167,7 +167,8 @@ exports.getHardwareInfo = function (did, success, error) {
  * @param error
  */
 exports.updateDeviceFromServer = function (productKey, success, error) {
-    exec(success, error, "gwsdk", "updateDeviceFromServer", [productKey]);
+    console.error("此接口已废弃!");
+    // exec(success, error, "gwsdk", "updateDeviceFromServer", [productKey]);
 };
 /**
  *  cordova 释放内存

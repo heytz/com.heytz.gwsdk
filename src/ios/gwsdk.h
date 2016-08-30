@@ -7,13 +7,13 @@
 
 
 #import <Cordova/CDV.h>
-#import <XPGWifiSDK/XPGWifiSDK.h>
+#import <GizWifiSDK/GizWifiSDK.h>
 
 
-@interface gwsdk : CDVPlugin<XPGWifiDeviceDelegate,XPGWifiSDKDelegate> {
+@interface gwsdk : CDVPlugin<GizWifiDeviceDelegate, GizWifiSDKDelegate> {
     // Member variables go here.
     //当前操作的值
-    XPGWifiDevice *selectedDevices;
+    GizWifiDevice *selectedDevices;
 }
 @property (nonatomic, strong) NSString *gizwAppId;
 /**

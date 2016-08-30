@@ -7,7 +7,8 @@
 //
 
 
-#import <XPGWifiSDK/XPGWifiSDK.h>
+#import <GizWifiSDK/GizWifiSDK.h>
+
 
 @interface GwsdkUtils
 /**
