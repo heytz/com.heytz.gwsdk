@@ -21,7 +21,7 @@
  *
  *  @param command [appid,"",ssid,pwd,timeout]
  */
--(void)setDeviceWifi:(CDVInvokedUrlCommand *)command;
+-(void)setDeviceOnboarding:(CDVInvokedUrlCommand *)command;
 /**
  *  cordova 配对上网，并且绑定这个设备
  *

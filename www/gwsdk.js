@@ -1,5 +1,5 @@
 var exec = require('cordova/exec');
-var productToArray = function (products) {
+var checkProduct = function (products) {
     var proArr = [];
     if (products) {
         if (products instanceof Array)
@@ -9,13 +9,23 @@ var productToArray = function (products) {
     }
     return proArr;
 };
+var checkWifiGAgentType = function (wifiGAgentTypes) {
+    var wifiGAgentTypeArr = [];
+    if (wifiGAgentTypes) {
+        if (wifiGAgentTypes instanceof Array)
+            wifiGAgentTypeArr = wifiGAgentTypes;
+        else
+            wifiGAgentTypeArr.push(wifiGAgentTypes);
+    }
+    return wifiGAgentTypeArr;
+};
 /**
  *  cordova 配对设备上网
  *
  *  @param command ["",ssid,pwd,timeout]
  */
-exports.setDeviceOnboarding = function (productKey, wifiSSID, wifiKey, timeout, success, error) {
-    exec(success, error, "gwsdk", "setDeviceOnboarding", [productToArray(productKey), wifiSSID, wifiKey, timeout ? timeout : 60,]);
+exports.setDeviceOnboarding = function (productKey, wifiSSID, wifiKey, timeout,wifiGAgentType, success, error) {
+    exec(success, error, "gwsdk", "setDeviceOnboarding", [checkProduct(productKey), wifiSSID, wifiKey, timeout ? timeout : 60,checkWifiGAgentType(wifiGAgentType)]);
 };
 /**
  * 配对并且绑定设备
@@ -46,7 +56,7 @@ exports.setDeviceOnboarding = function (productKey, wifiSSID, wifiKey, timeout, 
  */
 exports.setDeviceWifiBindDevice = function (productKey, wifiSSID, wifiKey, uid, token, timeout, mode, softAPSSIDPrefix, wifiGAgentType, success, error) {
     exec(success, error, "gwsdk", "setDeviceWifiBindDevice", [
-        productToArray(productKey),
+        checkProduct(productKey),
         wifiSSID,
         wifiKey,
         uid,
@@ -54,7 +64,7 @@ exports.setDeviceWifiBindDevice = function (productKey, wifiSSID, wifiKey, uid, 
         timeout ? timeout : 60,
         mode ? mode : XPGConfigureMode.XPGWifiSDKAirLinkMode,
         softAPSSIDPrefix ? softAPSSIDPrefix : null,
-        wifiGAgentType ? wifiGAgentType : null
+        checkWifiGAgentType(wifiGAgentType)
     ]);
 };
 /**
@@ -63,7 +73,7 @@ exports.setDeviceWifiBindDevice = function (productKey, wifiSSID, wifiKey, uid, 
  *  @param command [[productkey],uid,token]
  */
 exports.getDeviceList = function (productKey, uid, token, success, error) {
-    exec(success, error, "gwsdk", "getDeviceList", [productToArray(productKey), uid, token]);
+    exec(success, error, "gwsdk", "getDeviceList", [checkProduct(productKey), uid, token]);
 };
 /**
  * 开启固定间隔 获取设备列表
@@ -75,7 +85,7 @@ exports.getDeviceList = function (productKey, uid, token, success, error) {
  * @param error
  */
 exports.startGetDeviceList = function (productKey, uid, token, interval, success, error) {
-    exec(success, error, "gwsdk", "startGetDeviceList", [productToArray(productKey), uid, token, interval]);
+    exec(success, error, "gwsdk", "startGetDeviceList", [checkProduct(productKey), uid, token, interval]);
 };
 exports.stopGetDeviceList = function (success, error) {
     exec(success, error, "gwsdk", "stopGetDeviceList", []);
@@ -102,7 +112,7 @@ exports.unbindDevice = function (uid, token, did, passcode, success, error) {
  *  @param command [["prodctkeys"],"uid","token","mac","value"]
  */
 exports.deviceControl = function (productKey, uid, token, mac, value, success, error) {
-    exec(success, error, "gwsdk", "deviceControl", [productToArray(productKey), uid, token, mac, value]);
+    exec(success, error, "gwsdk", "deviceControl", [checkProduct(productKey), uid, token, mac, value]);
 };
 /**
  * cordova 获取ssid列表
