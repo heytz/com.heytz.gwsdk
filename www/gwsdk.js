@@ -24,8 +24,10 @@ var checkWifiGAgentType = function (wifiGAgentTypes) {
  *
  *  @param command ["",ssid,pwd,timeout]
  */
-exports.setDeviceOnboarding = function (productKey, wifiSSID, wifiKey, timeout,wifiGAgentType, success, error) {
-    exec(success, error, "gwsdk", "setDeviceOnboarding", [checkProduct(productKey), wifiSSID, wifiKey, timeout ? timeout : 60,checkWifiGAgentType(wifiGAgentType)]);
+exports.setDeviceOnboarding = function (wifiSSID, wifiKey, mode, timeout, softAPSSIDPrefix, wifiGAgentType, success, error) {
+    exec(success, error, "gwsdk", "setDeviceOnboarding", [wifiSSID, wifiKey, mode,
+        timeout ? timeout : 60, softAPSSIDPrefix, checkWifiGAgentType(wifiGAgentType)
+    ]);
 };
 /**
  * 配对并且绑定设备
@@ -188,70 +190,62 @@ exports.updateDeviceFromServer = function (productKey, success, error) {
 exports.deAlloc = function (success, error) {
     exec(success, error, "gwsdk", "dealloc", []);
 };
-/**
- XPGConfigureMode枚举，描述SDK支持的设备配置方式
+
+/*
+ GizWifiConfigureMode枚举，描述SDK支持的设备配置方式
  */
-XPGConfigureMode = {
-    /**
+GizWifiConfigureMode = {
+    /*
      SoftAP配置模式
      */
-    XPGWifiSDKSoftAPMode: 1,
-    /**
+    GizWifiSoftAP: 0,
+    /*
      AirLink配置模式
      */
-    XPGWifiSDKAirLinkMode: 2,
+    GizWifiAirLink: 1,
 };
-/**
- XPGWifiGAgentType枚举，描述SDK支持的Wifi模组类型
+/*
+ GizWifiGAgentType 模组类型 ，描述SDK支持的Wifi模组类型
  */
-XPGWifiGAgentType = {
-    /**
-     MXCHIP 模组（庆科3162）
+GizWifiGAgentType = {
+    /*
+     庆科3162模组
      */
-    XPGWifiGAgentTypeMXCHIP: 0,
-
-    /**
-     HF 模组（汉枫）
+    GizGAgentMXCHIP: 0,
+    /*
+     汉枫模组
      */
-    XPGWifiGAgentTypeHF: 1,
-
-    /**
-     RTK 模组（RealTek）
+    GizGAgentHF: 1,
+    /*
+     瑞昱模组
      */
-    XPGWifiGAgentTypeRTK: 2,
-
-    /**
-     WM 模组（联盛德）
+    GizGAgentRTK: 2,
+    /*
+     联盛德模组
      */
-    XPGWifiGAgentTypeWM: 3,
-
-    /**
-     ESP 模组（乐鑫）
+    GizGAgentWM: 3,
+    /*
+     乐鑫模组
      */
-    XPGWifiGAgentTypeESP: 4,
-
-    /**
-     QCA 模组（高通）
+    GizGAgentESP: 4,
+    /*
+     高通模组
      */
-    XPGWifiGAgentTypeQCA: 5,
-
-    /**
-     TI 模组（TI）
+    GizGAgentQCA: 5,
+    /*
+     TI 模组
      */
-    XPGWifiGAgentTypeTI: 6,
-
-    /**
-     FSK 模组（宇音天下）
+    GizGAgentTI: 6,
+    /*
+     宇音天下模组
      */
-    XPGWifiGAgentTypeFSK: 7,
-
-    /**
-     MXCHIP3.x 协议 模组（庆科3088或5088）
+    GizGAgentFSK: 7,
+    /*
+     庆科V3
      */
-    XPGWifiGAgentTypeMXCHIP3: 8,
-
-    /**
-     BL 模组（古北）
+    GizGAgentMXCHIP3: 8,
+    /*
+     古北模组
      */
-    XPGWifiGAgentTypeBL: 9
+    GizGAgentBL: 9
 };
