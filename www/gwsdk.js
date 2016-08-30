@@ -14,8 +14,8 @@ var productToArray = function (products) {
  *
  *  @param command ["",ssid,pwd,timeout]
  */
-exports.setDeviceWifi = function (productKey, wifiSSID, wifiKey, timeout, success, error) {
-    exec(success, error, "gwsdk", "setDeviceWifi", [productToArray(productKey), wifiSSID, wifiKey, timeout ? timeout : 60,]);
+exports.setDeviceOnboarding = function (productKey, wifiSSID, wifiKey, timeout, success, error) {
+    exec(success, error, "gwsdk", "setDeviceOnboarding", [productToArray(productKey), wifiSSID, wifiKey, timeout ? timeout : 60,]);
 };
 /**
  * 配对并且绑定设备
