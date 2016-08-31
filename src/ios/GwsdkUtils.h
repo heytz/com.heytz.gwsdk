@@ -27,6 +27,7 @@
  *  @return [did,macAddress,passcode,productkey]
  */
 + (NSDictionary *)deviceToDictionary:(XPGWifiDevice *)device uid:(NSString *)uid;
++ (NSDictionary *)gizDeviceToDictionary:(GizWifiDevice *)device;
 /**
  *  方法 打印device的log
  *

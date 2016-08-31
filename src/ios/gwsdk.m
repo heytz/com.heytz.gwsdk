@@ -12,7 +12,7 @@
 NSString *_currentPairDeviceMacAddress;
 NSInteger currentState;
 bool _debug = true;
-NSString *_uid, *_token, *_mac;
+NSString *_uid, *_token, *_mac, *_remark, *_alias;
 NSMutableDictionary *_controlObject;
 BOOL isDiscoverLock;
 GizWifiDevice *_currentDevice;
@@ -900,7 +900,7 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
 /**
  *  cordova 配对设备上网
  *
- *  @param command [appid,"",ssid,pwd,timeout]
+ *  @param command [wifiSSID, wifiKey, mode, timeout, softAPSSIDPrefix, wifiGAgentType]
  */
 - (void)setDeviceOnboarding:(CDVInvokedUrlCommand *)command {
 
@@ -947,43 +947,44 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
 
     [self init:command];
     currentState = setDeviceOnboardingAndBindDeviceCode;
-    _uid = command.arguments[3];
-    _token = command.arguments[4];
 
-    /**
-     配置设备连接路由的方法
-     @param ssid 需要配置到路由的SSID名
-     @param key 需要配置到路由的密码
-     @param mode 配置方式
-     @see XPGConfigureMode
-     @param softAPSSIDPrefix SoftAPMode模式下SoftAP的SSID前缀或全名（XPGWifiSDK以此判断手机当前是否连上了SoftAP，AirLink配置时该参数无意义，传nil即可）
-     @param timeout 配置的超时时间 SDK默认执行的最小超时时间为30秒
-     @param types 配置的wifi模组类型列表，存放NSNumber对象，SDK默认同时发送庆科和汉枫模组配置包；SoftAPMode模式下该参数无意义。types为nil，SDK按照默认处理。如果只想配置庆科模组，types中请加入@XPGWifiGAgentTypeMXCHIP类；如果只想配置汉枫模组，types中请加入@XPGWifiGAgentTypeHF；如果希望多种模组配置包同时传，可以把对应类型都加入到types中。XPGWifiGAgentType枚举类型定义SDK支持的所有模组类型。
-     @see 对应的回调接口：[XPGWifiSDKDelegate XPGWifiSDK:didSetDeviceWifi:result:]
-     */
-    NSString *timeout = [command.arguments objectAtIndex:5];
-    NSString *mode = [command.arguments objectAtIndex:6];
-    //新接口 11.24
+    /*
+          把设备配置到局域网 wifi 上。设备处于 softap 模式时，模组会产生一个热点名称，手机 wifi 连接此热点后就可以配置了。如果是机智云提供的固件，模组热点名称前缀为"XPG-GAgent-"，密码为"123456789"。设备处于 airlink 模式时，手机随时都可以开始配置。但无论哪种配置方式，设备上线时，手机要连接到配置的局域网 wifi 上，才能够确认设备已配置成功。
+          设备配置成功时，在回调中会返回设备 mac 地址。如果设备重置了，设备did可能要在设备搜索回调中才能获取。
+
+          @param ssid 待配置的路由 SSID 名
+          @param key 待配置的路由密码
+          @param mode 配置模式，详细见 GizWifiConfigureMode 枚举定义
+          @param softAPSSIDPrefix SoftAPMode 模式下 SoftAP 的 SSID 前缀或全名。默认前缀为：XPG-GAgent-，SDK 以此判断手机当前是否连上了设备的 SoftAP 热点。AirLink 模式时传 nil 即可
+          @param timeout 配置的超时时间。SDK 默认执行的最小超时时间为30秒
+          @param types 待配置的模组类型，是一个GizWifiGAgentType 枚举数组。若不指定则默认配置乐鑫模组。GizWifiGAgentType定义了 SDK 支持的所有模组类型
+          @see 对应的回调接口：[GizWifiSDKDelegate wifiSDK:didSetDeviceOnboarding:device:]
+          @see GizConfigureMode
+          @see GizWifiGAgentType
+        */
+    //新接口 8.31
     if (_debug) {
-        NSLog(@"ssid:%@,pwd:%@ uid:%@ token:%@ timeout:%@ mode:%@ softAPssidPrefix:%@ wifiGAgentType:%@",
+        NSLog(@"ssid:%@,pwd:%@ mode:%@ timeout:%@ softAPssidPrefix:%@ wifiGAgentType:%@ uid:%@ token:%@ ",
                 command.arguments[1],
                 command.arguments[2],
                 command.arguments[3],
                 command.arguments[4],
                 command.arguments[5],
                 command.arguments[6],
-                command.arguments[7],
-                command.arguments[8]);
+                command.arguments[7]);
     }
-    NSString *ssid = [command.arguments objectAtIndex:1];
-    NSString *pwd = [command.arguments objectAtIndex:2];
-//    NSString *mode = [command.arguments objectAtIndex:5];
-//    NSString *timeout = [command.arguments objectAtIndex:3];
-//    NSString *softAPSSIDPrefix = ([command.arguments objectAtIndex:6] == [NSNull null]) ? nil : command.arguments[6];
-//    NSArray *wifiAgentTypeArr = [command.arguments objectAtIndex:4];
 
-    NSArray *wifiAgentTypeArr = [command.arguments objectAtIndex:4];
-    NSString *softAPSSIDPrefix = ([command.arguments objectAtIndex:7] == [NSNull null]) ? nil : command.arguments[7];
+    NSString *ssid = [command.arguments objectAtIndex:0];
+    NSString *pwd = [command.arguments objectAtIndex:1];
+    NSString *mode = [command.arguments objectAtIndex:2];
+    NSString *timeout = [command.arguments objectAtIndex:3];
+    NSString *softAPSSIDPrefix = ([command.arguments objectAtIndex:4] == [NSNull null]) ? nil : command.arguments[7];
+    NSArray *wifiAgentTypeArr = [command.arguments objectAtIndex:5];
+    _uid = command.arguments[6];
+    _token = command.arguments[7];
+    _remark = command.arguments[8];
+    _alias = command.arguments[9];
+
 
     [[XPGWifiSDK sharedInstance] setDeviceOnboarding:ssid
                                                  key:pwd
@@ -1099,17 +1100,10 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
         switch (currentState) {
             case setDeviceOnboardingAndBindDeviceCode:
                 //判断mac是否存在
-                if (mac.length > 0) {
-                    //判断did是否存在
-                    if (_currentPairDeviceMacAddress == nil && did.length > 0) {
-                        [[GizWifiSDK sharedInstance] bindRemoteDevice:_uid token:_token
-                                                                  mac:mac productKey:productKey
-                                                        productSecret:@"27d79f833378428ab25bead62819f91a"];
-                    } else {
-                        _currentPairDeviceMacAddress = mac;
-                    }
+                if (_currentPairDeviceMacAddress == nil && mac.length > 0 && did.length > 0) {
+                    // [[GizWifiSDK sharedInstance] bindRemoteDevice:_uid token:_tokenmac:mac productKey:productKey productSecret:@"27d79f833378428ab25bead62819f91a"];
+                    _currentPairDeviceMacAddress = mac;
                 }
-
                 break;
             case setDeviceOnboardingCode:
                 //判断did是否存在
@@ -1153,6 +1147,12 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
 - (void)device:(GizWifiDevice *)device didSetCustomInfo:(NSError *)result {
     if (result.code == GIZ_SDK_SUCCESS) {
         // 修改成功
+        CDVPluginResult *pluginResult= [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[GwsdkUtils gizDeviceToDictionary:device]];
+        NSLog(@"\n =========binding success========\n %@");
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:self.commandHolder.callbackId];
+        //清空缓存
+        selectedDevices = nil;
+        _currentPairDeviceMacAddress = nil;
     } else {
         // 修改失败
     }
@@ -1221,6 +1221,23 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
     // 提示错误原因
     if (result.code != GIZ_SDK_SUCCESS) {
         NSLog(@"result: %@", result.localizedDescription);
+        switch (currentState) {
+            case setDeviceOnboardingAndBindDeviceCode:
+                if (deviceList.count > 0 && _currentPairDeviceMacAddress != nil) {
+                    for (GizWifiDevice *device in deviceList) {
+                        if ([_currentPairDeviceMacAddress isEqualToString:device.macAddress] && (device.did.length > 0)) {
+                            if (isDiscoverLock == true) {
+                                isDiscoverLock = false;
+                                device.delegate = self;
+                                [device setCustomInfo:_remark alias:_alias];
+                            }
+                        }
+                    }
+                }
+                break;
+            default:
+                break;
+        }
     }
     // 显示变化后的设备列表
     NSLog(@"discovered deviceList: %@", deviceList);

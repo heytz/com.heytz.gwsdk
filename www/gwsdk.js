@@ -22,11 +22,25 @@ var checkWifiGAgentType = function (wifiGAgentTypes) {
 /**
  *  cordova 配对设备上网
  *
- *  @param command ["",ssid,pwd,timeout]
+ * @param wifiSSID
+ * @param wifiKey
+ * @param mode
+ * @param timeout       默认 60秒
+ * @param softAPSSIDPrefix
+ * @param wifiGAgentType
+ * @param success
+ * @param error
  */
 exports.setDeviceOnboarding = function (wifiSSID, wifiKey, mode, timeout, softAPSSIDPrefix, wifiGAgentType, success, error) {
     exec(success, error, "gwsdk", "setDeviceOnboarding", [wifiSSID, wifiKey, mode,
         timeout ? timeout : 60, softAPSSIDPrefix, checkWifiGAgentType(wifiGAgentType)
+    ]);
+};
+exports.setDeviceOnboardingAndBindDevice = function (wifiSSID, wifiKey, mode, timeout, softAPSSIDPrefix, wifiGAgentType,
+                                                     uid, token, device_remark, device_alias, success, error) {
+    exec(success, error, "gwsdk", "setDeviceOnboardingAndBindDevice", [wifiSSID, wifiKey, mode,
+        timeout ? timeout : 60, softAPSSIDPrefix, checkWifiGAgentType(wifiGAgentType),
+        uid, token, device_remark, device_alias
     ]);
 };
 /**
