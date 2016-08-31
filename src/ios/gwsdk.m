@@ -17,6 +17,7 @@ NSMutableDictionary *_controlObject;
 BOOL isDiscoverLock;
 GizWifiDevice *_currentDevice;
 NSArray *_memoryDeviceList; //内存中的device列表。
+NSArray *devices; //内存中的device列表。
 NSString *currentUpdateProductKey;
 //当前更新的设备
 NSTimer *timer;
@@ -59,6 +60,7 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
 
     setDeviceOnboardingCode = 5,
     setDeviceOnboardingAndBindDeviceCode = 6,
+    getBoundDevicesCode = 7
 };
 
 
@@ -80,6 +82,7 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
     if (!([GizWifiSDK sharedInstance].delegate)) {
         [GizWifiSDK sharedInstance].delegate = self;
     }
+    devices = [GizWifiSDK sharedInstance].deviceList;
     _currentPairDeviceMacAddress = nil;
     isDiscoverLock = true;
     attempts = 2;//尝试两次绑定。
@@ -1011,6 +1014,22 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
 }
 
 /**
+ *  cordova 获取设备列表
+ *
+ *  @param command [appid,[productkey],uid,token]
+ */
+- (void)getBoundDevices:(CDVInvokedUrlCommand *)command {
+    [self init:command];
+    currentState = getBoundDevicesCode;
+    _uid = command.arguments[1];
+    _token = command.arguments[2];
+    NSLog(@"\n======productkeys%@=====\n", command.arguments[0]);
+    NSArray *productkeys = [command.arguments objectAtIndex:0];
+    [[XPGWifiSDK sharedInstance] getBoundDevices:command.arguments[1] token:command.arguments[2]
+                              specialProductKeys:productkeys];
+}
+
+/**
  *  cordova 获取硬件信息
  *
  *  不订阅设备也可以获取硬件信息。APP可以获取模块协议版本号，mcu固件版本号等硬件信息，但只有局域网设备才支持该功能。
@@ -1093,19 +1112,13 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
 
                 break;
             case setDeviceOnboardingCode:
-                //判断mac是否存在
-                if (mac.length > 0) {
-                    //判断did是否存在
-                    if (_currentPairDeviceMacAddress == nil && did.length > 0) {
-                        NSMutableDictionary *d;
-                        d = [@{@"macAddress" : mac,
-                                @"did" : did,
-                                @"productKey" : productKey} mutableCopy];
-                        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:d];
-                        [self.commandDelegate sendPluginResult:pluginResult callbackId:self.commandHolder.callbackId];
-                    } else {
-                        _currentPairDeviceMacAddress = mac;
-                    }
+                //判断did是否存在
+                if (mac.length > 0 && did.length > 0) {
+                    NSMutableDictionary *d = [@{@"macAddress" : mac,
+                            @"did" : did,
+                            @"productKey" : productKey} mutableCopy];
+                    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:d];
+                    [self.commandDelegate sendPluginResult:pluginResult callbackId:self.commandHolder.callbackId];
                 }
                 break;
             default:
@@ -1195,6 +1208,23 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
     } else {
         // 获取失败
     }
+}
+
+/**
+ * 回调  接收设备列表变化上报
+ *
+ * APP设置好委托，启动SDK后，就可以收到SDK的设备列表推送。每次局域网设备或者用户绑定设备发生变化时，SDK都会主动上报最新的设备列表。设备断电再上电、有新设备上线等都会触发设备列表发生变化。用户登录后，SDK会主动把用户已绑定的设备列表上报给APP，绑定设备在不同的手机上登录帐号都可获取到。
+   如果APP想要刷新绑定设备列表，可以调用绑定设备列表接口，同时可以指定自己关心的产品类型标识，SDK会把筛选后的设备列表返回给APP。
+   SDK提供设备列表缓存，设备列表中的设备对象在整个APP生命周期中一直有效。缓存的设备列表会与当前最新的已发现设备同步更新。
+ */
+- (void)wifiSDK:(GizWifiSDK *)wifiSDK didDiscovered:(NSError *)result deviceList:(NSArray *)deviceList {
+    // 提示错误原因
+    if (result.code != GIZ_SDK_SUCCESS) {
+        NSLog(@"result: %@", result.localizedDescription);
+    }
+    // 显示变化后的设备列表
+    NSLog(@"discovered deviceList: %@", deviceList);
+    devices = deviceList;
 }
 
 /**
