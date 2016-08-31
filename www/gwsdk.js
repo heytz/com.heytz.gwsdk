@@ -37,50 +37,10 @@ exports.setDeviceOnboarding = function (wifiSSID, wifiKey, mode, timeout, softAP
     ]);
 };
 exports.setDeviceOnboardingAndBindDevice = function (wifiSSID, wifiKey, mode, timeout, softAPSSIDPrefix, wifiGAgentType,
-                                                     uid, token, device_remark, device_alias, success, error) {
+                                                     uid, token, device_remark, device_alias, productSecret, success, error) {
     exec(success, error, "gwsdk", "setDeviceOnboardingAndBindDevice", [wifiSSID, wifiKey, mode,
         timeout ? timeout : 60, softAPSSIDPrefix, checkWifiGAgentType(wifiGAgentType),
-        uid, token, device_remark, device_alias
-    ]);
-};
-/**
- * 配对并且绑定设备
- * todo ios下面: 如果同一个设备,第一次被配对上网,再去配对第二次会出现配对失败(error HTTP response error format.),再次配对才可以成功
- * @param productKey
- * @param wifiSSID
- * @param wifiKey
- * @param uid
- * @param token
- * @param timeout   默认: 60s
- * @param mode      默认: AirLink
- * @param softAPSSIDPrefix
- SoftAPMode模式下SoftAP的SSID前缀或全名（
- XPGWifiSDK以此判断手机当前是否连上了SoftAP，AirLink配置时该参数无意义，
- 传nil即可）
- * @param wifiGAgentType types 配置的wifi模组类型列表，存放NSNumber对象，SDK默认同时发送庆科和汉枫模组配置包；
- *        SoftAPMode模式下该参数无意义。types为nil，SDK按照默认处理。如果只想配置庆科模组，types中请加入@XPGWifiGAgentTypeMXCHIP类；
- *        如果只想配置汉枫模组，types中请加入@XPGWifiGAgentTypeHF；如果希望多种模组配置包同时传，
- *        可以把对应类型都加入到types中。XPGWifiGAgentType枚举类型定义SDK支持的所有模组类型。
- * @param success object
- {
-   did: "Zt8Vw8kVpDYyXfNGuEyGmK",
-   passcode: "QEKASRXAYP",
-   productKey: "36d6b9a11d374a1db939f6b8c9d7bf95",
-   macAddress: "C893464A06BD"
- }
- * @param error string
- */
-exports.setDeviceWifiBindDevice = function (productKey, wifiSSID, wifiKey, uid, token, timeout, mode, softAPSSIDPrefix, wifiGAgentType, success, error) {
-    exec(success, error, "gwsdk", "setDeviceWifiBindDevice", [
-        checkProduct(productKey),
-        wifiSSID,
-        wifiKey,
-        uid,
-        token,
-        timeout ? timeout : 60,
-        mode ? mode : XPGConfigureMode.XPGWifiSDKAirLinkMode,
-        softAPSSIDPrefix ? softAPSSIDPrefix : null,
-        checkWifiGAgentType(wifiGAgentType)
+        uid, token, device_remark, device_alias, productSecret
     ]);
 };
 /**
@@ -88,8 +48,8 @@ exports.setDeviceWifiBindDevice = function (productKey, wifiSSID, wifiKey, uid, 
  *
  *  @param command [[productkey],uid,token]
  */
-exports.getDeviceList = function (productKey, uid, token, success, error) {
-    exec(success, error, "gwsdk", "getDeviceList", [checkProduct(productKey), uid, token]);
+exports.getBoundDevices = function (uid, token, productKey, success, error) {
+    exec(success, error, "gwsdk", "getBoundDevices", [uid, token, checkProduct(productKey)]);
 };
 /**
  * 开启固定间隔 获取设备列表
@@ -115,12 +75,36 @@ exports.deviceBinding = function (uid, token, did, passcode, remark, success, er
     exec(success, error, "gwsdk", "deviceBinding", [uid, token, did, passcode, remark])
 };
 /**
+ *
+ * @param did
+ * @param remark
+ * @param alias
+ * @param success
+ * @param error
+ */
+exports.setCustomInfo = function (did, remark, alias, success, error) {
+    exec(success, error, "gwsdk", "setCustomInfo", [did, remark, alias])
+};
+exports.bindRemoteDevice = function (uid, token, mac, productKey, productSecret, success, error) {
+    exec(success, error, "gwsdk", "bindRemoteDevice", [uid, token, mac, productKey, productSecret])
+};
+/**
  *  cordova 解绑设备
  *
  *  @param command ["uid","token","did","passcode","remark"]
  */
-exports.unbindDevice = function (uid, token, did, passcode, success, error) {
-    exec(success, error, "gwsdk", "unbindDevice", [uid, token, did, passcode])
+exports.unbindDevice = function (uid, token, did, success, error) {
+    exec(success, error, "gwsdk", "unbindDevice", [uid, token, did])
+};
+/**
+ * cordova 订阅设备
+ * @param did
+ * @param subState
+ * @param success
+ * @param error
+ */
+exports.setSubscribe = function (did, subState, success, error) {
+    exec(success, error, "gwsdk", "setSubscribe", [did, subState])
 };
 /**
  *  cordova 控制设备
@@ -153,22 +137,6 @@ exports.startDeviceListener = function (success, error) {
  */
 exports.stopDeviceListener = function (success, error) {
     exec(success, error, "gwsdk", "stopDeviceListener", []);
-};
-/**
- * cordova 连接设备
- *
- *  @param command ["uid","token","did"]
- */
-exports.connect = function (uid, token, did, success, error) {
-    exec(success, error, "gwsdk", "connect", [uid, token, did]);
-};
-/**
- * cordova 断开连接
- *
- *  @param command ["did"]
- */
-exports.disconnect = function (did, success, error) {
-    exec(success, error, "gwsdk", "disconnect", [did]);
 };
 /**
  * cordova 发送控制命令

@@ -68,17 +68,11 @@
  */
 -(void)endDeviceListener:(CDVInvokedUrlCommand *)command;
 /**
- * cordova 连接设备
+ * cordova 设备订阅
  *
  *  @param command ["uid","token","did"]
  */
--(void)connect:(CDVInvokedUrlCommand *)command;
-/**
- * cordova 断开连接
- *
- *  @param command ["did"]
- */
--(void)disconnect:(CDVInvokedUrlCommand *)command;
+-(void)setSubscribe:(CDVInvokedUrlCommand *)command;
 /**
  * cordova 发送控制命令
  *
