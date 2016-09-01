@@ -61,6 +61,9 @@
  *  @param command []
  */
 -(void)startDeviceListener:(CDVInvokedUrlCommand *)command;
+
+- (void)wifiSDK:(GizWifiSDK *)wifiSDK didGetSSIDList:(NSError *)result ssidList:(NSArray *)ssidList;
+
 /**
  *  cordova 停止device的监听
  *
@@ -89,6 +92,5 @@
 
 @property (strong,nonatomic) CDVInvokedUrlCommand * commandHolder;
 @property (strong, nonatomic) NSArray * _deviceList;
-//@property (strong,nonatomic) NSArray *_arraySsidList;
 
 @end

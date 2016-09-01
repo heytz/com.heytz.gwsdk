@@ -231,3 +231,21 @@ GizWifiGAgentType = {
      */
     GizGAgentBL: 9
 };
+/*
+ GizWifiDeviceNetStatus 枚举，描述 SDK 支持的设备网路状态
+ */
+GizWifiDeviceNetStatus = {
+    /*
+     离线状态
+     */
+    GizDeviceOffline: 0,
+    /*
+     在线状态
+     */
+    GizDeviceOnline: 1,
+    /*
+     可控状态
+     */
+    GizDeviceControlled: 2,
+    GizDeviceUnavailable: 3,
+};
