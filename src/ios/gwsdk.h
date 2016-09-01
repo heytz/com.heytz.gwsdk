@@ -64,12 +64,7 @@
 
 - (void)wifiSDK:(GizWifiSDK *)wifiSDK didGetSSIDList:(NSError *)result ssidList:(NSArray *)ssidList;
 
-/**
- *  cordova 停止device的监听
- *
- *  @param command []
- */
--(void)endDeviceListener:(CDVInvokedUrlCommand *)command;
+
 /**
  * cordova 设备订阅
  *

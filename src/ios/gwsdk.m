@@ -311,11 +311,10 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
     BOOL isExist = false;
     for (GizWifiDevice *device in devices) {
         if ([did isEqualToString:device.did]) {
-            selectedDevices = device;
-            selectedDevices.delegate = self;
+            device.delegate = self;
             isExist = true;
             [device getDeviceStatus];
-            CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[GwsdkUtils deviceToDictionary:selectedDevices uid:_uid]];
+            CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[GwsdkUtils gizDeviceToDictionary:device]];
             [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
         }
     }
