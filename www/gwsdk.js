@@ -52,27 +52,12 @@ exports.getBoundDevices = function (uid, token, productKey, success, error) {
     exec(success, error, "gwsdk", "getBoundDevices", [uid, token, checkProduct(productKey)]);
 };
 /**
- * 开启固定间隔 获取设备列表
- * @param productKey
- * @param uid
- * @param token
- * @param interval
- * @param success
- * @param error
- */
-exports.startGetDeviceList = function (productKey, uid, token, interval, success, error) {
-    exec(success, error, "gwsdk", "startGetDeviceList", [checkProduct(productKey), uid, token, interval]);
-};
-exports.stopGetDeviceList = function (success, error) {
-    exec(success, error, "gwsdk", "stopGetDeviceList", []);
-};
-/**
  *  cordova 绑定设备
  *
  *  @param command ["uid","token","did","passcode","remark"]
  */
 exports.deviceBinding = function (uid, token, did, passcode, remark, success, error) {
-    exec(success, error, "gwsdk", "deviceBinding", [uid, token, did, passcode, remark])
+    console.error("此接口已废弃!");
 };
 /**
  *
@@ -112,7 +97,7 @@ exports.setSubscribe = function (did, subState, success, error) {
  *  @param command [["prodctkeys"],"uid","token","mac","value"]
  */
 exports.deviceControl = function (productKey, uid, token, mac, value, success, error) {
-    exec(success, error, "gwsdk", "deviceControl", [checkProduct(productKey), uid, token, mac, value]);
+    console.error("此接口已废弃!");
 };
 /**
  * cordova 获取ssid列表
