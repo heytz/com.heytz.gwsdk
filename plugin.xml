@@ -38,7 +38,18 @@
             </feature>
             <preference name="gizwappid" value="$GIZWITS_APPID"/>
         </config-file>
-        <config-file parent="/*" target="AndroidManifest.xml"></config-file>
+        <config-file target="AndroidManifest.xml" parent="/manifest">
+            <!-- Required  一些系统要求的权限，如访问网络等-->
+            <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+            <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+            <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+            <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+            <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+            <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+            <uses-permission android:name="android.permission.INTERNET" />
+            <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+            <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
+        </config-file>
         <source-file src="src/android/Gwsdk.java" target-dir="src/com/heytz/gwsdk/"/>
         <source-file src="src/android/HeytzApp.java" target-dir="src/com/heytz/gwsdk/"/>
         <source-file src="src/android/HeytzGizWifiDeviceListener.java" target-dir="src/com/heytz/gwsdk/"/>
