@@ -37,10 +37,10 @@ exports.setDeviceOnboarding = function (wifiSSID, wifiKey, mode, timeout, softAP
     ]);
 };
 exports.setDeviceOnboardingAndBindDevice = function (wifiSSID, wifiKey, mode, timeout, softAPSSIDPrefix, wifiGAgentType,
-                                                     uid, token, device_remark, device_alias, productSecret, success, error) {
+                                                     uid, token, productSecret, success, error) {
     exec(success, error, "gwsdk", "setDeviceOnboardingAndBindDevice", [wifiSSID, wifiKey, mode,
         timeout ? timeout : 60, softAPSSIDPrefix, checkWifiGAgentType(wifiGAgentType),
-        uid, token, device_remark, device_alias, productSecret
+        uid, token, productSecret
     ]);
 };
 /**
@@ -59,6 +59,9 @@ exports.getBoundDevices = function (uid, token, productKey, success, error) {
 exports.deviceBinding = function (uid, token, did, passcode, remark, success, error) {
     console.error("此接口已废弃!");
 };
+exports.bindRemoteDevice = function (uid, token, mac, productKey, productSecret, success, error) {
+    exec(success, error, "gwsdk", "bindRemoteDevice", [uid, token, mac, productKey, productSecret])
+};
 /**
  *
  * @param did
@@ -70,9 +73,7 @@ exports.deviceBinding = function (uid, token, did, passcode, remark, success, er
 exports.setCustomInfo = function (did, remark, alias, success, error) {
     exec(success, error, "gwsdk", "setCustomInfo", [did, remark, alias])
 };
-exports.bindRemoteDevice = function (uid, token, mac, productKey, productSecret, success, error) {
-    exec(success, error, "gwsdk", "bindRemoteDevice", [uid, token, mac, productKey, productSecret])
-};
+
 /**
  *  cordova 解绑设备
  *

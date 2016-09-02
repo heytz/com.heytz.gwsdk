@@ -1,7 +1,6 @@
 package com.heytz.gwsdk;
 
 import com.gizwits.gizwifisdk.api.GizWifiDevice;
-import com.xtremeprog.xpgconnect.XPGWifiDevice;
 import org.apache.cordova.CallbackContext;
 
 import java.util.ArrayList;
@@ -22,7 +21,6 @@ public  class HeytzApp {
     private String productKey;
     private String productSecret;
 
-    private Object controlObject;
 
     private String uid; //当前用户的uid
 
@@ -37,17 +35,7 @@ public  class HeytzApp {
     private List<GizWifiDevice> deviceList = new ArrayList<GizWifiDevice>();//筛选出来的设备列表
 
     private Map<String, CallbackContext> callbackContextMap = new HashMap<String, CallbackContext>();
-//    public List getProductKey() {
-//        return productKey;
-//    }
-//    public void setProductKey(List productKey) {
-//        this.productKey = productKey;
-//    }
 
-    public Boolean hasDone(List<XPGWifiDevice> deviceList) {
-        if (this.deviceList.isEmpty()) return false;
-        return this.deviceList.size() == deviceList.size();
-    }
 
     public String getProductKey() {
         return this.productKey;
@@ -123,13 +111,7 @@ public  class HeytzApp {
         return deviceList;
     }
 
-    public void setControlObject(Object object) {
-        this.controlObject = object;
-    }
 
-    public Object getControlObject() {
-        return this.controlObject;
-    }
 
     /**
      * 获取callback,指定某个方法

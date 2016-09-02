@@ -1,10 +1,8 @@
 package com.heytz.gwsdk;
 
 import android.util.Base64;
-import android.util.Log;
 import com.gizwits.gizwifisdk.api.GizWifiDevice;
 import com.xtremeprog.xpgconnect.XPGWifiDevice;
-import org.apache.cordova.CallbackContext;
 import org.apache.cordova.PluginResult;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -53,30 +51,30 @@ public class HeytzUtil {
             json.put("isDisabled", device.isDisabled());
             json.put("isLAN", device.isLAN());
             json.put("isBind", device.isBind());
+            int netStatus=0;
+            switch (device.getNetStatus()){
+                case GizDeviceOffline:
+                    netStatus=0;
+                    break;
+                case GizDeviceOnline:
+                    netStatus=1;
+                    break;
+                case GizDeviceControlled:
+                    netStatus=2;
+                    break;
+               default:
+                    netStatus=3;
+                   break;
+            }
+            json.put("netStatus",netStatus);
+            json.put("alias",device.getAlias());
+            json.put("isSubscribed",device.isSubscribed());
+            json.put("isProductDefined",device.isProductDefined());
         } catch (JSONException e) {
         } finally {
             return json;
         }
     }
-
-    public static void logDevice(String map, XPGWifiDevice device) {
-        if (HeytzApp.DEBUG) {
-            Log.e(map, device.getMacAddress());
-            Log.e(map, device.getDid());
-            Log.e(map, device.getIPAddress());
-            Log.e(map, device.getProductKey());
-        }
-    }
-
-    public static void logDevice(String map, GizWifiDevice device) {
-        if (HeytzApp.DEBUG) {
-            Log.e(map, device.getMacAddress());
-            Log.e(map, device.getDid());
-            Log.e(map, device.getIPAddress());
-            Log.e(map, device.getProductKey());
-        }
-    }
-
     /**
      * string 转换成base64
      *
@@ -102,51 +100,6 @@ public class HeytzUtil {
             arrayOfByte[(i / 2)] = ((byte) Integer.valueOf(str, 16).intValue());
         }
     }
-
-    /**
-     * 方法 发送控制命令的方法  第三步
-     *
-     * @param xpgWifiDevice
-     * @param value
-     */
-    private void cWrite(XPGWifiDevice xpgWifiDevice, Object value, CallbackContext callbackContext) {
-        try {
-            JSONObject arr = new JSONObject(value.toString());
-            //创建JSONObject 对象，用于封装所有数据
-            JSONObject jsonsend = new JSONObject();
-            //写入命令字段（所有产品一致）
-            jsonsend.put("cmd", 1);
-            //jsonsend.put("aciton", 1);
-            //创建JSONObject 对象，用于封装数据点
-            JSONObject jsonparam = new JSONObject();
-            //写入数据点字段
-//            jsonparam.put(key, value);
-            Iterator it = arr.keys();
-            while (it.hasNext()) {
-                String jsonKey = (String) it.next();
-                String jsonValue = arr.getString(jsonKey);
-                jsonparam.put(jsonKey, HeytzUtil.getData(jsonValue));
-            }
-//            jsonparam.put("command", getData(arr.getString("command")));
-//            jsonparam.put("mac",  getData(arr.getString("mac")));
-//            jsonparam.put("control",  getData(arr.getString("control")));
-//            jsonparam.put("percent",  getData(arr.getString("percent")));
-//            jsonparam.put("angle",  getData(arr.getString("angle")));
-            //写入产品字段（所有产品一致）
-            jsonsend.put("entity0", jsonparam);
-            //{"entity0":"{\"command\":\"0009\",\"control\":\"02\",\"mac\":\"000000008d418d12\",\"percent\":\"00\",\"angle\":\"00\"}","cmd":1}
-            // 0x00 0x01 0x02 0x03 0x04 0x05 0x06 0x07 0x08 0x09 0x0a 0x0b 0x0c 0x0d 0x0e 0x0f
-            // 0x00 0x01 0x02 0x03 0x04 0x05 0x06 0x07 0x08 0x09 0x0a 0x0b 0x0c 0x0d 0x0e 0x0f
-            //调用发送指令方法
-            xpgWifiDevice.write(jsonsend.toString());
-            callbackContext.success("success");
-        } catch (JSONException e) {
-            if (HeytzApp.DEBUG)
-                e.printStackTrace();
-            callbackContext.error("error");
-        }
-    }
-
     public static void sendAndRemoveCallback(HeytzApp app, String operation, PluginResult pr) {
         if (app.getCallbackContext(operation) != null) {
             app.getCallbackContext(operation).sendPluginResult(pr);

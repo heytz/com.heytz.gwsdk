@@ -20,16 +20,11 @@ public class HeytzGizWifiSDKListener extends GizWifiSDKListener {
     private HeytzGizWifiDeviceListener heytzGizWifiDeviceListener = new HeytzGizWifiDeviceListener();
     private HeytzApp app;
 
-    //private XPGWifiDevice _currentDevice;
-    private int attempts;
-
-    private Object controlObject;           //用户控制的值.
-
-    private boolean controlState;
-
     @Override
     public void didSetDeviceOnboarding(GizWifiErrorCode result, String mac, String did, String productKey) {
         if (result == GizWifiErrorCode.GIZ_SDK_SUCCESS) {
+            app.setMac(mac);
+            app.setProductKey(productKey);
             // 配置成功
             if (app.getCallbackContext(Operation.SET_DEVICE_ON_BOARDING.getMethod()) != null) {
                 JSONObject json = new JSONObject();
@@ -43,15 +38,20 @@ public class HeytzGizWifiSDKListener extends GizWifiSDKListener {
                 HeytzUtil.sendAndRemoveCallback(app, Operation.SET_DEVICE_ON_BOARDING.getMethod(), pr);
             }
             if (app.getCallbackContext(Operation.SET_DEVICE_ON_BOARDING_AND_BIND_DEVICE.getMethod()) != null) {
-                app.setMac(mac);
-                app.setProductKey(productKey);
-                GizWifiSDK.sharedInstance().bindRemoteDevice(app.getUid(), app.getToken(), mac, productKey, app.getProductSecret());
+                GizWifiSDK.sharedInstance().bindRemoteDevice(app.getUid(),
+                        app.getToken(), mac,
+                        productKey,
+                        app.getProductSecret());
             }
         } else {
             // 配置失败
             PluginResult pr = new PluginResult(PluginResult.Status.ERROR, result.getResult());
-            HeytzUtil.sendAndRemoveCallback(app, Operation.SET_DEVICE_ON_BOARDING.getMethod(), pr);
-            HeytzUtil.sendAndRemoveCallback(app, Operation.SET_DEVICE_ON_BOARDING_AND_BIND_DEVICE.getMethod(), pr);
+            if (app.getCallbackContext(Operation.SET_DEVICE_ON_BOARDING.getMethod()) != null) {
+                HeytzUtil.sendAndRemoveCallback(app, Operation.SET_DEVICE_ON_BOARDING.getMethod(), pr);
+            }
+            if (app.getCallbackContext(Operation.SET_DEVICE_ON_BOARDING_AND_BIND_DEVICE.getMethod()) != null) {
+                HeytzUtil.sendAndRemoveCallback(app, Operation.SET_DEVICE_ON_BOARDING_AND_BIND_DEVICE.getMethod(), pr);
+            }
         }
     }
 
@@ -80,8 +80,8 @@ public class HeytzGizWifiSDKListener extends GizWifiSDKListener {
             // 绑定失败
             pr = new PluginResult(PluginResult.Status.ERROR, result.getResult());
         }
-        if (app.getCallbackContext(Operation.SET_DEVICE_ON_BOARDING.getMethod()) != null) {
-            HeytzUtil.sendAndRemoveCallback(app, Operation.SET_DEVICE_ON_BOARDING.getMethod(), pr);
+        if (app.getCallbackContext(Operation.SET_DEVICE_ON_BOARDING_AND_BIND_DEVICE.getMethod()) != null) {
+            HeytzUtil.sendAndRemoveCallback(app, Operation.SET_DEVICE_ON_BOARDING_AND_BIND_DEVICE.getMethod(), pr);
         }
         if (app.getCallbackContext(Operation.BIND_REMOTE_DEVICE.getMethod()) != null) {
             HeytzUtil.sendAndRemoveCallback(app, Operation.BIND_REMOTE_DEVICE.getMethod(), pr);
@@ -196,13 +196,5 @@ public class HeytzGizWifiSDKListener extends GizWifiSDKListener {
 
     public void setApp(HeytzApp app) {
         this.app = app;
-    }
-
-    public void setAttempts(int attempts) {
-        this.attempts = attempts;
-    }
-
-    public void setControlState(Boolean controlState) {
-        this.controlState = controlState;
     }
 }

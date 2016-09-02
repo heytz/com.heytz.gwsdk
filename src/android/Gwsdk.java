@@ -76,12 +76,11 @@ public class Gwsdk extends CordovaPlugin {
             String pwd = args.getString(1);
             int mode = args.getInt(2);
             int timeout = args.getInt(3);
-            String softAppSSIDPrefix = args.getString(4);
+            String softAppSSIDPrefix = args.isNull(4) ? null : args.getString(4);
+
             JSONArray wifigagentTypeArray = args.getJSONArray(5);
             app.setUid(args.getString(6));
             app.setToken(args.getString(7));
-            String remark = args.getString(8);
-            String alias = args.getString(9);
             String productSecret = args.getString(10);
             app.setProductSecret(productSecret);
             GizWifiConfigureMode wifiConfigMode = GizWifiConfigureMode.GizWifiAirLink;
@@ -109,16 +108,15 @@ public class Gwsdk extends CordovaPlugin {
             this.getBoundDevices(args.getString(0), args.getString(1), products);
             return true;
         }
+        if (action.equals(Operation.BIND_REMOTE_DEVICE.getMethod())) {
+            app.setCallbackContext(Operation.BIND_REMOTE_DEVICE.getMethod(), callbackContext);
+            GizWifiSDK.sharedInstance().bindRemoteDevice(args.getString(0), args.getString(1), args.getString(2)
+                    , args.getString(3), args.getString(4));
+            return true;
+        }
         if (action.equals(Operation.SET_CUSTOM_INFO.getMethod())) {
             app.setCallbackContext(Operation.GET_BOUND_DEVICES.getMethod(), callbackContext);
             this.setCustomInfo(args.getString(0), args.getString(1), args.getString(2));
-            return true;
-        }
-        if (action.equals(Operation.BIND_REMOTE_DEVICE.getMethod())) {
-            app.setCallbackContext(Operation.BIND_REMOTE_DEVICE.getMethod(), callbackContext);
-            this.setCustomInfo(args.getString(0), args.getString(1), args.getString(2));
-            GizWifiSDK.sharedInstance().bindRemoteDevice(args.getString(0), args.getString(1), args.getString(2)
-                    , args.getString(3), args.getString(4));
             return true;
         }
         /**
@@ -162,8 +160,6 @@ public class Gwsdk extends CordovaPlugin {
         if (action.equals(Operation.WRITE.getMethod())) {
             app.setCallbackContext(Operation.WRITE.getMethod(), callbackContext);
             String did = args.getString(0);
-            Object value = args.getJSONObject(1);
-            app.setControlObject(value);
             this.write(did, args.getJSONObject(1));
             return true;
         }
@@ -186,8 +182,14 @@ public class Gwsdk extends CordovaPlugin {
         if (wifiSSID != null && wifiSSID.length() > 0 && wifiKey != null && wifiKey.length() > 0) {
             GizWifiSDK.sharedInstance().setDeviceOnboarding(wifiSSID, wifiKey, mode, softAPSSIDPrefix, timeout, types);
         } else {
-            app.getCallbackContext(Operation.SET_DEVICE_ON_BOARDING.getMethod()).error("args is empty or null");
-            app.removeCallbackContext(Operation.SET_DEVICE_ON_BOARDING.getMethod());
+            if (app.getCallbackContext(Operation.SET_DEVICE_ON_BOARDING.getMethod()) != null) {
+                app.getCallbackContext(Operation.SET_DEVICE_ON_BOARDING.getMethod()).error("args is empty or null");
+                app.removeCallbackContext(Operation.SET_DEVICE_ON_BOARDING.getMethod());
+            }
+            if (app.getCallbackContext(Operation.SET_DEVICE_ON_BOARDING_AND_BIND_DEVICE.getMethod()) != null) {
+                app.getCallbackContext(Operation.SET_DEVICE_ON_BOARDING_AND_BIND_DEVICE.getMethod()).error("args is empty or null");
+                app.removeCallbackContext(Operation.SET_DEVICE_ON_BOARDING_AND_BIND_DEVICE.getMethod());
+            }
         }
     }
 
@@ -232,6 +234,7 @@ public class Gwsdk extends CordovaPlugin {
             app.removeCallbackContext(Operation.GET_HARDWARE_INFO.getMethod());
         }
     }
+
     /**
      * 方法  发送控制命令
      *

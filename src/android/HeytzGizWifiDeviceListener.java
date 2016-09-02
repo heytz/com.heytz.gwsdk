@@ -45,14 +45,14 @@ public class HeytzGizWifiDeviceListener extends GizWifiDeviceListener {
                 }
                 // 已定义的设备故障数据点，设备发生故障后该字段有内容，没有发生故障则没内容
 
-                if (dataMap.get("alters") != null) {
-                    JSONObject altersJson = new JSONObject(dataMap.get("alters").toString());
+                if (dataMap.get("alerts") != null) {
+                    JSONObject altersJson = new JSONObject(dataMap.get("alerts").toString());
                     jsonObject.put("alerts", altersJson);
                 }
                 // 已定义的设备报警数据点，设备发生报警后该字段有内容，没有发生报警则没内容
 
                 if (dataMap.get("faults") != null) {
-                    JSONObject faultsJson = new JSONObject(dataMap.get("alters").toString());
+                    JSONObject faultsJson = new JSONObject(dataMap.get("faults").toString());
                     jsonObject.put("faults", faultsJson);
                 }
                 // 透传数据，无数据点定义，适合开发者自行定义协议自行解析
@@ -101,15 +101,15 @@ public class HeytzGizWifiDeviceListener extends GizWifiDeviceListener {
     public void didSetSubscribe(GizWifiErrorCode result, GizWifiDevice device, boolean isSubscribed) {
         if (result == GizWifiErrorCode.GIZ_SDK_SUCCESS) {
             // 订阅或解除订阅成功
-            if (app.getCallbackContext(Operation.GET_HARDWARE_INFO.getMethod()) != null) {
+            if (app.getCallbackContext(Operation.SET_SUBSCRIBE.getMethod()) != null) {
                 PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, HeytzUtil.gizDeviceToJsonObject(device));
-                HeytzUtil.sendAndRemoveCallback(app, Operation.GET_HARDWARE_INFO.getMethod(), pluginResult);
+                HeytzUtil.sendAndRemoveCallback(app, Operation.SET_SUBSCRIBE.getMethod(), pluginResult);
             }
         } else {
             // 失败
-            if (app.getCallbackContext(Operation.GET_HARDWARE_INFO.getMethod()) != null) {
+            if (app.getCallbackContext(Operation.SET_SUBSCRIBE.getMethod()) != null) {
                 PluginResult pr = new PluginResult(PluginResult.Status.ERROR, result.getResult());
-                HeytzUtil.sendAndRemoveCallback(app, Operation.GET_HARDWARE_INFO.getMethod(), pr);
+                HeytzUtil.sendAndRemoveCallback(app, Operation.SET_SUBSCRIBE.getMethod(), pr);
             }
         }
     }
