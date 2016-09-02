@@ -147,7 +147,6 @@ exports.getHardwareInfo = function (did, success, error) {
  */
 exports.updateDeviceFromServer = function (productKey, success, error) {
     console.error("此接口已废弃!");
-    // exec(success, error, "gwsdk", "updateDeviceFromServer", [productKey]);
 };
 /**
  *  cordova 释放内存

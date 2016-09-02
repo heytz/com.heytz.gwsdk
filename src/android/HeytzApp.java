@@ -1,5 +1,6 @@
 package com.heytz.gwsdk;
 
+import com.gizwits.gizwifisdk.api.GizWifiDevice;
 import com.xtremeprog.xpgconnect.XPGWifiDevice;
 import org.apache.cordova.CallbackContext;
 
@@ -19,6 +20,7 @@ public  class HeytzApp {
     private List<String> productKeys = new ArrayList();
 
     private String productKey;
+    private String productSecret;
 
     private Object controlObject;
 
@@ -30,9 +32,9 @@ public  class HeytzApp {
 
     private Operation operation;
 
-    private XPGWifiDevice currentDevice;
+    private GizWifiDevice currentDevice;
 
-    private List<XPGWifiDevice> deviceList = new ArrayList<XPGWifiDevice>();//筛选出来的设备列表
+    private List<GizWifiDevice> deviceList = new ArrayList<GizWifiDevice>();//筛选出来的设备列表
 
     private Map<String, CallbackContext> callbackContextMap = new HashMap<String, CallbackContext>();
 //    public List getProductKey() {
@@ -78,6 +80,13 @@ public  class HeytzApp {
     public void setMac(String mac) {
         this.mac = mac;
     }
+    public String getProductSecret() {
+        return productSecret;
+    }
+
+    public void setProductSecret(String Secret) {
+        this.productSecret = Secret;
+    }
 
     public List<String> getProductKeys() {
         return productKeys;
@@ -95,22 +104,22 @@ public  class HeytzApp {
         this.operation = operation;
     }
 
-    public void setCurrentDevice(XPGWifiDevice currentDevice) {
+    public void setCurrentDevice(GizWifiDevice currentDevice) {
         this.currentDevice = currentDevice;
     }
 
-    public XPGWifiDevice getCurrentDevice() {
+    public GizWifiDevice getCurrentDevice() {
         return currentDevice;
     }
 
-    public void setDeviceList(List<XPGWifiDevice> deviceList) {
+    public void setDeviceList(List<GizWifiDevice> deviceList) {
         if (deviceList == null) {
             deviceList.clear();
         }
         this.deviceList = deviceList;
     }
 
-    public List<XPGWifiDevice> getDeviceList() {
+    public List<GizWifiDevice> getDeviceList() {
         return deviceList;
     }
 

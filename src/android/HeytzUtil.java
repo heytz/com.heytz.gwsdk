@@ -2,6 +2,7 @@ package com.heytz.gwsdk;
 
 import android.util.Base64;
 import android.util.Log;
+import com.gizwits.gizwifisdk.api.GizWifiDevice;
 import com.xtremeprog.xpgconnect.XPGWifiDevice;
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.PluginResult;
@@ -9,6 +10,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Iterator;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by chendongdong on 16/3/7.
@@ -39,7 +41,34 @@ public class HeytzUtil {
         }
     }
 
+    public static JSONObject gizDeviceToJsonObject(GizWifiDevice device) {
+        JSONObject json = new JSONObject();
+        try {
+            json.put("macAddress", device.getMacAddress());
+            json.put("did", device.getDid());
+            json.put("ipAddress", device.getIPAddress());
+            json.put("productKey", device.getProductKey());
+            json.put("productName", device.getProductName());
+            json.put("remark", device.getRemark());
+            json.put("isDisabled", device.isDisabled());
+            json.put("isLAN", device.isLAN());
+            json.put("isBind", device.isBind());
+        } catch (JSONException e) {
+        } finally {
+            return json;
+        }
+    }
+
     public static void logDevice(String map, XPGWifiDevice device) {
+        if (HeytzApp.DEBUG) {
+            Log.e(map, device.getMacAddress());
+            Log.e(map, device.getDid());
+            Log.e(map, device.getIPAddress());
+            Log.e(map, device.getProductKey());
+        }
+    }
+
+    public static void logDevice(String map, GizWifiDevice device) {
         if (HeytzApp.DEBUG) {
             Log.e(map, device.getMacAddress());
             Log.e(map, device.getDid());
@@ -123,5 +152,18 @@ public class HeytzUtil {
             app.getCallbackContext(operation).sendPluginResult(pr);
             app.removeCallbackContext(operation);
         }
+    }
+
+    public static ConcurrentHashMap<String, Object> jsonToMap(JSONObject jsonObject) throws JSONException {
+        ConcurrentHashMap<String, Object> command = new ConcurrentHashMap<String, Object>();
+        Iterator keyIter = jsonObject.keys();
+        String key;
+        Object value;
+        while (keyIter.hasNext()) {
+            key = (String) keyIter.next();
+            value = jsonObject.get(key);
+            command.put(key, value);
+        }
+        return command;
     }
 }

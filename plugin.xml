@@ -41,11 +41,12 @@
         <config-file parent="/*" target="AndroidManifest.xml"></config-file>
         <source-file src="src/android/Gwsdk.java" target-dir="src/com/heytz/gwsdk/"/>
         <source-file src="src/android/HeytzApp.java" target-dir="src/com/heytz/gwsdk/"/>
+        <source-file src="src/android/HeytzGizWifiDeviceListener.java" target-dir="src/com/heytz/gwsdk/"/>
+        <source-file src="src/android/HeytzGizWifiGAgentType.java" target-dir="src/com/heytz/gwsdk/"/>
+        <source-file src="src/android/HeytzGizWifiSDKListener.java" target-dir="src/com/heytz/gwsdk/"/>
         <source-file src="src/android/HeytzUtil.java" target-dir="src/com/heytz/gwsdk/"/>
-        <source-file src="src/android/HeytzXPGWifiDeviceListener.java" target-dir="src/com/heytz/gwsdk/"/>
-        <source-file src="src/android/HeytzXPGWifiSDKListener.java" target-dir="src/com/heytz/gwsdk/"/>
         <source-file src="src/android/Operation.java" target-dir="src/com/heytz/gwsdk/"/>
-        <source-file src="src/android/HeytzXPGWifiGAgentType.java" target-dir="src/com/heytz/gwsdk/"/>
+
 
         <source-file src="libs/android/armeabi/libBLEasyConfig.so" target-dir="libs/armeabi/"/>
         <source-file src="libs/android/armeabi/libsimpleconfiglib.so" target-dir="libs/armeabi/"/>
