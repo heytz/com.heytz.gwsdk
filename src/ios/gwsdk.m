@@ -670,8 +670,7 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
     NSLog(@"//====dealloc...====");
     _currentPairDeviceMacAddress = nil;
 
-    currentUpdateProductKey = nil;
-    [GizWifiSDK sharedInstance].delegate = nil;
+     [GizWifiSDK sharedInstance].delegate = nil;
     [GizWifiSDK sharedInstance].delegate = self;
 }
 
@@ -679,7 +678,6 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
 - (void)dispose {
     NSLog(@"//====disposed...====");
     _currentPairDeviceMacAddress = nil;
-      currentUpdateProductKey = nil;
     [GizWifiSDK sharedInstance].delegate = nil;
     [GizWifiSDK sharedInstance].delegate = self;
 }
