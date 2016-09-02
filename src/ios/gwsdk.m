@@ -586,12 +586,12 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
     if (result.code == GIZ_SDK_SUCCESS) {
         NSLog(@"sn:%@", sn);
         //如果sn 为1 代表是控制命令
-        if (sn == [NSNumber numberWithInt:1]) {
+        if ([sn isEqualToNumber:@1]) {
             if (writeCommandHolder != nil) {
                 CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
                 [self.commandDelegate sendPluginResult:pluginResult callbackId:writeCommandHolder.callbackId];
             }
-        }
+        }else{
         // 已定义的设备数据点，有布尔、数值、枚举、扩展类型
         NSDictionary *dataDict = dataMap[@"data"];
         NSLog(@"已定义的设备数据点%@", dataDict);
@@ -615,7 +615,7 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
             [pluginResult setKeepCallbackAsBool:true];
             [self.commandDelegate sendPluginResult:pluginResult callbackId:listenerCommandHolder.callbackId];
         }
-
+        }
     } else {
         //出错，处理 result 信息
         NSLog(@"\n================didReceiveData error====\ndid:%ld", (long) result.code);
