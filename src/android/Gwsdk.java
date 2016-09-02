@@ -81,7 +81,7 @@ public class Gwsdk extends CordovaPlugin {
             JSONArray wifigagentTypeArray = args.getJSONArray(5);
             app.setUid(args.getString(6));
             app.setToken(args.getString(7));
-            String productSecret = args.getString(10);
+            String productSecret = args.getString(8);
             app.setProductSecret(productSecret);
             GizWifiConfigureMode wifiConfigMode = GizWifiConfigureMode.GizWifiAirLink;
             if (mode == 2) {

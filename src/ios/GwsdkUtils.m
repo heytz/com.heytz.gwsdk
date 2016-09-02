@@ -10,13 +10,6 @@
 #import "GwsdkUtils.h"
 
 @implementation GwsdkUtils
-
-int DeviceWifiState;
-int DeviceWifiBindDeviceState;
-int ControlState;
-int DeviceListState;
-
-
 /**
  *  GizWifiDevice 转换为dictionary
  *

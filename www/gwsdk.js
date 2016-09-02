@@ -51,14 +51,6 @@ exports.setDeviceOnboardingAndBindDevice = function (wifiSSID, wifiKey, mode, ti
 exports.getBoundDevices = function (uid, token, productKey, success, error) {
     exec(success, error, "gwsdk", "getBoundDevices", [uid, token, checkProduct(productKey)]);
 };
-/**
- *  cordova 绑定设备
- *
- *  @param command ["uid","token","did","passcode","remark"]
- */
-exports.deviceBinding = function (uid, token, did, passcode, remark, success, error) {
-    console.error("此接口已废弃!");
-};
 exports.bindRemoteDevice = function (uid, token, mac, productKey, productSecret, success, error) {
     exec(success, error, "gwsdk", "bindRemoteDevice", [uid, token, mac, productKey, productSecret])
 };
@@ -91,14 +83,6 @@ exports.unbindDevice = function (uid, token, did, success, error) {
  */
 exports.setSubscribe = function (did, subState, success, error) {
     exec(success, error, "gwsdk", "setSubscribe", [did, subState])
-};
-/**
- *  cordova 控制设备
- *
- *  @param command [["prodctkeys"],"uid","token","mac","value"]
- */
-exports.deviceControl = function (productKey, uid, token, mac, value, success, error) {
-    console.error("此接口已废弃!");
 };
 /**
  * cordova 获取ssid列表
@@ -140,15 +124,7 @@ exports.write = function (did, value, success, error) {
 exports.getHardwareInfo = function (did, success, error) {
     exec(success, error, "gwsdk", "getHardwareInfo", [did]);
 };
-/**
- * cordova 下载产品配置文件 配置文件，是定义 APP 与指定设备通信的规则
- * @param productKey
- * @param success
- * @param error
- */
-exports.updateDeviceFromServer = function (productKey, success, error) {
-    console.error("此接口已废弃!");
-};
+
 /**
  *  cordova 释放内存
  *
