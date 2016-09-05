@@ -41,7 +41,7 @@ public class HeytzGizWifiDeviceListener extends GizWifiDeviceListener {
                     JSONObject dataJson = new JSONObject(dataMap.get("data").toString());
                     jsonObject.put("data", dataJson);
                     // 扩展数据点，key如果是“BBBB”
-                    byte[] bytes = (byte[]) dataJson.get("BBBB");
+                  //  byte[] bytes = (byte[]) dataJson.get("BBBB");
                 }
                 // 已定义的设备故障数据点，设备发生故障后该字段有内容，没有发生故障则没内容
 
