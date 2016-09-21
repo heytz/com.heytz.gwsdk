@@ -908,4 +908,70 @@ typedef NS_ENUM(NSInteger, GizPushType) {
     GizPushJiGuang = 1
 };
 
+/*
+ 定时按周重复
+ */
+typedef NS_ENUM(NSInteger, GizScheduleWeekday) {
+    /*
+     星期日
+     */
+    GizScheduleSunday = 0,
+    /*
+     星期一
+     */
+    GizScheduleMonday = 1,
+    /*
+     星期二
+     */
+    GizScheduleTuesday = 2,
+    /*
+     星期三
+     */
+    GizScheduleWednesday = 3,
+    /*
+     星期四
+     */
+    GizScheduleThursday = 4,
+    /*
+     星期五
+     */
+    GizScheduleFriday = 5,
+    /*
+     星期六
+     */
+    GizScheduleSaturday = 6
+};
+
+/*
+ 定时任务重复策略
+ */
+typedef NS_ENUM(NSInteger, GizScheduleRepeatRule) {
+    /*
+     不管什么情况都重复
+     */
+    GizScheduleRepeatAll = 0,
+    /*
+     仅失败重复
+     */
+    GizScheduleRepeatFailed,
+};
+
+/*
+ 定时任务执行状态
+ */
+typedef NS_ENUM(NSInteger, GizScheduleStatus) {
+    /*
+     成功
+     */
+    GizScheduleSucceed = 0,
+    /*
+     失败
+     */
+    GizScheduleFailed,
+    /**
+     无状态
+     */
+    GizScheduleNotDone,
+};
+
 #endif

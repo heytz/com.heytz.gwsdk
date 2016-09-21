@@ -14,6 +14,7 @@
 #import <GizWifiSDK/GizWifiSSID.h>
 #import <GizWifiSDK/GizUserInfo.h>
 #import <GizWifiSDK/GizWifiBinary.h>
+#import <GizWifiSDK/GizSchedulerInfo.h>
 
 @class GizWifiSDK;
 
@@ -311,7 +312,43 @@
  @param result 详细见 GizWifiErrorCode 枚举定义。result.code 为 GIZ_SDK_SUCCESS 表示成功，其他为失败。失败时，其他回调参数为 nil
  @see 触发函数：[GizWifiSDK disableLAN:]
  */
-- (void)wifiSDK:(GizWifiSDK*)wifiSDK didDisableLAN:(NSError*)result;
+- (void)wifiSDK:(GizWifiSDK *)wifiSDK didDisableLAN:(NSError *)result;
+
+/*
+ 创建定时任务的回调接口
+ @param wifiSDK 为回调的 GizWifiSDK 单例
+ @param result 详细见 GizWifiErrorCode 枚举定义。GIZ_SDK_SUCCESS 表示成功，其他为失败。失败时，sid为 nil
+ @param sid 已创建好的定时任务 sid
+ @see 触发函数：[GizWifiSDK createScheduler:schedulerInfo:]
+ */
+- (void)wifiSDK:(GizWifiSDK *)wifiSDK didCreateScheduler:(NSError *)result sid:(NSString *)sid;
+
+/*
+ 获取定时任务列表的回调接口
+ @param result 详细见 GizWifiErrorCode 枚举定义。GIZ_SDK_SUCCESS 表示成功，其他为失败。失败时，sid为 nil
+ @see 触发函数：[GizWifiSDK deleteScheduler:sid:]
+ */
+- (void)wifiSDK:(GizWifiSDK *)wifiSDK didDeleteScheduler:(NSError *)result;
+
+/*
+ 删除定时任务的回调接口
+ @param result 详细见 GizWifiErrorCode 枚举定义。GIZ_SDK_SUCCESS 表示成功，其他为失败。失败时，sid为 nil
+ @param scheduleTaskList 获取到的定时任务列表，为GizSchedulerInfo类对象数组
+ @see 触发函数：[GizWifiSDK getSchedulers:]
+ */
+- (void)wifiSDK:(GizWifiSDK *)wifiSDK didGetSchedulers:(NSError *)result scheduleTaskList:(NSArray *)scheduleTaskList;
+
+/*
+ 查询定时任务执行状态的回调接口
+ @param result 详细见 GizWifiErrorCode 枚举定义。GIZ_SDK_SUCCESS 表示成功，其他为失败。失败时，sid为 nil
+ @param sid 获取到执行状态的定时任务id
+ @param datetime 定时任务的执行时间
+ @param status 定时任务的执行状态
+ @param statusDetail 执行状态的详细信息，以字典类型表示，<key, value>为：
+ <did, true|false>
+ @see 触发函数：[GizWifiSDK getSchedulerStatus:sid:]
+ */
+- (void)wifiSDK:(GizWifiSDK *)wifiSDK didGetSchedulerStatus:(NSError *)result sid:(NSString *)sid datetime:(NSString *)datetime status:(GizScheduleStatus)status statusDetail:(NSDictionary *)statusDetail;
 
 @end
 
@@ -735,5 +772,36 @@
  @see 对应的回调接口：[GizWifiSDKDelegate wifiSDK:didDisableLAN:]
  */
 + (void)disableLAN:(BOOL)disabled;
+
+/*
+ 创建定时任务。用户登录、绑定设备后才能创建定时任务
+ @param token 用户登录或注册时得到的token
+ @param schedulerInfo 要创建的定时任务内容
+ @see 对应的回调接口：[GizWifiSDKDelegate wifiSDK:didCreateScheduler:sid:]
+ */
+- (void)createScheduler:(NSString *)token schedulerInfo:(GizSchedulerInfo *)schedulerInfo;
+
+/*
+ 获取定时任务列表。用户登录后才能获取
+ @param token 用户登录或注册时得到的token
+ @see 对应的回调接口：[GizWifiSDKDelegate wifiSDK:didGetSchedulers:scheduleTaskList:]
+ */
+- (void)getSchedulers:(NSString *)token;
+
+/*
+ 删除定时任务。用户登录后才能删除
+ @param token 用户登录或注册时得到的token
+ @param sid 待删除的定时任务id
+ @see 对应的回调接口：[GizWifiSDKDelegate wifiSDK:didDeleteScheduler:]
+ */
+- (void)deleteScheduler:(NSString *)token sid:(NSString *)sid;
+
+/*
+ 获取指定sid的定时任务执行状态
+ @param token 用户登录或注册时得到的token
+ @param sid 待删除的定时任务id
+ @see 对应的回调接口：[GizWifiSDKDelegate wifiSDK:didGetSchedulerStatus:sid:datetime:status:statusDetail:]
+ */
+- (void)getSchedulerStatus:(NSString *)token sid:(NSString *)sid;
 
 @end
