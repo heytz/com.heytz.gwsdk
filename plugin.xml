@@ -1,39 +1,82 @@
 <?xml version='1.0' encoding='utf-8'?>
-<plugin id="com.heytz.gwsdk" version="0.4.1" xmlns="http://apache.org/cordova/ns/plugins/1.0"
+<plugin id="com.heytz.gwsdk" version="0.6.1" xmlns="http://apache.org/cordova/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android">
     <name>gwsdk</name>
     <js-module name="gwsdk" src="www/gwsdk.js">
         <clobbers target="cordova.plugins.gwsdk"/>
     </js-module>
+    <preference name="GIZWITS_APPID"/>
     <platform name="ios">
         <config-file parent="/*" target="config.xml">
             <feature name="gwsdk">
                 <param name="ios-package" value="gwsdk"/>
             </feature>
+            <preference name="gizwappid" value="$GIZWITS_APPID"/>
         </config-file>
         <source-file src="src/ios/gwsdk.m"/>
-        <source-file framework="true" src="libcrypto.a"/>
-        <source-file framework="true" src="libssl.a"/>
-        <source-file framework="true" src="libEsptouch_v0.3.3.4_4.a"/>
+        <source-file src="src/ios/gwsdk.h"/>
+        <source-file src="src/ios/GwsdkUtils.h"/>
+        <source-file src="src/ios/GwsdkUtils.m"/>
+
+        <source-file framework="true" src="libs/ios/libBLEasyConfig.a"/>
+        <source-file framework="true" src="libs/ios/libEasyLink.a"/>
+        <source-file framework="true" src="libs/ios/libemTMF.a"/>
+        <source-file framework="true" src="libs/ios/libEsptouch_v0.3.5.0.a"/>
+        <source-file framework="true" src="libs/ios/libssl.a"/>
+        <source-file framework="true" src="libs/ios/libcrypto.a"/>
+
         <framework src="SystemConfiguration.framework"/>
+        <framework src="CoreTelephony.framework"/>
         <framework src="libc++.dylib"/>
-        <framework custom="true" src="XPGWifiSDK.framework"/>
+        <framework custom="true" src="libs/ios/GizWifiSDK.framework"/>
         <framework custom="true" src="openssl"/>
     </platform>
     <platform name="android">
         <config-file parent="/*" target="res/xml/config.xml">
             <feature name="gwsdk">
-                <param name="android-package" value="com.heytz.gwsdk.gwsdk"/>
+                <param name="android-package" value="com.heytz.gwsdk.Gwsdk"/>
             </feature>
+            <preference name="gizwappid" value="$GIZWITS_APPID"/>
         </config-file>
-        <config-file parent="/*" target="AndroidManifest.xml"></config-file>
-        <source-file src="src/android/gwsdk.java" target-dir="src/com/heytz/gwsdk/" />
-        <source-file src="libs/armeabi/libsimpleconfiglib.so" target-dir="libs/armeabi/" />
-        <source-file src="libs/armeabi/libXPGConnect.so" target-dir="libs/armeabi/" />
+        <config-file target="AndroidManifest.xml" parent="/manifest">
+            <!-- Required  一些系统要求的权限，如访问网络等-->
+            <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+            <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+            <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+            <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+            <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+            <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+            <uses-permission android:name="android.permission.INTERNET" />
+            <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+            <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
+        </config-file>
+        <source-file src="src/android/Gwsdk.java" target-dir="src/com/heytz/gwsdk/"/>
+        <source-file src="src/android/HeytzApp.java" target-dir="src/com/heytz/gwsdk/"/>
+        <source-file src="src/android/HeytzGizWifiDeviceListener.java" target-dir="src/com/heytz/gwsdk/"/>
+        <source-file src="src/android/HeytzGizWifiGAgentType.java" target-dir="src/com/heytz/gwsdk/"/>
+        <source-file src="src/android/HeytzGizWifiSDKListener.java" target-dir="src/com/heytz/gwsdk/"/>
+        <source-file src="src/android/HeytzUtil.java" target-dir="src/com/heytz/gwsdk/"/>
+        <source-file src="src/android/Operation.java" target-dir="src/com/heytz/gwsdk/"/>
 
-        <source-file src="libs/simpleconfiglib.jar" target-dir="libs" />
-        <source-file src="libs/libEsptouch_v0.3.3.4_3.jar" target-dir="libs" />
-        <source-file src="libs/json-lib-2.4-jdk15.jar" target-dir="libs" />
-        <source-file src="libs/XPGWiFiSDK.jar" target-dir="libs" />
+
+        <source-file src="libs/android/armeabi/libBLEasyConfig.so" target-dir="libs/armeabi/"/>
+        <source-file src="libs/android/armeabi/libsimpleconfiglib.so" target-dir="libs/armeabi/"/>
+        <source-file src="libs/android/armeabi/libwavegen.so" target-dir="libs/armeabi/"/>
+        <source-file src="libs/android/armeabi/libSDKLog.so" target-dir="libs/armeabi/"/>
+
+
+        <source-file src="libs/android/BLEasyConfig.jar" target-dir="libs"/>
+        <source-file src="libs/android/easylink2.0.jar" target-dir="libs"/>
+        <source-file src="libs/android/GizWifiSDK.jar" target-dir="libs"/>
+        <source-file src="libs/android/hiflying-iots-android-smartlink7.0.2.jar" target-dir="libs"/>
+        <source-file src="libs/android/Lark7618SDK_noudp1606031910_0101.jar" target-dir="libs"/>
+        <source-file src="libs/android/libEsptouch_v0.3.3.4_3.jar" target-dir="libs"/>
+        <source-file src="libs/android/libForEElink.jar" target-dir="libs"/>
+        <source-file src="libs/android/LSFSK_1.0.jar" target-dir="libs"/>
+        <source-file src="libs/android/OneShotConfig.jar" target-dir="libs"/>
+        <source-file src="libs/android/simpleconfigwizardlib.jar" target-dir="libs"/>
+
+        <source-file src="libs/json-lib-2.4-jdk15.jar" target-dir="libs"/>
+
     </platform>
 </plugin>
