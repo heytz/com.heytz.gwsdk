@@ -11,13 +11,13 @@ import java.util.Map;
 /**
  * Created by chendongdong on 16/3/7.
  */
-public  class HeytzApp {
+public class HeytzApp {
     public final static boolean DEBUG = true;
 
     public final static String TAG = "\n===gwsdkwrapper====\n";
 
     private List<String> productKeys = new ArrayList();
-
+    private String appId;
     private String productKey;
     private String productSecret;
 
@@ -45,6 +45,14 @@ public  class HeytzApp {
         this.productKey = productKey;
     }
 
+    public String getAppId() {
+        return this.appId;
+    }
+
+    public void setAppId(String appId) {
+        this.appId = appId;
+    }
+
     public String getUid() {
         return uid;
     }
@@ -68,6 +76,7 @@ public  class HeytzApp {
     public void setMac(String mac) {
         this.mac = mac;
     }
+
     public String getProductSecret() {
         return productSecret;
     }
@@ -110,7 +119,6 @@ public  class HeytzApp {
     public List<GizWifiDevice> getDeviceList() {
         return deviceList;
     }
-
 
 
     /**
