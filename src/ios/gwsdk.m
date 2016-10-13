@@ -9,10 +9,10 @@
 @synthesize commandHolder;
 @synthesize _deviceList;
 
-NSString *_currentPairDeviceMacAddress;
+
 NSInteger currentState;
 bool _debug = true;
-NSString *_uid, *_token, *_mac, *_remark, *_alias, *_productSecret;
+NSString *_uid, *_token, *_productSecret;
 NSString *_currentbindDeviceMac, *_currentBindDeviceProductKey;
 
 NSArray *devices; //内存中的device列表。
@@ -64,12 +64,8 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
         [GizWifiSDK sharedInstance].delegate = self;
     }
     devices = [GizWifiSDK sharedInstance].deviceList;
-    _currentPairDeviceMacAddress = nil;
     self.commandHolder = command;
 }
-
-
-
 
 
 /**
@@ -228,7 +224,7 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
     for (GizWifiDevice *device in devices) {
         if (device.did == did) {
             device.delegate = self;
-             isExist = true;
+            isExist = true;
             [device setCustomInfo:remark alias:alias];
         }
     }
@@ -273,6 +269,7 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
     }
 
 }
+
 /**
  * cordova 获取ssid列表
  *
@@ -317,16 +314,18 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
     writeCommandHolder = command;
     for (GizWifiDevice *device in devices) {
         if ([did isEqualToString:device.did]) {
-            isExist = true;
-            device.delegate = self;
-            NSLog(@"Write data: %@", value);
-            [device write:value withSN:1];
-        } else {
-            /**
-             *  设备没有连接
-             */
-            CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"The device is not connected!"];
-            [self.commandDelegate sendPluginResult:pluginResult callbackId:writeCommandHolder.callbackId];
+            if (device.netStatus == 2) {
+                isExist = true;
+                device.delegate = self;
+                NSLog(@"Write data: %@", value);
+                [device write:value withSN:1];
+            } else {
+                /**
+                 *  设备没有连接
+                 */
+                CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"The device is not connected!"];
+                [self.commandDelegate sendPluginResult:pluginResult callbackId:writeCommandHolder.callbackId];
+            }
         }
     }
     if (isExist == false) {
@@ -334,6 +333,7 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
         [self.commandDelegate sendPluginResult:pluginResult callbackId:writeCommandHolder.callbackId];
     }
 }
+
 /**
  *  cordova 获取硬件信息
  *
@@ -377,7 +377,6 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
 }
 
 
-
 /**
  * 回调  新版本回调接口 16,08,30
  */
@@ -415,6 +414,7 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
         [self.commandDelegate sendPluginResult:pluginResult callbackId:self.commandHolder.callbackId];
     }
 }
+
 /**
  * 回调 设置设备绑定信息
  *
@@ -451,7 +451,7 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
         [self.commandDelegate sendPluginResult:pluginResult callbackId:self.commandHolder.callbackId];
     } else {
         // 绑定失败
-        NSLog(@"\n =========didBindDevice error========\n code:@ld",result.code);
+        NSLog(@"\n =========didBindDevice error========\n code:@ld", result.code);
         CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDouble:(long) result.code];
         [self.commandDelegate sendPluginResult:pluginResult callbackId:self.commandHolder.callbackId];
     }
@@ -591,30 +591,30 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
                 CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
                 [self.commandDelegate sendPluginResult:pluginResult callbackId:writeCommandHolder.callbackId];
             }
-        }else{
-        // 已定义的设备数据点，有布尔、数值、枚举、扩展类型
-        NSDictionary *dataDict = dataMap[@"data"];
-        NSLog(@"已定义的设备数据点%@", dataDict);
-        // 扩展类型数据点，key如果是“extData”
-        NSData *extData = dataMap[@"extdata"];
-        NSLog(@"扩展数据extData：%@", extData);
-        // 已定义的设备故障或报警数据点，设备发生故障或报警后该字段有内容，没有发生故障或报警则没内容
-        NSDictionary *alertsDict = dataMap[@"alerts"];
-        NSDictionary *faultsDict = dataMap[@"faults"];
-        NSLog(@"报警：%@, 故障：%@", alertsDict, faultsDict);
-        // 透传数据，无数据点定义，适合开发者自行定义协议做数据解析
-        NSData *binary = dataMap[@"binary"];
-        NSLog(@"透传数据：%@", binary);
-        NSString *did = device.did;
-        NSMutableDictionary *d;
-        d = [dataMap mutableCopy];
-        d[@"did"] = did;
-        d[@"device"] = [GwsdkUtils gizDeviceToDictionary:device];
-        if (listenerCommandHolder != nil) {
-            CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:d];
-            [pluginResult setKeepCallbackAsBool:true];
-            [self.commandDelegate sendPluginResult:pluginResult callbackId:listenerCommandHolder.callbackId];
-        }
+        } else {
+            // 已定义的设备数据点，有布尔、数值、枚举、扩展类型
+            NSDictionary *dataDict = dataMap[@"data"];
+            NSLog(@"已定义的设备数据点%@", dataDict);
+            // 扩展类型数据点，key如果是“extData”
+            NSData *extData = dataMap[@"extdata"];
+            NSLog(@"扩展数据extData：%@", extData);
+            // 已定义的设备故障或报警数据点，设备发生故障或报警后该字段有内容，没有发生故障或报警则没内容
+            NSDictionary *alertsDict = dataMap[@"alerts"];
+            NSDictionary *faultsDict = dataMap[@"faults"];
+            NSLog(@"报警：%@, 故障：%@", alertsDict, faultsDict);
+            // 透传数据，无数据点定义，适合开发者自行定义协议做数据解析
+            NSData *binary = dataMap[@"binary"];
+            NSLog(@"透传数据：%@", binary);
+            NSString *did = device.did;
+            NSMutableDictionary *d;
+            d = [dataMap mutableCopy];
+            d[@"did"] = did;
+            d[@"device"] = [GwsdkUtils gizDeviceToDictionary:device];
+            if (listenerCommandHolder != nil) {
+                CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:d];
+                [pluginResult setKeepCallbackAsBool:true];
+                [self.commandDelegate sendPluginResult:pluginResult callbackId:listenerCommandHolder.callbackId];
+            }
         }
     } else {
         //出错，处理 result 信息
@@ -668,16 +668,13 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
  */
 - (void)dealloc:(CDVInvokedUrlCommand *)command {
     NSLog(@"//====dealloc...====");
-    _currentPairDeviceMacAddress = nil;
-
-     [GizWifiSDK sharedInstance].delegate = nil;
+    [GizWifiSDK sharedInstance].delegate = nil;
     [GizWifiSDK sharedInstance].delegate = self;
 }
 
 
 - (void)dispose {
     NSLog(@"//====disposed...====");
-    _currentPairDeviceMacAddress = nil;
     [GizWifiSDK sharedInstance].delegate = nil;
     [GizWifiSDK sharedInstance].delegate = self;
 }
