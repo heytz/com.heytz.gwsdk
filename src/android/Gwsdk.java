@@ -18,6 +18,7 @@ import java.util.List;
  */
 public class Gwsdk extends CordovaPlugin {
     private static final String GIZ_APP_ID = "gizwappid";
+    private static String _appId;
     private HeytzApp app = new HeytzApp();
     private HeytzGizWifiSDKListener heytzGizWifiSDKListener = new HeytzGizWifiSDKListener();
     private HeytzGizWifiDeviceListener heytzGizWifiDeviceListener = new HeytzGizWifiDeviceListener();
@@ -26,12 +27,18 @@ public class Gwsdk extends CordovaPlugin {
     @Override
     public void initialize(CordovaInterface cordova, CordovaWebView webView) {
         super.initialize(cordova, webView);
-        //设置appId
-        String appId = webView.getPreferences().getString(GIZ_APP_ID, "");
-        GizWifiSDK.sharedInstance().startWithAppID(cordova.getActivity().getApplicationContext(), appId);
-        GizWifiSDK.sharedInstance().setListener(heytzGizWifiSDKListener);
-        heytzGizWifiSDKListener.setApp(app);
-        app.setDeviceList(GizWifiSDK.sharedInstance().getDeviceList());
+        //设置appId 以后就不再执行里面的方法。
+        // 这个initialize 会被连续调用三次，
+        // 在华为手机上面 连续调用三次startWithAppID出现GizWifiSDK崩溃 ，导致应用崩溃。
+        //可能原因是 GizWifiSDK 回去调用手机通讯录，然后应用崩溃
+        if (_appId == null) {
+            //设置appId
+            _appId = webView.getPreferences().getString(GIZ_APP_ID, "");
+            GizWifiSDK.sharedInstance().startWithAppID(cordova.getActivity().getApplicationContext(), _appId);
+            GizWifiSDK.sharedInstance().setListener(heytzGizWifiSDKListener);
+            heytzGizWifiSDKListener.setApp(app);
+            app.setDeviceList(GizWifiSDK.sharedInstance().getDeviceList());
+        }
     }
 
     /**
