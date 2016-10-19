@@ -35,7 +35,8 @@ public class Gwsdk extends CordovaPlugin {
             //设置appId
             _appId = webView.getPreferences().getString(GIZ_APP_ID, "");
             app.setAppId(_appId);
-            GizWifiSDK.sharedInstance().startWithAppID(cordova.getActivity().getApplicationContext(), _appId);
+            List<String> prodckeKeyList = new ArrayList<String>();
+            GizWifiSDK.sharedInstance().startWithAppID(cordova.getActivity().getApplicationContext(), _appId, prodckeKeyList, null);
             GizWifiSDK.sharedInstance().setListener(heytzGizWifiSDKListener);
             heytzGizWifiSDKListener.setApp(app);
             app.setDeviceList(GizWifiSDK.sharedInstance().getDeviceList());
