@@ -1,6 +1,7 @@
 package com.heytz.gwsdk;
 
 import com.gizwits.gizwifisdk.api.GizWifiDevice;
+import com.gizwits.gizwifisdk.enumration.GizWifiDeviceNetStatus;
 import com.gizwits.gizwifisdk.enumration.GizWifiErrorCode;
 import com.gizwits.gizwifisdk.listener.GizWifiDeviceListener;
 import org.apache.cordova.PluginResult;
@@ -29,8 +30,8 @@ public class HeytzGizWifiDeviceListener extends GizWifiDeviceListener {
      * @param sn
      */
     @Override
-    public void didReceiveData(GizWifiErrorCode result, GizWifiDevice device,
-                               ConcurrentHashMap<String, Object> dataMap, int sn) {
+    public void didReceiveData(GizWifiErrorCode result, GizWifiDevice device, ConcurrentHashMap<String, Object> dataMap, int sn) {
+        super.didReceiveData(result, device, dataMap, sn);
         // 如果App不使用sn，此处不需要判断sn
         if (result == GizWifiErrorCode.GIZ_SDK_SUCCESS) {
             JSONObject jsonObject = new JSONObject();
@@ -41,7 +42,7 @@ public class HeytzGizWifiDeviceListener extends GizWifiDeviceListener {
                     JSONObject dataJson = new JSONObject(dataMap.get("data").toString());
                     jsonObject.put("data", dataJson);
                     // 扩展数据点，key如果是“BBBB”
-                  //  byte[] bytes = (byte[]) dataJson.get("BBBB");
+                    //  byte[] bytes = (byte[]) dataJson.get("BBBB");
                 }
                 // 已定义的设备故障数据点，设备发生故障后该字段有内容，没有发生故障则没内容
 
@@ -99,17 +100,46 @@ public class HeytzGizWifiDeviceListener extends GizWifiDeviceListener {
      */
     @Override
     public void didSetSubscribe(GizWifiErrorCode result, GizWifiDevice device, boolean isSubscribed) {
+        super.didSetSubscribe(result, device, isSubscribed);
         if (result == GizWifiErrorCode.GIZ_SDK_SUCCESS) {
-            // 订阅或解除订阅成功
-            if (app.getCallbackContext(Operation.SET_SUBSCRIBE.getMethod()) != null) {
-                PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, HeytzUtil.gizDeviceToJsonObject(device));
-                HeytzUtil.sendAndRemoveCallback(app, Operation.SET_SUBSCRIBE.getMethod(), pluginResult);
+            if (!isSubscribed) {
+                // 订阅或解除订阅成功
+                // didUpdateNetStatus 不会再触发
+                if (app.getCallbackContext(Operation.SET_SUBSCRIBE.getMethod()) != null) {
+                    PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, HeytzUtil.gizDeviceToJsonObject(device));
+                    HeytzUtil.sendAndRemoveCallback(app, Operation.SET_SUBSCRIBE.getMethod(), pluginResult);
+                }
+            } else {
+                // 去 didUpdateNetStatus 方法中 等待 GizWifiDeviceNetStatus== GizWifiDeviceNetStatus.GizDeviceControlled
+                // 否则这个 subscribe 是失败的
             }
         } else {
             // 失败
             if (app.getCallbackContext(Operation.SET_SUBSCRIBE.getMethod()) != null) {
                 PluginResult pr = new PluginResult(PluginResult.Status.ERROR, result.getResult());
                 HeytzUtil.sendAndRemoveCallback(app, Operation.SET_SUBSCRIBE.getMethod(), pr);
+            }
+        }
+    }
+
+    @Override
+    public void didUpdateNetStatus(GizWifiDevice device, GizWifiDeviceNetStatus netStatus) {
+        super.didUpdateNetStatus(device, netStatus);
+        if (device.isSubscribed()) {
+            if (netStatus == GizWifiDeviceNetStatus.GizDeviceControlled) {
+                if (app.getCurrentDevice().getDid().equals(device.getDid())) {
+                    // 订阅或解除订阅成功
+                    if (app.getCallbackContext(Operation.SET_SUBSCRIBE.getMethod()) != null) {
+                        PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, HeytzUtil.gizDeviceToJsonObject(device));
+                        HeytzUtil.sendAndRemoveCallback(app, Operation.SET_SUBSCRIBE.getMethod(), pluginResult);
+                    }
+                }
+            } else {
+                // 失败
+                if (app.getCallbackContext(Operation.SET_SUBSCRIBE.getMethod()) != null) {
+                    PluginResult pr = new PluginResult(PluginResult.Status.ERROR, HeytzUtil.gizDeviceToJsonObject(device));
+                    HeytzUtil.sendAndRemoveCallback(app, Operation.SET_SUBSCRIBE.getMethod(), pr);
+                }
             }
         }
     }
@@ -123,6 +153,7 @@ public class HeytzGizWifiDeviceListener extends GizWifiDeviceListener {
      */
     @Override
     public void didSetCustomInfo(GizWifiErrorCode result, GizWifiDevice device) {
+        super.didSetCustomInfo(result, device);
         if (result == GizWifiErrorCode.GIZ_SDK_SUCCESS) {
             // 修改成功
             if (app.getCallbackContext(Operation.SET_CUSTOM_INFO.getMethod()) != null) {
@@ -148,7 +179,9 @@ public class HeytzGizWifiDeviceListener extends GizWifiDeviceListener {
      * @param hardwareInfo
      */
     @Override
-    public void didGetHardwareInfo(GizWifiErrorCode result, GizWifiDevice device, ConcurrentHashMap<String, String> hardwareInfo) {
+    public void didGetHardwareInfo(GizWifiErrorCode result, GizWifiDevice
+            device, ConcurrentHashMap<String, String> hardwareInfo) {
+        super.didGetHardwareInfo(result, device, hardwareInfo);
         StringBuilder sb = new StringBuilder();
         if (result == GizWifiErrorCode.GIZ_SDK_SUCCESS) {
             sb.append("Wifi Hardware Version:" + hardwareInfo.get("wifiHardVersion")

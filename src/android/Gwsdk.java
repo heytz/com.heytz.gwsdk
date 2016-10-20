@@ -3,6 +3,7 @@ package com.heytz.gwsdk;
 import com.gizwits.gizwifisdk.api.GizWifiDevice;
 import com.gizwits.gizwifisdk.api.GizWifiSDK;
 import com.gizwits.gizwifisdk.enumration.GizWifiConfigureMode;
+import com.gizwits.gizwifisdk.enumration.GizWifiDeviceNetStatus;
 import com.gizwits.gizwifisdk.enumration.GizWifiGAgentType;
 import org.apache.cordova.*;
 import org.json.JSONArray;
@@ -14,7 +15,7 @@ import java.util.List;
 
 
 /**
- * This class wrapping Gizwits WifiSDK called from JavaScript.
+ * This class wrapping Jests WifiSDK called from JavaScript.
  */
 public class Gwsdk extends CordovaPlugin {
     private static final String GIZ_APP_ID = "gizwappid";
@@ -225,6 +226,12 @@ public class Gwsdk extends CordovaPlugin {
         }
     }
 
+    /**
+     * 设备订阅
+     *
+     * @param did
+     * @param isSub
+     */
     private void setSubscribe(String did, Boolean isSub) {
         List<GizWifiDevice> list = app.getDeviceList();
         boolean isExist = false;
@@ -234,7 +241,15 @@ public class Gwsdk extends CordovaPlugin {
                 app.setCurrentDevice(gizWifiDevice);
                 heytzGizWifiDeviceListener.setApp(app);
                 gizWifiDevice.setListener(heytzGizWifiDeviceListener);
-                gizWifiDevice.setSubscribe(isSub);
+                if (gizWifiDevice.isSubscribed() && gizWifiDevice.getNetStatus() == GizWifiDeviceNetStatus.GizDeviceControlled) {
+                    // 订阅或解除订阅成功
+                    if (app.getCallbackContext(Operation.SET_SUBSCRIBE.getMethod()) != null) {
+                        PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, HeytzUtil.gizDeviceToJsonObject(gizWifiDevice));
+                        HeytzUtil.sendAndRemoveCallback(app, Operation.SET_SUBSCRIBE.getMethod(), pluginResult);
+                    }
+                } else {
+                    gizWifiDevice.setSubscribe(isSub);
+                }
             }
         }
         if (!isExist) {

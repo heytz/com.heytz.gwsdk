@@ -22,6 +22,7 @@ public class HeytzGizWifiSDKListener extends GizWifiSDKListener {
 
     @Override
     public void didSetDeviceOnboarding(GizWifiErrorCode result, String mac, String did, String productKey) {
+        super.didSetDeviceOnboarding(result, mac, did, productKey);
         if (result == GizWifiErrorCode.GIZ_SDK_SUCCESS) {
             app.setMac(mac);
             app.setProductKey(productKey);
@@ -65,6 +66,7 @@ public class HeytzGizWifiSDKListener extends GizWifiSDKListener {
      */
     @Override
     public void didBindDevice(GizWifiErrorCode result, String did) {
+        super.didBindDevice(result, did);
         PluginResult pr;
         if (result == GizWifiErrorCode.GIZ_SDK_SUCCESS) {
             // 绑定成功
@@ -99,6 +101,7 @@ public class HeytzGizWifiSDKListener extends GizWifiSDKListener {
      */
     @Override
     public void didUnbindDevice(GizWifiErrorCode result, String did) {
+        super.didUnbindDevice(result, did);
         if (result == GizWifiErrorCode.GIZ_SDK_SUCCESS) {
             // 解绑成功
             if (app.getCallbackContext(Operation.UNBIND_DEVICE.getMethod()) != null) {
@@ -128,6 +131,7 @@ public class HeytzGizWifiSDKListener extends GizWifiSDKListener {
      */
     @Override
     public void didDiscovered(GizWifiErrorCode result, List<GizWifiDevice> deviceList) {
+        super.didDiscovered(result, deviceList);
         // 提示错误原因
         if (result == GizWifiErrorCode.GIZ_SDK_SUCCESS) {
             if (app.getCallbackContext(Operation.GET_BOUND_DEVICES.getMethod()) != null) {
@@ -154,6 +158,7 @@ public class HeytzGizWifiSDKListener extends GizWifiSDKListener {
      */
     @Override
     public void didGetSSIDList(GizWifiErrorCode result, List<GizWifiSSID> ssidInfoList) {
+        super.didGetSSIDList(result, ssidInfoList);
         if (result == GizWifiErrorCode.GIZ_SDK_SUCCESS) {
             if (app.getCallbackContext(Operation.GET_WIFI_SSID_LIST.getMethod()) != null) {
                 JSONArray jsonArray = new JSONArray();
@@ -178,6 +183,7 @@ public class HeytzGizWifiSDKListener extends GizWifiSDKListener {
      */
     @Override
     public void didUpdateProduct(GizWifiErrorCode result, String productKey, String productUI) {
+        super.didUpdateProduct(result, productKey, productUI);
         if (result == GizWifiErrorCode.GIZ_SDK_SUCCESS) {
 
         } else {
