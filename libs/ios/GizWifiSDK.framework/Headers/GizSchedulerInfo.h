@@ -25,8 +25,8 @@
 @property (strong, nonatomic) NSString *remark;
 @property (strong, nonatomic) NSArray *taskList;
 @property (assign, nonatomic) GizScheduleRepeatRule repeatRule;
-@property (strong, nonatomic) NSArray* weekdays;
-@property (strong, nonatomic) NSArray* monthDays;
+@property (strong, nonatomic) NSArray *weekdays;
+@property (strong, nonatomic) NSArray *monthDays;
 @property (assign, nonatomic) NSInteger repeatCount;
 
 @end

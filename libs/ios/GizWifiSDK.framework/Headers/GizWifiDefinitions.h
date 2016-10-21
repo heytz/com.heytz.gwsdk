@@ -714,6 +714,14 @@ typedef NS_ENUM(NSInteger, GizWifiGAgentType) {
      古北模组
      */
     GizGAgentBL = 9,
+    /*
+     AtmelEE
+     */
+    GizGAgentAtmelEE = 10,
+    /*
+     其他
+     */
+    GizGAgentOther = 11,
 };
 
 /*

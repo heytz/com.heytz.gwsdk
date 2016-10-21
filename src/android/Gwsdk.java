@@ -241,14 +241,19 @@ public class Gwsdk extends CordovaPlugin {
                 app.setCurrentDevice(gizWifiDevice);
                 heytzGizWifiDeviceListener.setApp(app);
                 gizWifiDevice.setListener(heytzGizWifiDeviceListener);
-                if (gizWifiDevice.isSubscribed() && gizWifiDevice.getNetStatus() == GizWifiDeviceNetStatus.GizDeviceControlled) {
-                    // 订阅或解除订阅成功
-                    if (app.getCallbackContext(Operation.SET_SUBSCRIBE.getMethod()) != null) {
-                        PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, HeytzUtil.gizDeviceToJsonObject(gizWifiDevice));
-                        HeytzUtil.sendAndRemoveCallback(app, Operation.SET_SUBSCRIBE.getMethod(), pluginResult);
+                if (isSub) {
+                    if (gizWifiDevice.isSubscribed() &&
+                            gizWifiDevice.getNetStatus() == GizWifiDeviceNetStatus.GizDeviceControlled) {
+                        // 订阅或解除订阅成功
+                        if (app.getCallbackContext(Operation.SET_SUBSCRIBE.getMethod()) != null) {
+                            PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, HeytzUtil.gizDeviceToJsonObject(gizWifiDevice));
+                            HeytzUtil.sendAndRemoveCallback(app, Operation.SET_SUBSCRIBE.getMethod(), pluginResult);
+                        }
+                    } else {
+                        gizWifiDevice.setSubscribe(true);
                     }
                 } else {
-                    gizWifiDevice.setSubscribe(isSub);
+                    gizWifiDevice.setSubscribe(false);
                 }
             }
         }

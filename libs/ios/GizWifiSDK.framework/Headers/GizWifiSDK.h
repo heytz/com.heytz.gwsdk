@@ -350,6 +350,10 @@
  */
 - (void)wifiSDK:(GizWifiSDK *)wifiSDK didGetSchedulerStatus:(NSError *)result sid:(NSString *)sid datetime:(NSString *)datetime status:(GizScheduleStatus)status statusDetail:(NSDictionary *)statusDetail;
 
+- (void)wifiSDK:(GizWifiSDK *)wifiSDK didGetDevicesToSetServerInfo:(NSError *)result devices:(NSArray *)devices;
+
+- (void)wifiSDK:(GizWifiSDK *)wifiSDK didSetDeviceServerInfo:(NSError *)result mac:(NSString *)mac;
+
 @end
 
 /*
@@ -370,6 +374,19 @@
  @param 在 site.gizwits.com 中，每个注册的设备在“产品信息”中，都能够查到对应的 appID。
  */
 + (void)startWithAppID:(NSString *)appID;
+
+/*
+ 初始化 SDK。该接口执行后，其他接口功能才能正常执行。并且如果app设置了delegate，SDK可能会立即通过didDisconverd上报发现的设备。
+ @param appID 在 site.gizwits.com 中，每个注册的设备在“产品信息”中，都能够查到对应的 appID。
+ @param specialProductKeys 要过滤的设备productKey列表。该参数传null则返回所有设备。指定后，SDK将只返回过滤后的设备
+ @param cloudServiceInfo 要切换的服务器域名信息。该参数传null表示使用默认的机智云生产环境。若需要指定其他环境，则按照以下字典{key:
+ value}格式传值： { "openAPIInfo": "xxx", // String类型 "siteInfo":
+ "xxx" // String类型 }
+ 
+ 不指定端口号，默认使用80端口，形如：api.gizwits.com
+ 如果要指定特殊端口号，需同时指定Http和Https端口，形如： xxx.gizwits.com:81&8443
+ */
++ (void)startWithAppID:(NSString *)appID specialProductKeys:(NSArray *)specialProductKeys cloudServiceInfo:(NSDictionary *)cloudSeviceInfo;
 
 /*
  获取 SDK 版本号
@@ -778,30 +795,39 @@
  @param token 用户登录或注册时得到的token
  @param schedulerInfo 要创建的定时任务内容
  @see 对应的回调接口：[GizWifiSDKDelegate wifiSDK:didCreateScheduler:sid:]
+ @note 替代的定时任务接口将在2.05.05版本中发布
  */
-- (void)createScheduler:(NSString *)token schedulerInfo:(GizSchedulerInfo *)schedulerInfo;
+- (void)createScheduler:(NSString *)token schedulerInfo:(GizSchedulerInfo *)schedulerInfo DEPRECATED_ATTRIBUTE;
 
 /*
  获取定时任务列表。用户登录后才能获取
  @param token 用户登录或注册时得到的token
  @see 对应的回调接口：[GizWifiSDKDelegate wifiSDK:didGetSchedulers:scheduleTaskList:]
+ @note 替代的定时任务接口将在2.05.05版本中发布
  */
-- (void)getSchedulers:(NSString *)token;
+- (void)getSchedulers:(NSString *)token DEPRECATED_ATTRIBUTE;
 
 /*
  删除定时任务。用户登录后才能删除
  @param token 用户登录或注册时得到的token
  @param sid 待删除的定时任务id
  @see 对应的回调接口：[GizWifiSDKDelegate wifiSDK:didDeleteScheduler:]
+ @note 替代的定时任务接口将在2.05.05版本中发布
  */
-- (void)deleteScheduler:(NSString *)token sid:(NSString *)sid;
+- (void)deleteScheduler:(NSString *)token sid:(NSString *)sid DEPRECATED_ATTRIBUTE;
 
 /*
  获取指定sid的定时任务执行状态
  @param token 用户登录或注册时得到的token
  @param sid 待删除的定时任务id
  @see 对应的回调接口：[GizWifiSDKDelegate wifiSDK:didGetSchedulerStatus:sid:datetime:status:statusDetail:]
+ @note 替代的定时任务接口将在2.05.05版本中发布
  */
-- (void)getSchedulerStatus:(NSString *)token sid:(NSString *)sid;
+- (void)getSchedulerStatus:(NSString *)token sid:(NSString *)sid DEPRECATED_ATTRIBUTE;
+
+@property (strong, nonatomic, readonly) NSString *domain;
+
++ (void)getDevicesToSetServerInfo;
++ (void)setDeviceServerInfo:(NSString *)domain mac:(NSString *)mac;
 
 @end
