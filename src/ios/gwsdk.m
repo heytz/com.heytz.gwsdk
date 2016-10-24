@@ -9,7 +9,7 @@
 @synthesize commandHolder;
 @synthesize _deviceList;
 
-
+GizWifiDevice *_currentGizWfifDevice;
 NSInteger currentState;
 bool _debug = true;
 NSString *_uid, *_token, *_productSecret;
@@ -260,7 +260,19 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
         if ([did isEqualToString:device.did]) {
             device.delegate = self;
             isExist = true;
-            [device setSubscribe:subState];
+            _currentGizWfifDevice=device;
+            if(subState==YES){
+                if(device.isSubscribed&&device.netStatus==GizDeviceControlled){
+                    //订阅或解绑订阅成功
+                 CDVPluginResult   *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[GwsdkUtils gizDeviceToDictionary:device]];
+                    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+                }else{
+                   [device setSubscribe:subState];
+                }
+            }else{
+                [device setSubscribe:subState];
+            }
+
         }
     }
     if (isExist == false) {
@@ -483,9 +495,13 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
 - (void)device:(GizWifiDevice *)device didSetSubscribe:(NSError *)result isSubscribed:(BOOL)isSubscribed {
     CDVPluginResult *pluginResult;
     if (result.code == GIZ_SDK_SUCCESS) {
+        if(!isSubscribed){
         //订阅或解绑订阅成功
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[GwsdkUtils gizDeviceToDictionary:device]];
         [self.commandDelegate sendPluginResult:pluginResult callbackId:self.commandHolder.callbackId];
+        }else{
+            // 去didUpdateNetStatus 中 等待状态改变为GizDeviceControlled
+        }
     } else {
         //操作失败
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:[GwsdkUtils gizDeviceToDictionary:device]];
@@ -493,6 +509,22 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
     }
 }
 
+-(void)device:(GizWifiDevice *)device didUpdateNetStatus:(GizWifiDeviceNetStatus)netStatus{
+    CDVPluginResult *pluginResult;
+    if(device.isSubscribed==YES){
+        if(netStatus==GizDeviceControlled){
+            if([_currentGizWfifDevice.did isEqualToString:device.did]){
+                //订阅或解绑订阅成功
+                pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:[GwsdkUtils gizDeviceToDictionary:device]];
+                [self.commandDelegate sendPluginResult:pluginResult callbackId:self.commandHolder.callbackId];
+            }
+        }else{
+            //操作失败
+            pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:[GwsdkUtils gizDeviceToDictionary:device]];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:self.commandHolder.callbackId];
+        }
+    }
+}
 /**
  * 回调 获取硬件信息
  * 不订阅设备也可以获取硬件信息。APP可以获取模块协议版本号，mcu固件版本号等硬件信息，但只有局域网设备才支持该功能。
