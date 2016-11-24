@@ -46,7 +46,7 @@ public class HeytzGizWifiSDKListener extends GizWifiSDKListener {
             }
         } else {
             // 配置失败
-            PluginResult pr = new PluginResult(PluginResult.Status.ERROR, result.getResult());
+            PluginResult pr = new PluginResult(PluginResult.Status.ERROR, result == null ? 0 : result.getResult());
             if (app.getCallbackContext(Operation.SET_DEVICE_ON_BOARDING.getMethod()) != null) {
                 HeytzUtil.sendAndRemoveCallback(app, Operation.SET_DEVICE_ON_BOARDING.getMethod(), pr);
             }
@@ -80,7 +80,7 @@ public class HeytzGizWifiSDKListener extends GizWifiSDKListener {
             pr = new PluginResult(PluginResult.Status.OK, json);
         } else {
             // 绑定失败
-            pr = new PluginResult(PluginResult.Status.ERROR, result.getResult());
+            pr = new PluginResult(PluginResult.Status.ERROR, result == null ? 0 : result.getResult());
         }
         if (app.getCallbackContext(Operation.SET_DEVICE_ON_BOARDING_AND_BIND_DEVICE.getMethod()) != null) {
             HeytzUtil.sendAndRemoveCallback(app, Operation.SET_DEVICE_ON_BOARDING_AND_BIND_DEVICE.getMethod(), pr);
@@ -113,7 +113,7 @@ public class HeytzGizWifiSDKListener extends GizWifiSDKListener {
             // 解绑失败
             if (app.getCallbackContext(Operation.UNBIND_DEVICE.getMethod()) != null) {
                 //解除绑定设备失败，弹出错误信息
-                PluginResult pr = new PluginResult(PluginResult.Status.ERROR, result.getResult());
+                PluginResult pr = new PluginResult(PluginResult.Status.ERROR, result == null ? 0 : result.getResult());
                 HeytzUtil.sendAndRemoveCallback(app, Operation.UNBIND_DEVICE.getMethod(), pr);
             }
         }
@@ -170,7 +170,7 @@ public class HeytzGizWifiSDKListener extends GizWifiSDKListener {
             }
         } else {
             if (app.getCallbackContext(Operation.GET_WIFI_SSID_LIST.getMethod()) != null) {
-                PluginResult pr = new PluginResult(PluginResult.Status.ERROR, result.getResult());
+                PluginResult pr = new PluginResult(PluginResult.Status.ERROR, result == null ? 0 : result.getResult());
                 HeytzUtil.sendAndRemoveCallback(app, Operation.GET_WIFI_SSID_LIST.getMethod(), pr);
             }
         }

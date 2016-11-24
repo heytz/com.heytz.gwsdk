@@ -83,7 +83,7 @@ public class HeytzGizWifiDeviceListener extends GizWifiDeviceListener {
             // 操作失败
             if (sn == 1) {
                 if (app.getCallbackContext(Operation.WRITE.getMethod()) != null) {
-                    PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR, result.getResult());
+                    PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR, result == null ? 0 : result.getResult());
                     app.getCallbackContext(Operation.WRITE.getMethod()).sendPluginResult(pluginResult);
                 }
             }
@@ -116,7 +116,7 @@ public class HeytzGizWifiDeviceListener extends GizWifiDeviceListener {
         } else {
             // 失败
             if (app.getCallbackContext(Operation.SET_SUBSCRIBE.getMethod()) != null) {
-                PluginResult pr = new PluginResult(PluginResult.Status.ERROR, result.getResult());
+                PluginResult pr = new PluginResult(PluginResult.Status.ERROR, result == null ? 0 : result.getResult());
                 HeytzUtil.sendAndRemoveCallback(app, Operation.SET_SUBSCRIBE.getMethod(), pr);
             }
         }
@@ -163,7 +163,7 @@ public class HeytzGizWifiDeviceListener extends GizWifiDeviceListener {
         } else {
             // 修改失败
             if (app.getCallbackContext(Operation.SET_CUSTOM_INFO.getMethod()) != null) {
-                PluginResult pr = new PluginResult(PluginResult.Status.ERROR, result.getResult());
+                PluginResult pr = new PluginResult(PluginResult.Status.ERROR, result == null ? 0 : result.getResult());
                 HeytzUtil.sendAndRemoveCallback(app, Operation.SET_CUSTOM_INFO.getMethod(), pr);
             }
         }
@@ -228,7 +228,7 @@ public class HeytzGizWifiDeviceListener extends GizWifiDeviceListener {
             }
         } else {
             sb.append("获取失败，错误号：" + result);
-            PluginResult pr = new PluginResult(PluginResult.Status.ERROR, result.getResult());
+            PluginResult pr = new PluginResult(PluginResult.Status.ERROR, result == null ? 0 : result.getResult());
             HeytzUtil.sendAndRemoveCallback(app, Operation.GET_HARDWARE_INFO.getMethod(), pr);
         }
 
