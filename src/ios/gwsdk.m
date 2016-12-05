@@ -48,7 +48,9 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
 - (void)pluginInitialize {
     NSString *gizwAppId = [[self.commandDelegate settings] objectForKey:@"gizwappid"];
     if (gizwAppId) {
-       [GizWifiSDK startWithAppID:gizwAppId specialProductKeys:nil cloudServiceInfo:nil autoSetDeviceDomain:NO];
+        NSDictionary *cloud=@{@"openAPIInfo":@"api.gizwits.com",@"siteInfo":@"site.gizwits.com",
+                               @"pushInfo":@"push.gizwitsapi.com"};
+       [GizWifiSDK startWithAppID:gizwAppId specialProductKeys:nil cloudServiceInfo:cloud autoSetDeviceDomain:NO];
         self.gizwAppId = gizwAppId;
     }
 
