@@ -6,12 +6,17 @@
         <clobbers target="cordova.plugins.gwsdk"/>
     </js-module>
     <preference name="GIZWITS_APPID"/>
+    <preference name="GIZWITS_LOGSTATE" default="false"/>
     <platform name="ios">
         <config-file parent="/*" target="config.xml">
             <feature name="gwsdk">
                 <param name="ios-package" value="gwsdk"/>
             </feature>
             <preference name="gizwappid" value="$GIZWITS_APPID"/>
+            <preference name="gizwlogstate" value="$GIZWITS_LOGSTATE"/>
+        </config-file>
+        <config-file target="*-Info.plist" parent="UIFileSharingEnabled">
+            <false />
         </config-file>
         <source-file src="src/ios/gwsdk.m"/>
         <source-file src="src/ios/gwsdk.h"/>
@@ -37,6 +42,7 @@
                 <param name="android-package" value="com.heytz.gwsdk.Gwsdk"/>
             </feature>
             <preference name="gizwappid" value="$GIZWITS_APPID"/>
+            <preference name="gizwlogstate" value="$GIZWITS_LOGSTATE"/>
         </config-file>
         <config-file target="AndroidManifest.xml" parent="/manifest">
             <!-- Required  一些系统要求的权限，如访问网络等-->

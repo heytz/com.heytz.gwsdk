@@ -47,6 +47,10 @@ public class Gwsdk extends CordovaPlugin {
             GizWifiSDK.sharedInstance().setListener(heytzGizWifiSDKListener);
             heytzGizWifiSDKListener.setApp(app);
             app.setDeviceList(GizWifiSDK.sharedInstance().getDeviceList());
+            String gizLogState = webView.getPreferences().getString("gizwlogstate", "");
+            if ("true".equals(gizLogState)) {
+                  GizWifiSDK.sharedInstance().setLogLevel(GizLogPrintLevel.GizLogPrintAll);
+             }
          }
     }
 

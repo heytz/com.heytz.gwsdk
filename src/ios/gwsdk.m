@@ -51,6 +51,11 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
         NSDictionary *cloud=@{@"openAPIInfo":@"api.gizwits.com",@"siteInfo":@"site.gizwits.com",
                                @"pushInfo":@"push.gizwitsapi.com"};
        [GizWifiSDK startWithAppID:gizwAppId specialProductKeys:nil cloudServiceInfo:cloud autoSetDeviceDomain:NO];
+        NSString *gizwLogState=[[self.commandDelegate settings] objectForKey:@"gizwlogstate"];
+        if([gizwLogState isEqual:@"true"]){
+           //设置日志
+           [GizWifiSDK setLogLevel:GizLogPrintAll];
+           }
         self.gizwAppId = gizwAppId;
     }
 
@@ -422,9 +427,9 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
     } else {
         // 配置失败
         if (_debug) {
-            NSLog(@"======配置失败 \n error code:===%d", result);
+            NSLog(@"======配置失败 \n error code:===%ld",result.code);
         }
-        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsInt:result];
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDouble:result.code];
         [self.commandDelegate sendPluginResult:pluginResult callbackId:self.commandHolder.callbackId];
     }
 }
