@@ -40,20 +40,19 @@ public class Gwsdk extends CordovaPlugin {
             app.setAppId(_appId);
             List<String> prodckeKeyList = new ArrayList<String>();
             ConcurrentHashMap<String, String> cloudServiceMap = new ConcurrentHashMap<String, String>();
-
             cloudServiceMap.put("openAPIInfo", "api.gizwits.com");
             cloudServiceMap.put("siteInfo", "site.gizwits.com");
             // 如果APP设置了消息推送，则同样需要设置绑定推送API
             cloudServiceMap.put("pushInfo", "push.gizwitsapi.com");
             GizWifiSDK.sharedInstance().startWithAppID(cordova.getActivity().getApplicationContext(), _appId, prodckeKeyList, cloudServiceMap,false);
-            GizWifiSDK.sharedInstance().setListener(heytzGizWifiSDKListener);
-            heytzGizWifiSDKListener.setApp(app);
-            app.setDeviceList(GizWifiSDK.sharedInstance().getDeviceList());
             String gizLogState = webView.getPreferences().getString("gizwlogstate", "");
             if ("true".equals(gizLogState)) {
                   GizWifiSDK.sharedInstance().setLogLevel(GizLogPrintLevel.GizLogPrintAll);
              }
          }
+         app.setDeviceList(GizWifiSDK.sharedInstance().getDeviceList());
+         GizWifiSDK.sharedInstance().setListener(heytzGizWifiSDKListener);
+         heytzGizWifiSDKListener.setApp(app);
     }
 
     /**
