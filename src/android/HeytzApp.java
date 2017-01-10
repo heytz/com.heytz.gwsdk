@@ -32,7 +32,7 @@ public class HeytzApp {
 
     private GizWifiDevice currentDevice;
 
-    private List<GizWifiDevice> deviceList = new ArrayList<GizWifiDevice>();//筛选出来的设备列表
+    private List<GizWifiDevice> deviceList;//筛选出来的设备列表
 
     private Map<String, CallbackContext> callbackContextMap = new HashMap<String, CallbackContext>();
 
@@ -110,14 +110,11 @@ public class HeytzApp {
     }
 
     public void setDeviceList(List<GizWifiDevice> deviceList) {
-        if (deviceList == null) {
-            deviceList.clear();
-        }
         this.deviceList = deviceList;
     }
 
     public List<GizWifiDevice> getDeviceList() {
-        return deviceList;
+        return this.deviceList;
     }
 
 
