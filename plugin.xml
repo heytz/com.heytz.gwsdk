@@ -26,9 +26,10 @@
         <source-file framework="true" src="libs/ios/libBLEasyConfig.a"/>
         <source-file framework="true" src="libs/ios/libcrypto.a"/>
         <source-file framework="true" src="libs/ios/libEasyLink.a"/>
-        <source-file framework="true" src="libs/ios/libemTMF.a"/>
         <source-file framework="true" src="libs/ios/libEsptouch_v0.3.5.2.a"/>
+        <source-file framework="true" src="libs/ios/libLibSimpleConfig.a"/>
         <source-file framework="true" src="libs/ios/libssl.a"/>
+        <source-file framework="true" src="libs/ios/libWMOneShotConfig.a"/>
 
         <framework custom="true" src="libs/ios/GizWifiSDK.framework"/>
         <framework src="SystemConfiguration.framework"/>
@@ -81,6 +82,7 @@
         <source-file src="libs/android/LSFSK_1.0.jar" target-dir="libs"/>
         <source-file src="libs/android/OneShotConfig.jar" target-dir="libs"/>
         <source-file src="libs/android/simpleconfigwizardlib.jar" target-dir="libs"/>
+        <source-file src="libs/android/zxing.jar" target-dir="libs"/>
 
         <source-file src="libs/json-lib-2.4-jdk15.jar" target-dir="libs"/>
 
