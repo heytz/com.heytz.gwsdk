@@ -413,7 +413,7 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
                 break;
             case setDeviceOnboardingCode:
                 //判断did是否存在
-                if (mac.length > 0 && did.length > 0) {
+                if (mac.length > 0) {
                     NSMutableDictionary *d = [@{@"macAddress" : mac,
                             @"did" : did,
                             @"productKey" : productKey} mutableCopy];
