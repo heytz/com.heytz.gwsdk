@@ -11,6 +11,7 @@
         <config-file parent="/*" target="config.xml">
             <feature name="gwsdk">
                 <param name="ios-package" value="gwsdk"/>
+                <param name="onload" value="true" />
             </feature>
             <preference name="gizwappid" value="$GIZWITS_APPID"/>
             <preference name="gizwlogstate" value="$GIZWITS_LOGSTATE"/>
@@ -41,6 +42,7 @@
         <config-file parent="/*" target="res/xml/config.xml">
             <feature name="gwsdk">
                 <param name="android-package" value="com.heytz.gwsdk.Gwsdk"/>
+                <param name="onload" value="true" />
             </feature>
             <preference name="gizwappid" value="$GIZWITS_APPID"/>
             <preference name="gizwlogstate" value="$GIZWITS_LOGSTATE"/>
