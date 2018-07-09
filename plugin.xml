@@ -11,28 +11,33 @@
         <config-file parent="/*" target="config.xml">
             <feature name="gwsdk">
                 <param name="ios-package" value="gwsdk"/>
-                <param name="onload" value="true" />
+                <param name="onload" value="true"/>
             </feature>
             <preference name="gizwappid" value="$GIZWITS_APPID"/>
             <preference name="gizwlogstate" value="$GIZWITS_LOGSTATE"/>
         </config-file>
         <config-file target="*-Info.plist" parent="UIFileSharingEnabled">
-            <false />
+            <false/>
         </config-file>
         <source-file src="src/ios/gwsdk.m"/>
         <source-file src="src/ios/gwsdk.h"/>
         <source-file src="src/ios/GwsdkUtils.h"/>
         <source-file src="src/ios/GwsdkUtils.m"/>
 
-        <source-file framework="true" src="libs/ios/libBLEasyConfig.a"/>
-        <source-file framework="true" src="libs/ios/libcrypto.a"/>
-        <source-file framework="true" src="libs/ios/libEasyLink.a"/>
-        <source-file framework="true" src="libs/ios/libEsptouch_v0.3.5.2.a"/>
-        <source-file framework="true" src="libs/ios/libLibSimpleConfig.a"/>
-        <source-file framework="true" src="libs/ios/libssl.a"/>
-        <source-file framework="true" src="libs/ios/libWMOneShotConfig.a"/>
+        <!--StaticLibrary-->
+        <!--<source-file framework="true" src="libs/ios/libBLEasyConfig.a"/>-->
+        <!--<source-file framework="true" src="libs/ios/libcrypto.a"/>-->
+        <!--<source-file framework="true" src="libs/ios/libEasyLink.a"/>-->
+        <!--<source-file framework="true" src="libs/ios/libEsptouch_v0.3.5.3.a"/>-->
+        <!--<source-file framework="true" src="libs/ios/libLibSimpleConfig.a"/>-->
+        <!--<source-file framework="true" src="libs/ios/libLTLink.a"/>-->
+        <!--<source-file framework="true" src="libs/ios/libssl.a"/>-->
+        <!--<source-file framework="true" src="libs/ios/libWMOneShotConfig.a"/>-->
+        <!--<framework custom="true" src="libs/ios/GizWifiSDK.framework"/>-->
 
-        <framework custom="true" src="libs/ios/GizWifiSDK.framework"/>
+        <!--DynamicLibrary-->
+        <framework custom="true" src="libs/ios/DynamicLibrary/GizWifiSDK.framework" embed="true"/>
+
         <framework src="SystemConfiguration.framework"/>
         <framework src="CoreTelephony.framework"/>
         <framework src="libc++.dylib"/>
@@ -42,7 +47,7 @@
         <config-file parent="/*" target="res/xml/config.xml">
             <feature name="gwsdk">
                 <param name="android-package" value="com.heytz.gwsdk.Gwsdk"/>
-                <param name="onload" value="true" />
+                <param name="onload" value="true"/>
             </feature>
             <preference name="gizwappid" value="$GIZWITS_APPID"/>
             <preference name="gizwlogstate" value="$GIZWITS_LOGSTATE"/>
