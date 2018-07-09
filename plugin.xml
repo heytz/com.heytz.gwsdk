@@ -77,14 +77,13 @@
         <source-file src="libs/android/BLEasyConfig.jar" target-dir="libs"/>
         <source-file src="libs/android/easylink2.0.jar" target-dir="libs"/>
         <source-file src="libs/android/GizWifiSDK.jar" target-dir="libs"/>
-        <source-file src="libs/android/hiflying-iots-android-smartlink7.0.2.jar" target-dir="libs"/>
         <source-file src="libs/android/Lark7618SDK_noudp1606031910_0101.jar" target-dir="libs"/>
-        <source-file src="libs/android/libEsptouch_v0.3.3.4_3.jar" target-dir="libs"/>
         <source-file src="libs/android/libForEElink.jar" target-dir="libs"/>
         <source-file src="libs/android/LSFSK_1.0.jar" target-dir="libs"/>
         <source-file src="libs/android/OneShotConfig.jar" target-dir="libs"/>
         <source-file src="libs/android/simpleconfigwizardlib.jar" target-dir="libs"/>
         <source-file src="libs/android/zxing.jar" target-dir="libs"/>
+        <source-file src="libs/android/ltlink2.jar" target-dir="libs"/>
 
         <source-file src="libs/json-lib-2.4-jdk15.jar" target-dir="libs"/>
 
