@@ -85,8 +85,10 @@ public class Gwsdk extends CordovaPlugin {
             for (int i = 0; i < wifigagentTypeArray.length(); i++) {
                 list.add(HeytzGizWifiGAgentType.getHeytzGizWifiGAgentType(wifigagentTypeArray.getInt(i)));
             }
+            app.setCurrentBoardingMac(null);
             this.setDeviceOnboarding(ssid, pwd, wifiConfigMode
                     , softAppSSIDPrefix, timeout, list);
+
             return true;
         }
         //wifiSSID, wifiKey, mode, timeout, softAPSSIDPrefix, wifiGAgentType,
@@ -323,5 +325,6 @@ public class Gwsdk extends CordovaPlugin {
     private void dealloc() {
         GizWifiSDK.sharedInstance().setListener(null);
         GizWifiSDK.sharedInstance().setListener(heytzGizWifiSDKListener);
+        app.setCurrentBoardingMac(null);
     }
 }

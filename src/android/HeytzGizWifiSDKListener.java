@@ -25,10 +25,10 @@ public class HeytzGizWifiSDKListener extends GizWifiSDKListener {
     @Override
     public void didSetDeviceOnboarding(GizWifiErrorCode result, GizWifiDevice device) {
         super.didSetDeviceOnboarding(result, device);
-        String mac = device.getMacAddress();
-        String did = device.getDid();
-        String productKey = device.getProductKey();
         if (result == GizWifiErrorCode.GIZ_SDK_SUCCESS) {
+            String mac = device.getMacAddress();
+            String did = device.getDid();
+            String productKey = device.getProductKey();
             app.setMac(mac);
             app.setProductKey(productKey);
             // 配置成功
@@ -45,6 +45,7 @@ public class HeytzGizWifiSDKListener extends GizWifiSDKListener {
                     HeytzUtil.sendAndRemoveCallback(app, Operation.SET_DEVICE_ON_BOARDING.getMethod(), pr);
                 } else {
                     //没有did 等待发现设备列表里面找到设备
+                    app.setCurrentBoardingMac(mac);
                 }
             }
             if (app.getCallbackContext(Operation.SET_DEVICE_ON_BOARDING_AND_BIND_DEVICE.getMethod()) != null) {
@@ -192,14 +193,14 @@ public class HeytzGizWifiSDKListener extends GizWifiSDKListener {
                 pr.setKeepCallback(true);
                 app.getCallbackContext(Operation.GET_BOUND_DEVICES.getMethod()).sendPluginResult(pr);
             }
-            String currentMac = app.getMac();
+            String currentMac = app.getCurrentBoardingMac();
             if (currentMac != null) {
                 for (int i = 0; i < deviceList.size(); i++) {
                     GizWifiDevice device = deviceList.get(i);
                     String mac = device.getMacAddress();
                     String did = device.getDid();
                     String productKey = device.getProductKey();
-                    if ((mac != null && !"".equals(mac) && mac.length() > 0) && (did != null && !"".equals(did) && did.length() > 0)) {
+                    if ((mac != null && !"".equals(mac) && mac.length() > 0) && (currentMac.equalsIgnoreCase(mac)) && (did != null && !"".equals(did) && did.length() > 0)) {
                         JSONObject json = new JSONObject();
                         try {
                             json.put("macAddress", mac);
@@ -209,7 +210,7 @@ public class HeytzGizWifiSDKListener extends GizWifiSDKListener {
                         }
                         PluginResult pr = new PluginResult(PluginResult.Status.OK, json);
                         HeytzUtil.sendAndRemoveCallback(app, Operation.SET_DEVICE_ON_BOARDING.getMethod(), pr);
-                        app.setMac(null);
+                        app.setCurrentBoardingMac(null);
                     }
                 }
             }

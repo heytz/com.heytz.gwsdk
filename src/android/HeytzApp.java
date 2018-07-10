@@ -31,6 +31,7 @@ public class HeytzApp {
     private Operation operation;
 
     private GizWifiDevice currentDevice;
+    private String currentBoardingMac;
 
     private List<GizWifiDevice> deviceList;//筛选出来的设备列表
 
@@ -75,6 +76,14 @@ public class HeytzApp {
 
     public void setMac(String mac) {
         this.mac = mac;
+    }
+
+    public String getCurrentBoardingMac() {
+        return this.currentBoardingMac;
+    }
+
+    public void setCurrentBoardingMac(String mac) {
+        this.currentBoardingMac = mac;
     }
 
     public String getProductSecret() {
