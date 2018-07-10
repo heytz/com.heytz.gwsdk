@@ -12,7 +12,7 @@
 GizWifiDevice *_currentGizWfifDevice;
 NSInteger currentState;
 bool _debug = true;
-NSString *_uid, *_token, *_productSecret;
+NSString *_uid, *_token, *_productSecret,*currentBoardingMac;
 NSString *_currentbindDeviceMac, *_currentBindDeviceProductKey;
 
 NSArray *devices; //内存中的device列表。
@@ -47,10 +47,12 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
 
 - (void)pluginInitialize {
     NSString *gizwAppId = [[self.commandDelegate settings] objectForKey:@"gizwappid"];
-    if (!gizwAppId) {
+    if (gizwAppId) {
         NSDictionary *cloud=@{@"openAPIInfo":@"api.gizwits.com",@"siteInfo":@"site.gizwits.com",
                                @"pushInfo":@"push.gizwitsapi.com"};
        [GizWifiSDK startWithAppID:gizwAppId specialProductKeys:nil cloudServiceInfo:cloud autoSetDeviceDomain:NO];
+        
+//        [GizWifiSDK startWithAppInfo:@{@"appId": gizwAppId, @"appSecret": @"8b67cf01e91641cc8f0fec7d7fddd148"} productInfo:nil cloudServiceInfo:cloud autoSetDeviceDomain:NO];
         NSString *gizwLogState=[[self.commandDelegate settings] objectForKey:@"gizwlogstate"];
         if([gizwLogState isEqual:@"true"]){
            //设置日志
@@ -121,7 +123,7 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
     NSString *timeout = [command.arguments objectAtIndex:3];
     NSString *softAPSSIDPrefix = ([command.arguments objectAtIndex:4] == [NSNull null]) ? nil : command.arguments[4];
     NSArray *wifiAgentTypeArr = [command.arguments objectAtIndex:5];
-
+    currentBoardingMac=nil;
     [[GizWifiSDK sharedInstance] setDeviceOnboarding:ssid
                                                  key:pwd
                                           configMode:[mode intValue]
@@ -182,6 +184,8 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
                                     softAPSSIDPrefix:softAPSSIDPrefix
                                              timeout:[timeout intValue]
                                       wifiGAgentType:wifiAgentTypeArr];
+    
+//    [[GizWifiSDK sharedInstance] setDeviceOnboardingByBind:ssid key:pwd configMode:[mode intValue] softAPSSIDPrefix:softAPSSIDPrefix timeout:[timeout intValue] wifiGAgentType:wifiAgentTypeArr];
 }
 
 
@@ -414,11 +418,15 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
             case setDeviceOnboardingCode:
                 //判断did是否存在
                 if (mac.length > 0) {
+                    if(did&&did.length>0){
                     NSMutableDictionary *d = [@{@"macAddress" : mac,
                             @"did" : did,
                             @"productKey" : productKey} mutableCopy];
                     CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:d];
                     [self.commandDelegate sendPluginResult:pluginResult callbackId:self.commandHolder.callbackId];
+                    }else{
+                        currentBoardingMac=mac;
+                    }
                 }
                 break;
             default:
@@ -596,6 +604,18 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
             [pluginResult setKeepCallbackAsBool:true];
             [self.commandDelegate sendPluginResult:pluginResult callbackId:startDeviceListCommandHolder.callbackId];
         }
+        if(currentBoardingMac){
+            for (GizWifiDevice *device in deviceList) {
+                if(currentBoardingMac==device.macAddress&&device.did&&device.did.length>0){
+                    NSMutableDictionary *d = [@{@"macAddress" : device.macAddress,
+                                                @"did" : device.did,
+                                                @"productKey" : device.productKey} mutableCopy];
+                    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:d];
+                    [self.commandDelegate sendPluginResult:pluginResult callbackId:self.commandHolder.callbackId];
+                    currentBoardingMac=nil;
+                }
+            }
+        }
         switch (currentState) {
             case getBoundDevicesCode: {
                 NSMutableArray *jsonArray = [[NSMutableArray alloc] init];
@@ -709,6 +729,7 @@ typedef NS_ENUM(NSInteger, GwsdkStateCode) {
     NSLog(@"//====dealloc...====");
     [GizWifiSDK sharedInstance].delegate = nil;
     [GizWifiSDK sharedInstance].delegate = self;
+     currentBoardingMac=nil;
 }
 
 
