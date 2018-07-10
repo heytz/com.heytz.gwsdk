@@ -1,11 +1,13 @@
 package com.heytz.gwsdk;
 
 import android.util.Log;
+
 import com.gizwits.gizwifisdk.api.GizWifiDevice;
 import com.gizwits.gizwifisdk.api.GizWifiSDK;
 import com.gizwits.gizwifisdk.api.GizWifiSSID;
 import com.gizwits.gizwifisdk.enumration.GizWifiErrorCode;
 import com.gizwits.gizwifisdk.listener.GizWifiSDKListener;
+
 import org.apache.cordova.PluginResult;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -21,22 +23,29 @@ public class HeytzGizWifiSDKListener extends GizWifiSDKListener {
     private HeytzApp app;
 
     @Override
-    public void didSetDeviceOnboarding(GizWifiErrorCode result, String mac, String did, String productKey) {
-        super.didSetDeviceOnboarding(result, mac, did, productKey);
+    public void didSetDeviceOnboarding(GizWifiErrorCode result, GizWifiDevice device) {
+        super.didSetDeviceOnboarding(result, device);
+        String mac = device.getMacAddress();
+        String did = device.getDid();
+        String productKey = device.getProductKey();
         if (result == GizWifiErrorCode.GIZ_SDK_SUCCESS) {
             app.setMac(mac);
             app.setProductKey(productKey);
             // 配置成功
             if (app.getCallbackContext(Operation.SET_DEVICE_ON_BOARDING.getMethod()) != null) {
-                JSONObject json = new JSONObject();
-                try {
-                    json.put("macAddress", mac);
-                    json.put("did", did);
-                    json.put("productKey", productKey);
-                } catch (JSONException e) {
+                if (did != null && !"".equals(did) && did.length() > 0) {
+                    JSONObject json = new JSONObject();
+                    try {
+                        json.put("macAddress", mac);
+                        json.put("did", did);
+                        json.put("productKey", productKey);
+                    } catch (JSONException e) {
+                    }
+                    PluginResult pr = new PluginResult(PluginResult.Status.OK, json);
+                    HeytzUtil.sendAndRemoveCallback(app, Operation.SET_DEVICE_ON_BOARDING.getMethod(), pr);
+                } else {
+                    //没有did 等待发现设备列表里面找到设备
                 }
-                PluginResult pr = new PluginResult(PluginResult.Status.OK, json);
-                HeytzUtil.sendAndRemoveCallback(app, Operation.SET_DEVICE_ON_BOARDING.getMethod(), pr);
             }
             if (app.getCallbackContext(Operation.SET_DEVICE_ON_BOARDING_AND_BIND_DEVICE.getMethod()) != null) {
                 GizWifiSDK.sharedInstance().bindRemoteDevice(app.getUid(),
@@ -55,6 +64,46 @@ public class HeytzGizWifiSDKListener extends GizWifiSDKListener {
             }
         }
     }
+
+//    @Override
+//    public void didSetDeviceOnboarding(GizWifiErrorCode result, String mac, String did, String productKey) {
+//        super.didSetDeviceOnboarding(result, mac, did, productKey);
+//        if (result == GizWifiErrorCode.GIZ_SDK_SUCCESS) {
+//            app.setMac(mac);
+//            app.setProductKey(productKey);
+//            // 配置成功
+//            if (app.getCallbackContext(Operation.SET_DEVICE_ON_BOARDING.getMethod()) != null) {
+//                if ("".equals(did)) {
+//                    JSONObject json = new JSONObject();
+//                    try {
+//                        json.put("macAddress", mac);
+//                        json.put("did", did);
+//                        json.put("productKey", productKey);
+//                    } catch (JSONException e) {
+//                    }
+//                    PluginResult pr = new PluginResult(PluginResult.Status.OK, json);
+//                    HeytzUtil.sendAndRemoveCallback(app, Operation.SET_DEVICE_ON_BOARDING.getMethod(), pr);
+//                } else {
+//
+//                }
+//            }
+//            if (app.getCallbackContext(Operation.SET_DEVICE_ON_BOARDING_AND_BIND_DEVICE.getMethod()) != null) {
+//                GizWifiSDK.sharedInstance().bindRemoteDevice(app.getUid(),
+//                        app.getToken(), mac,
+//                        productKey,
+//                        app.getProductSecret());
+//            }
+//        } else {
+//            // 配置失败
+//            PluginResult pr = new PluginResult(PluginResult.Status.ERROR, result == null ? 0 : result.getResult());
+//            if (app.getCallbackContext(Operation.SET_DEVICE_ON_BOARDING.getMethod()) != null) {
+//                HeytzUtil.sendAndRemoveCallback(app, Operation.SET_DEVICE_ON_BOARDING.getMethod(), pr);
+//            }
+//            if (app.getCallbackContext(Operation.SET_DEVICE_ON_BOARDING_AND_BIND_DEVICE.getMethod()) != null) {
+//                HeytzUtil.sendAndRemoveCallback(app, Operation.SET_DEVICE_ON_BOARDING_AND_BIND_DEVICE.getMethod(), pr);
+//            }
+//        }
+//    }
 
     /**
      * 非局域网设备绑定
@@ -142,6 +191,27 @@ public class HeytzGizWifiSDKListener extends GizWifiSDKListener {
                 PluginResult pr = new PluginResult(PluginResult.Status.OK, cdvResult);
                 pr.setKeepCallback(true);
                 app.getCallbackContext(Operation.GET_BOUND_DEVICES.getMethod()).sendPluginResult(pr);
+            }
+            String currentMac = app.getMac();
+            if (currentMac != null) {
+                for (int i = 0; i < deviceList.size(); i++) {
+                    GizWifiDevice device = deviceList.get(i);
+                    String mac = device.getMacAddress();
+                    String did = device.getDid();
+                    String productKey = device.getProductKey();
+                    if ((mac != null && !"".equals(mac) && mac.length() > 0) && (did != null && !"".equals(did) && did.length() > 0)) {
+                        JSONObject json = new JSONObject();
+                        try {
+                            json.put("macAddress", mac);
+                            json.put("did", did);
+                            json.put("productKey", productKey);
+                        } catch (JSONException e) {
+                        }
+                        PluginResult pr = new PluginResult(PluginResult.Status.OK, json);
+                        HeytzUtil.sendAndRemoveCallback(app, Operation.SET_DEVICE_ON_BOARDING.getMethod(), pr);
+                        app.setMac(null);
+                    }
+                }
             }
         } else {
             Log.d("", "result: " + result.name());
